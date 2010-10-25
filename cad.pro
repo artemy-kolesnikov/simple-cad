@@ -1,4 +1,7 @@
-# Сюда складывается весь компиляторный треш
+# Простая CAD система, основана на opencascade
+# Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
+
+# Сюда складывается весь компиляторный мусор
 OBJECTS_DIR = ./obj
 MOC_DIR = $$OBJECTS_DIR
 UI_DIR = $$OBJECTS_DIR
