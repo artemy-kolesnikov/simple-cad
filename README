@@ -3,7 +3,7 @@
 
 ЗАВИСИМОСТИ
 Для установки зависимых пакетов необходимо набрать:
-sudo apt-get install g++ libopencascade-dev opencascade-examples libqt4-dev qt4-dev-tools qt4-qmake
+sudo apt-get install g++ libopencascade-dev opencascade-examples libqt4-dev qt4-dev-tools qt4-qmake cmake libxmu-dev
 
 Возможномно портребуются некоторые дополнительные пакеты, эти зависимости проследить сложно, поэтому
 их нужно устанавливать по факту.
