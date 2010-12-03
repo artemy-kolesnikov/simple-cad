@@ -46,21 +46,17 @@ Model::Model(QObject* parent) : QObject(parent)
 	context->CurrentViewer()->CreateView();
 }
 
-void Model::loadModel(QString& fileName)
+void Model::loadModel(QString& fileName) throw(FileError)
 {
-	this->fileName = fileName;
+	FileHelper::readFile(fileName, context);
 
-	if (!FileHelper::readFile(fileName, context))
-	{
-		qDebug() << "Read file" << fileName << "error";
-		return;
-	}
+	this->fileName = fileName;
 
 	Q_EMIT changed();
 	Q_EMIT fileNameChanged(fileName);
 }
 
-void Model::saveModel(QString& fileName)
+void Model::saveModel(QString& fileName) throw(FileError)
 {
 	if (!fileName.isEmpty())
 	{

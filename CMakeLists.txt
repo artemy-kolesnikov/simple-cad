@@ -23,7 +23,6 @@ SET(HEADERS
 	cadapplication.h
 	childwindow.h
 	controller.h
-	filehelper.h
 	mainwindow.h
 	model.h
 	view.h

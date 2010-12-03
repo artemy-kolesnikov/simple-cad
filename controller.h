@@ -21,7 +21,7 @@
 #include <QObject>
 
 /**
- * Controller dispatch commands between model and set views
+ * Controller dispatch commands between model and views set
  */
 class Controller : public QObject
 {

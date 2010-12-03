@@ -16,9 +16,6 @@
  */
 
 #include "mainwindow.h"
-#include "childwindow.h"
-#include "model.h"
-#include "controller.h"
 
 #include <QSize>
 #include <QMdiArea>
@@ -30,10 +27,15 @@
 #include <QFileDialog>
 #include <QStringList>
 #include <QDir>
+#include <QMessageBox>
+#include <QToolBar>
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
-	mdiArea(0), elementsDock(0), mainMenuBar(0), elementsTreeView(0),
-	acExit(0), acAbout(0), acOpenModel(0), acNewModel(0)
+#include "childwindow.h"
+#include "model.h"
+#include "controller.h"
+#include "error.h"
+
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
 	createUI();
 	createDockWidget();
@@ -92,6 +94,38 @@ void MainWindow::createMenuAndActions()
 	mainMenuBar->addMenu(helpMenu);
 
 	helpMenu->addAction(acAbout);
+
+	mainToolBar = new QToolBar(this);
+	addToolBar(mainToolBar);
+
+	acLine = new QAction(tr("Линия"), this);
+	mainToolBar->addAction(acLine);
+
+	acCurve = new QAction(tr("Ломаная линия"), this);
+	mainToolBar->addAction(acCurve);
+
+	acEllipse = new QAction(tr("Эллипс"), this);
+	mainToolBar->addAction(acEllipse);
+
+	acRectangle = new QAction(tr("Прямоугольник"), this);
+	mainToolBar->addAction(acRectangle);
+
+	acFunction = new QAction(tr("Функция"), this);
+	mainToolBar->addAction(acFunction);
+
+	mainToolBar->addSeparator();
+
+	acStamp = new QAction(tr("Выдавливание"), this);
+	mainToolBar->addAction(acStamp);
+
+	acRotation = new QAction(tr("Вращение"), this);
+	mainToolBar->addAction(acRotation);
+
+	acAddition = new QAction(tr("Сложение"), this);
+	mainToolBar->addAction(acAddition);
+
+	acSubstract = new QAction(tr("Вычитание"), this);
+	mainToolBar->addAction(acSubstract);
 }
 
 void MainWindow::elementsVisChanged(bool)
@@ -114,11 +148,19 @@ void MainWindow::openModel()
 						 "Images (*.xwd *.bmp *.png *.jpeg *.jpg *.gif)\n"
 						 "All files(*.*)");
 
-	QString fileName;
-	foreach(fileName, files)
+	try
 	{
-		ChildWindow* window = newChildWindow();
-		window->getController()->loadModel(fileName);
+		QString fileName;
+		foreach(fileName, files)
+		{
+			ChildWindow* window = newChildWindow();
+			window->getController()->loadModel(fileName);
+		}
+	}
+	catch(FileError& err)
+	{
+		QMessageBox::critical(this, tr("Ошибка"), err.what());
+		return;
 	}
 }
 

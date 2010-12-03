@@ -28,6 +28,7 @@ class QMenuBar;
 class QAction;
 class QTreeView;
 class Model;
+class QToolBar;
 
 class ChildWindow;
 
@@ -53,12 +54,23 @@ private:
 	// Model elements list
 	QDockWidget* elementsDock;
 	QMenuBar* mainMenuBar;
+	QToolBar* mainToolBar;
 	QTreeView* elementsTreeView;
 
 	QAction* acExit;
 	QAction* acAbout;
 	QAction* acOpenModel;
 	QAction* acNewModel;
+
+	QAction* acLine;
+	QAction* acCurve;
+	QAction* acEllipse;
+	QAction* acRectangle;
+	QAction* acFunction;
+	QAction* acStamp;
+	QAction* acRotation;
+	QAction* acAddition;
+	QAction* acSubstract;
 
 	QMap<QWidget*, Model*> windowModelMap;
 };

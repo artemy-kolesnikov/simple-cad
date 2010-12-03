@@ -19,8 +19,9 @@
 #define FILE_HELPER_HEADER
 
 #include <QString>
-
 #include <AIS_InteractiveContext.hxx>
+
+#include "error.h"
 
 /**
  * Import and export files in various formats
@@ -28,11 +29,11 @@
 class FileHelper
 {
 public:
-	static bool readFile(QString& fileName,
-		const Handle(AIS_InteractiveContext)& context);
+	static void readFile(QString& fileName,
+		const Handle(AIS_InteractiveContext)& context) throw(FileError);
 
-	static bool writeFile(QString& fileName,
-		const Handle(AIS_InteractiveContext)& context);
+	static void writeFile(QString& fileName,
+		const Handle(AIS_InteractiveContext)& context) throw(FileError);
 };
 
 #endif // FILE_HELPER_HEADER

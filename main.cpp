@@ -17,6 +17,7 @@
 
 #include <QTextCodec>
 #include <QPlastiqueStyle>
+#include <QMessageBox>
 
 #include <locale.h>
 
@@ -25,21 +26,30 @@
 
 int main(int argc, char *argv[])
 {
-	CADApplication a(argc, argv);
+	try
+	{
+		CADApplication a(argc, argv);
 
-	CADApplication::setStyle(new QPlastiqueStyle());
+		CADApplication::setStyle(new QPlastiqueStyle());
 
-	setlocale(LC_ALL, "rus_rus");
-	setlocale(LC_NUMERIC, "English");
-	setlocale(LC_TIME, "English");
+		setlocale(LC_ALL, "rus_rus");
+		setlocale(LC_NUMERIC, "English");
+		setlocale(LC_TIME, "English");
 
-	QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
-	QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
-	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf-8"));
+		QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
+		QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf-8"));
 
-	MainWindow w;
-	w.show();
+		MainWindow w;
+		w.show();
 
-	return a.exec();
+		return a.exec();
+	}
+	catch(...)
+	{
+		QMessageBox::critical(0, QObject::tr("Ошибка"),
+			QObject::tr("Необработанное исключение"));
+		return -1;
+	}
 }
 

@@ -19,9 +19,10 @@
 #define MODEL_HEADER
 
 #include <QObject>
-
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
+
+#include "error.h"
 
 /**
  * Keeps loaded CAD model
@@ -42,8 +43,8 @@ Q_SIGNALS:
 	void fileNameChanged(QString& newFileName);
 
 public Q_SLOTS:
-	void loadModel(QString& fileName);
-	void saveModel(QString& fileName);
+	void loadModel(QString& fileName) throw(FileError);
+	void saveModel(QString& fileName) throw(FileError);
 
 private:
 	QString fileName;

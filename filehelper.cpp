@@ -42,342 +42,343 @@
 #include <IGESControl_Controller.hxx>
 #include <Interface_Static.hxx>
 
-enum FileType
+namespace
 {
-	ftUnknown = -1,
-	ftBREP,
-	ftCSFDB,
-	ftIGES,
-	ftSTEP,
-	ftSTL,
-	ftVRML
-};
 
-FileType getFileType(QString& fileName);
-Handle(TopTools_HSequenceOfShape) importModel(FileType ft, QString& fileName);
-bool exportModel(FileType ft, QString& fileName, Handle(AIS_InteractiveContext)& context);
+	enum FileType
+	{
+		ftUnknown = -1,
+		ftBREP,
+		ftCSFDB,
+		ftIGES,
+		ftSTEP,
+		ftSTL,
+		ftVRML
+	};
 
-Handle(TopTools_HSequenceOfShape) importBREP(QString& fileName);
-Handle(TopTools_HSequenceOfShape) importIGES(QString& fileName);
-Handle(TopTools_HSequenceOfShape) importSTEP(QString& fileName);
-Handle(TopTools_HSequenceOfShape) importCSFDB(QString& fileName);
+	FileType getFileType(QString& fileName);
+	Handle(TopTools_HSequenceOfShape) importModel(FileType ft, QString& fileName);
+	bool exportModel(FileType ft, QString& fileName, Handle(AIS_InteractiveContext)& context);
 
-bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	Handle(TopTools_HSequenceOfShape) importBREP(QString& fileName);
+	Handle(TopTools_HSequenceOfShape) importIGES(QString& fileName);
+	Handle(TopTools_HSequenceOfShape) importSTEP(QString& fileName);
+	Handle(TopTools_HSequenceOfShape) importCSFDB(QString& fileName);
 
-Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context);
+	bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	
+	Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context);
+}
 
-bool FileHelper::readFile(QString& fileName,
-	const Handle(AIS_InteractiveContext)& context)
+void FileHelper::readFile(QString& fileName,
+	const Handle(AIS_InteractiveContext)& context) throw(FileError)
 {
 	FileType ft = getFileType(fileName);
 
     Handle(TopTools_HSequenceOfShape) shapes = importModel(ft, fileName);
 
 	if (shapes.IsNull() || !shapes->Length())
-	{
-		qDebug() << "Shapes invalid";
-		return false;
-	}
-
-	qDebug() << "Shapes loaded";
+		throw FileError(QObject::tr("Ошибка чтения элементов"));
 
 	for (int i = 1; i <= shapes->Length(); ++i)
 		context->Display(new AIS_Shape(shapes->Value(i)), false);
 
 	context->UpdateCurrentViewer();
-
-	return true;
 }
 
-bool FileHelper::writeFile(QString& fileName,
-	const Handle(AIS_InteractiveContext)& context)
+void FileHelper::writeFile(QString& fileName,
+	const Handle(AIS_InteractiveContext)& context) throw(FileError)
 {
-	return false;
 }
 
-FileType getFileType(QString& fileName)
+namespace
 {
-	QFileInfo fi(fileName);
-	QString ext = fi.completeSuffix();
 
-	if (ext == "brep" || ext == "rle")
-		return ftBREP;
-
-	if (ext == "csfdb")
-		return ftCSFDB;
-
-	if (ext == "iges")
-		return ftIGES;
-
-	if (ext == "step")
-		return ftSTEP;
-
-	if (ext == "stl")
-		return ftSTL;
-
-	if (ext == "vrml.gs")
-		return ftVRML;
-
-	return ftUnknown;
-}
-
-Handle(TopTools_HSequenceOfShape) importModel(FileType ft, QString& fileName)
-{
-    Handle(TopTools_HSequenceOfShape) shapes;
-
-	switch (ft)
+	FileType getFileType(QString& fileName)
 	{
-	case ftBREP:
-		shapes = importBREP(fileName);
-		break;
-	case ftCSFDB:
-		shapes = importCSFDB(fileName);
-		break;
-	case ftIGES:
-		shapes = importIGES(fileName);
-		break;
-	case ftSTEP:
-		shapes = importSTEP(fileName);
-		break;
-	default:
-		break;
+		QFileInfo fi(fileName);
+		QString ext = fi.completeSuffix();
+
+		if (ext == "brep" || ext == "rle")
+			return ftBREP;
+
+		if (ext == "csfdb")
+			return ftCSFDB;
+
+		if (ext == "iges")
+			return ftIGES;
+
+		if (ext == "step")
+			return ftSTEP;
+
+		if (ext == "stl")
+			return ftSTL;
+
+		if (ext == "vrml.gs")
+			return ftVRML;
+
+		return ftUnknown;
 	}
 
-	return shapes;
-}
-
-bool exportModel(FileType ft, QString& fileName, Handle(AIS_InteractiveContext)& context)
-{
-	Handle(TopTools_HSequenceOfShape) shapes = getShapes(context);
-	if (shapes.IsNull() || !shapes->Length())
-		return false;
-
-	bool res;
-	switch (ft)
+	Handle(TopTools_HSequenceOfShape) importModel(FileType ft, QString& fileName)
 	{
-	case ftBREP:
-		res = exportBREP(fileName, shapes);
-		break;
-	case ftCSFDB:
-		res = exportCSFDB(fileName, shapes);
-		break;
-	case ftIGES:
-		res = exportIGES(fileName, shapes);
-		break;
-	case ftSTEP:
-		res = exportSTEP(fileName, shapes);
-		break;
-	case ftSTL:
-		res = exportSTL(fileName, shapes);
-		break;
-	case ftVRML:
-		res = exportVRML(fileName, shapes);
-		break;
-	default:
-		res = false;
-		break;
-	}
+	    Handle(TopTools_HSequenceOfShape) shapes;
 
-	return res;
-}
-
-Handle(TopTools_HSequenceOfShape) importBREP(QString& fileName)
-{
-	Handle(TopTools_HSequenceOfShape) sequence;
-	TopoDS_Shape shape;
-	BRep_Builder builder;
-
-	Standard_Boolean result = BRepTools::Read(shape, (Standard_CString)fileName.toLatin1().constData(),
-		builder);
-	if (result)
-	{
-		sequence = new TopTools_HSequenceOfShape();
-		sequence->Append(shape);
-	}
-
-	return sequence;
-}
-
-Handle(TopTools_HSequenceOfShape) importIGES(QString& fileName)
-{
-	Handle(TopTools_HSequenceOfShape) sequence;
-	IGESControl_Reader reader;
-	int status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
-
-	if (status == IFSelect_RetDone)
-	{
-		sequence = new TopTools_HSequenceOfShape();
-		reader.TransferRoots();
-		TopoDS_Shape shape = reader.OneShape();
-		sequence->Append(shape);
-	}
-
-	return sequence;
-}
-
-Handle(TopTools_HSequenceOfShape) importSTEP(QString& fileName)
-{
-	Handle(TopTools_HSequenceOfShape) sequence;
-
-	STEPControl_Reader reader;
-	IFSelect_ReturnStatus status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
-	if (status == IFSelect_RetDone)
-	{
-		bool failsonly = false;
-		reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity);
-
-		int nbr = reader.NbRootsForTransfer();
-		reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
-		for (Standard_Integer n = 1; n <= nbr; ++n)
+		switch (ft)
 		{
-			reader.TransferRoot(n);
-			int nbs = reader.NbShapes();
-			if (nbs > 0)
-			{
-				sequence = new TopTools_HSequenceOfShape();
-				for (int i = 1; i <= nbs; ++i)
-				{
-					TopoDS_Shape shape = reader.Shape(i);
-					sequence->Append(shape);
-				}
-			}
+		case ftBREP:
+			shapes = importBREP(fileName);
+			break;
+		case ftCSFDB:
+			shapes = importCSFDB(fileName);
+			break;
+		case ftIGES:
+			shapes = importIGES(fileName);
+			break;
+		case ftSTEP:
+			shapes = importSTEP(fileName);
+			break;
+		default:
+			break;
 		}
+
+		return shapes;
 	}
 
-	return sequence;
-}
-
-Handle(TopTools_HSequenceOfShape) importCSFDB(QString& fileName)
-{
-	Handle(TopTools_HSequenceOfShape) sequence;
-
-    if (FSD_File::IsGoodFileType((Standard_CString)fileName.toLatin1().constData()) != Storage_VSOk)
-	    return sequence;
-
-    static FSD_File fileDriver;
-    TCollection_AsciiString name((Standard_CString)fileName.toLatin1().constData());
-    if ( fileDriver.Open(name, Storage_VSRead) != Storage_VSOk )
-        return sequence;
-
-    Handle(ShapeSchema) schema = new ShapeSchema();
-    Handle(Storage_Data) data  = schema->Read(fileDriver);
-    if (data->ErrorStatus() != Storage_VSOk)
-        return sequence;
-
-    fileDriver.Close();
-
-    sequence = new TopTools_HSequenceOfShape();
-    Handle(Storage_HSeqOfRoot) roots = data->Roots();
-
-    for (int i = 1; i <= roots->Length(); ++i)
-    {
-        Handle(Storage_Root) r = roots->Value( i );
-        Handle(Standard_Persistent) p = r->Object();
-        Handle(PTopoDS_HShape) pShape = Handle(PTopoDS_HShape)::DownCast(p);
-        if (!pShape.IsNull() )
-        {
-	        PTColStd_PersistentTransientMap map;
-	        TopoDS_Shape tShape;
-            MgtBRep::Translate(pShape, map, tShape, MgtBRep_WithTriangle);
-            sequence->Append(tShape);
-        }
-    }
-
-    return sequence;
-}
-
-bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	if (shapes.IsNull() || shapes->IsEmpty())
-		return false;
-
-	TopoDS_Shape shape = shapes->Value(1);
-	return BRepTools::Write(shape, (Standard_CString)fileName.toLatin1().constData()); 
-}
-
-bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	if (shapes.IsNull() || shapes->IsEmpty())
-		return false;
-
-	IGESControl_Controller::Init();
-	IGESControl_Writer writer(Interface_Static::CVal("XSTEP.iges.unit"),
-		Interface_Static::IVal("XSTEP.iges.writebrep.mode"));
- 
-	for (int i = 1; i <= shapes->Length(); ++i)
-		writer.AddShape (shapes->Value(i));
-
-	writer.ComputeModel();
-	return writer.Write((Standard_CString)fileName.toLatin1().constData());
-}
-
-bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	/*if (shapes.IsNull() || shapes->IsEmpty())
-		return false;
-
-	//TranslateDlg* theDlg = getDialog(-1, false);
-	STEPControl_StepModelType type;// = (STEPControl_StepModelType)theDlg->getMode();
-	if (type < 0)
-		return false;
-    
-	IFSelect_ReturnStatus status;
-
-	if (type == STEPControl_FacetedBrep && !checkFacetedBrep(shapes))
+	bool exportModel(FileType ft, QString& fileName, Handle(AIS_InteractiveContext)& context)
 	{
-		return false;
-	}
-
-	STEPControl_Writer writer;
-	for (int i = 1; i <= shapes->Length(); ++i)
-	{
-		status = writer.Transfer( shapes->Value(i), type);
-		if (status != IFSelect_RetDone)
+		Handle(TopTools_HSequenceOfShape) shapes = getShapes(context);
+		if (shapes.IsNull() || !shapes->Length())
 			return false;
+
+		bool res;
+		switch (ft)
+		{
+		case ftBREP:
+			res = exportBREP(fileName, shapes);
+			break;
+		case ftCSFDB:
+			res = exportCSFDB(fileName, shapes);
+			break;
+		case ftIGES:
+			res = exportIGES(fileName, shapes);
+			break;
+		case ftSTEP:
+			res = exportSTEP(fileName, shapes);
+		break;
+		case ftSTL:
+			res = exportSTL(fileName, shapes);
+			break;
+		case ftVRML:
+			res = exportVRML(fileName, shapes);
+			break;
+		default:
+			res = false;
+			break;
+		}
+
+		return res;
 	}
 
-	status = writer.Write((Standard_CString)fileName.toLatin1().constData());
-
-	return status == IFSelect_RetDone;*/
-
-	return false;
-}
-
-bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	return false;
-}
-
-bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	return false;
-}
-
-bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
-{
-	return false;
-}
-
-Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context)
-{
-	Handle(TopTools_HSequenceOfShape) sequence;
-	Handle(AIS_InteractiveObject) picked;
-	for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
+	Handle(TopTools_HSequenceOfShape) importBREP(QString& fileName)
 	{
-		Handle(AIS_InteractiveObject) obj = context->Current();
-		if (obj->IsKind(STANDARD_TYPE(AIS_Shape)))
+		Handle(TopTools_HSequenceOfShape) sequence;
+		TopoDS_Shape shape;
+		BRep_Builder builder;
+
+		Standard_Boolean result = BRepTools::Read(shape, (Standard_CString)fileName.toLatin1().constData(),
+			builder);
+		if (result)
 		{
-			TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(obj)->Shape();
-			if (sequence.IsNull())
 			sequence = new TopTools_HSequenceOfShape();
 			sequence->Append(shape);
 		}
+
+		return sequence;
 	}
-	return sequence;
+
+	Handle(TopTools_HSequenceOfShape) importIGES(QString& fileName)
+	{
+		Handle(TopTools_HSequenceOfShape) sequence;
+		IGESControl_Reader reader;
+		int status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
+
+		if (status == IFSelect_RetDone)
+		{
+			sequence = new TopTools_HSequenceOfShape();
+			reader.TransferRoots();
+			TopoDS_Shape shape = reader.OneShape();
+			sequence->Append(shape);
+		}
+
+		return sequence;
+	}
+
+	Handle(TopTools_HSequenceOfShape) importSTEP(QString& fileName)
+	{
+		Handle(TopTools_HSequenceOfShape) sequence;
+
+		STEPControl_Reader reader;
+		IFSelect_ReturnStatus status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
+		if (status == IFSelect_RetDone)
+		{
+			bool failsonly = false;
+			reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity);
+
+			int nbr = reader.NbRootsForTransfer();
+			reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
+			for (Standard_Integer n = 1; n <= nbr; ++n)
+			{
+				reader.TransferRoot(n);
+				int nbs = reader.NbShapes();
+				if (nbs > 0)
+				{
+					sequence = new TopTools_HSequenceOfShape();
+					for (int i = 1; i <= nbs; ++i)
+					{
+						TopoDS_Shape shape = reader.Shape(i);
+						sequence->Append(shape);
+					}
+				}
+			}
+		}
+
+		return sequence;
+	}
+
+	Handle(TopTools_HSequenceOfShape) importCSFDB(QString& fileName)
+	{
+		Handle(TopTools_HSequenceOfShape) sequence;
+
+	    if (FSD_File::IsGoodFileType((Standard_CString)fileName.toLatin1().constData()) != Storage_VSOk)
+		    return sequence;
+
+	    static FSD_File fileDriver;
+	    TCollection_AsciiString name((Standard_CString)fileName.toLatin1().constData());
+	    if ( fileDriver.Open(name, Storage_VSRead) != Storage_VSOk )
+	        return sequence;
+
+    	Handle(ShapeSchema) schema = new ShapeSchema();
+	    Handle(Storage_Data) data  = schema->Read(fileDriver);
+	    if (data->ErrorStatus() != Storage_VSOk)
+	        return sequence;
+
+    	fileDriver.Close();
+
+	    sequence = new TopTools_HSequenceOfShape();
+    	Handle(Storage_HSeqOfRoot) roots = data->Roots();
+
+	    for (int i = 1; i <= roots->Length(); ++i)
+	    {
+	        Handle(Storage_Root) r = roots->Value( i );
+	        Handle(Standard_Persistent) p = r->Object();
+	        Handle(PTopoDS_HShape) pShape = Handle(PTopoDS_HShape)::DownCast(p);
+	        if (!pShape.IsNull() )
+	        {
+		        PTColStd_PersistentTransientMap map;
+		        TopoDS_Shape tShape;
+	            MgtBRep::Translate(pShape, map, tShape, MgtBRep_WithTriangle);
+	            sequence->Append(tShape);
+	        }
+	    }
+
+	    return sequence;
+	}
+
+	bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		if (shapes.IsNull() || shapes->IsEmpty())
+			return false;
+
+		TopoDS_Shape shape = shapes->Value(1);
+		return BRepTools::Write(shape, (Standard_CString)fileName.toLatin1().constData()); 
+	}
+
+	bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		if (shapes.IsNull() || shapes->IsEmpty())
+			return false;
+
+		IGESControl_Controller::Init();
+		IGESControl_Writer writer(Interface_Static::CVal("XSTEP.iges.unit"),
+			Interface_Static::IVal("XSTEP.iges.writebrep.mode"));
+ 
+		for (int i = 1; i <= shapes->Length(); ++i)
+			writer.AddShape (shapes->Value(i));
+
+		writer.ComputeModel();
+		return writer.Write((Standard_CString)fileName.toLatin1().constData());
+	}
+
+	bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		/*if (shapes.IsNull() || shapes->IsEmpty())
+			return false;
+
+		//TranslateDlg* theDlg = getDialog(-1, false);
+		STEPControl_StepModelType type;// = (STEPControl_StepModelType)theDlg->getMode();
+		if (type < 0)
+			return false;
+    
+		IFSelect_ReturnStatus status;
+
+		if (type == STEPControl_FacetedBrep && !checkFacetedBrep(shapes))
+		{
+			return false;
+		}
+
+		STEPControl_Writer writer;
+		for (int i = 1; i <= shapes->Length(); ++i)
+		{
+			status = writer.Transfer( shapes->Value(i), type);
+			if (status != IFSelect_RetDone)
+				return false;
+		}
+
+		status = writer.Write((Standard_CString)fileName.toLatin1().constData());
+
+		return status == IFSelect_RetDone;*/
+
+		return false;
+	}
+
+	bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		return false;
+	}
+
+	bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		return false;
+	}
+
+	bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	{
+		return false;
+	}
+
+	Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context)
+	{
+		Handle(TopTools_HSequenceOfShape) sequence;
+		Handle(AIS_InteractiveObject) picked;
+		for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
+		{
+			Handle(AIS_InteractiveObject) obj = context->Current();
+			if (obj->IsKind(STANDARD_TYPE(AIS_Shape)))
+			{
+				TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(obj)->Shape();
+				if (sequence.IsNull())
+				sequence = new TopTools_HSequenceOfShape();
+				sequence->Append(shape);
+			}
+		}
+		return sequence;
+	}
+
 }
 
