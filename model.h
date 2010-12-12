@@ -21,6 +21,7 @@
 #include <QObject>
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 
 #include "error.h"
 
@@ -37,6 +38,7 @@ public:
 	QString getFileName() const;
 
 	Handle(AIS_InteractiveContext) getContext() const;
+	Handle(TopTools_HSequenceOfShape) getShapes() const;
 
 Q_SIGNALS:
 	void changed();
@@ -51,6 +53,8 @@ private:
 
 	Handle(V3d_Viewer) viewer;
 	Handle(AIS_InteractiveContext) context;
+
+	Handle(TopTools_HSequenceOfShape) shapes;
 };
 
 #endif // MODEL_HEADER

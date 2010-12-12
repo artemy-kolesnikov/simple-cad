@@ -24,6 +24,7 @@
 class Model;
 class View;
 class Controller;
+class QShapeModel;
 
 /**
  * Child MDI window.
@@ -36,7 +37,9 @@ class ChildWindow : public QMdiSubWindow
 public:
 	ChildWindow(Model* model, QWidget* parent = 0);
 
-	Controller* getController();
+	Controller* getController() const;
+	View* getView() const;
+	QShapeModel* getShapeModel() const;
 
 protected:
 	void keyPressEvent(QKeyEvent*);
@@ -52,6 +55,7 @@ private:
 	Model* model;
 	View* view;
 	Controller* controller;
+	QShapeModel* shapeModel;
 };
 
 #endif // CHILD_WINDOW_HEADER

@@ -29,6 +29,7 @@ class QAction;
 class QTreeView;
 class Model;
 class QToolBar;
+class QMdiSubWindow;
 
 class ChildWindow;
 
@@ -39,10 +40,12 @@ public:
 	MainWindow(QWidget* parent = 0);
 
 private Q_SLOTS:
-	void elementsVisChanged(bool);
+	void shapesVisChanged(bool);
 	void about();
 	void openModel();
 	ChildWindow* newChildWindow();
+	void childWindowActivated(QMdiSubWindow* window);
+	void modelChanged();
 
 private:
 	void createUI();
@@ -51,11 +54,11 @@ private:
 
 	QMdiArea* mdiArea;
 
-	// Model elements list
-	QDockWidget* elementsDock;
+	// Model shapes list
+	QDockWidget* shapesDock;
 	QMenuBar* mainMenuBar;
 	QToolBar* mainToolBar;
-	QTreeView* elementsTreeView;
+	QTreeView* shapesTreeView;
 
 	QAction* acExit;
 	QAction* acAbout;
@@ -73,6 +76,8 @@ private:
 	QAction* acSubstract;
 
 	QMap<QWidget*, Model*> windowModelMap;
+
+	ChildWindow* currentChild;
 };
 
 #endif // MAIN_WINDOW_HEADER

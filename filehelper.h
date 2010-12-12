@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <AIS_InteractiveContext.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 
 #include "error.h"
 
@@ -30,7 +31,7 @@ class FileHelper
 {
 public:
 	static void readFile(QString& fileName,
-		const Handle(AIS_InteractiveContext)& context) throw(FileError);
+		Handle(TopTools_HSequenceOfShape)& shapes) throw(FileError);
 
 	static void writeFile(QString& fileName,
 		const Handle(AIS_InteractiveContext)& context) throw(FileError);

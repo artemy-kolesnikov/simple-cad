@@ -23,6 +23,7 @@
 #include <QDebug>
 
 #include <Graphic3d_GraphicDevice.hxx>
+#include <AIS_Shape.hxx>
 
 static Handle(Graphic3d_GraphicDevice) defaultDevice;
 
@@ -43,12 +44,22 @@ Model::Model(QObject* parent) : QObject(parent)
 
 	context = new AIS_InteractiveContext(viewer);
 
-	context->CurrentViewer()->CreateView();
+	//context->CurrentViewer()->CreateView();
+
+	shapes = new TopTools_HSequenceOfShape();
 }
 
 void Model::loadModel(QString& fileName) throw(FileError)
 {
-	FileHelper::readFile(fileName, context);
+	FileHelper::readFile(fileName, shapes);
+
+	if (shapes.IsNull() || !shapes->Length())
+		throw FileError(QObject::tr("Ошибка чтения элементов"));
+
+	for (int i = 1; i <= shapes->Length(); ++i)
+		context->Display(new AIS_Shape(shapes->Value(i)), false);
+
+	context->UpdateCurrentViewer();
 
 	this->fileName = fileName;
 
@@ -73,5 +84,10 @@ QString Model::getFileName() const
 Handle(AIS_InteractiveContext) Model::getContext() const
 {
 	return context;
+}
+
+Handle(TopTools_HSequenceOfShape) Model::getShapes() const
+{
+	return shapes;
 }
 

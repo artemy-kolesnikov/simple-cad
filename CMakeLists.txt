@@ -17,6 +17,7 @@ SET(SOURCES
 	mainwindow.cpp
 	model.cpp
 	view.cpp
+	qshapemodel.cpp
 )
 
 SET(HEADERS
@@ -26,6 +27,7 @@ SET(HEADERS
 	mainwindow.h
 	model.h
 	view.h
+	qshapemodel.h
 )
 
 if (UNIX)

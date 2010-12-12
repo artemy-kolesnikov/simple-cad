@@ -11,7 +11,7 @@ sudo apt-get install g++ libopencascade-dev opencascade-examples libqt4-dev qt4-
 СбОРКА
 Для сборки программы необходимо набрать команду:
 
-qmake
+cmake .
 make
 
 ЗАПУСК

@@ -29,17 +29,22 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QToolBar>
+#include <QMdiSubWindow>
 
 #include "childwindow.h"
 #include "model.h"
 #include "controller.h"
 #include "error.h"
+#include "view.h"
+#include "qshapemodel.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
 	createUI();
 	createDockWidget();
 	createMenuAndActions();
+
+	currentChild = 0;
 }
 
 void MainWindow::createUI()
@@ -48,19 +53,21 @@ void MainWindow::createUI()
 
 	mdiArea = new QMdiArea(this);
 	setCentralWidget(mdiArea);
+	connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
+		this, SLOT(childWindowActivated(QMdiSubWindow*)));
 }
 
 void MainWindow::createDockWidget()
 {
-	elementsDock = new QDockWidget(tr("Элементы"), this);
-	elementsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::LeftDockWidgetArea, elementsDock);
+	shapesDock = new QDockWidget(tr("Элементы"), this);
+	shapesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::LeftDockWidgetArea, shapesDock);
 
-	connect(elementsDock, SIGNAL(visibilityChanged(bool)), this,
-		SLOT(elementsVisChanged(bool)));
+	connect(shapesDock, SIGNAL(visibilityChanged(bool)), this,
+		SLOT(shapesVisChanged(bool)));
 
-	elementsTreeView = new QTreeView(elementsDock);
-	elementsDock->setWidget(elementsTreeView);
+	shapesTreeView = new QTreeView(shapesDock);
+	shapesDock->setWidget(shapesTreeView);
 }
 
 void MainWindow::createMenuAndActions()
@@ -128,7 +135,7 @@ void MainWindow::createMenuAndActions()
 	mainToolBar->addAction(acSubstract);
 }
 
-void MainWindow::elementsVisChanged(bool)
+void MainWindow::shapesVisChanged(bool)
 {
 }
 
@@ -178,5 +185,34 @@ ChildWindow* MainWindow::newChildWindow()
 	window->setAttribute(Qt::WA_DeleteOnClose);
 
 	return window;
+}
+
+void MainWindow::childWindowActivated(QMdiSubWindow* window)
+{
+	if (!window)
+		return;
+
+	/*if (currentChild)
+	{
+		disconnect(currentChild->getView()->getModel(), SIGNAL(changed()),
+			this, SLOT(modelChanged()));
+	}*/
+
+	currentChild = qobject_cast<ChildWindow*>(window);
+	//shapesTreeView->setModel(currentChild->getShapeModel());
+
+	/*connect(currentChild->getView()->getModel(), SIGNAL(changed()),
+		this, SLOT(modelChanged()));*/
+}
+
+void MainWindow::modelChanged()
+{
+	Model* model = static_cast<Model*>(sender());
+
+	Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
+
+	for (int i = 1; i <= shapes->Length(); ++i)
+	{
+	}
 }
 

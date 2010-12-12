@@ -19,11 +19,12 @@
 #include "view.h"
 #include "controller.h"
 #include "model.h"
+#include "qshapemodel.h"
 
 #include <QCoreApplication>
 
 ChildWindow::ChildWindow(Model* model, QWidget* parent) : QMdiSubWindow(parent),
-	model(model), view(0), controller(0)
+	model(model), view(0), controller(0), shapeModel(0)
 {
 	controller = new Controller(this);
 
@@ -48,11 +49,23 @@ void ChildWindow::createUI()
 
 	connect(controller, SIGNAL(loadModelRequest(QString&)),
 		model, SLOT(loadModel(QString&)));
+
+	shapeModel = new QShapeModel(model, this);
 }
 
-Controller* ChildWindow::getController()
+Controller* ChildWindow::getController() const
 {
 	return controller;
+}
+
+View* ChildWindow::getView() const
+{
+	return view;
+}
+
+QShapeModel* ChildWindow::getShapeModel() const
+{
+	return shapeModel;
 }
 
 void ChildWindow::modelChanged()
