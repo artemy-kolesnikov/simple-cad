@@ -18,27 +18,28 @@
 #ifndef SHAPE_MODEL_HEADER
 #define SHAPE_MODEL_HEADER
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 class Model;
 
-class QShapeModel : public QAbstractTableModel
+class QShapeModel : public QAbstractItemModel
 {
 	Q_OBJECT
 public:
-    enum Roles {
-		TypeRole = Qt::UserRole + 1
-    };
-
 	QShapeModel(Model* model, QObject *parent = 0);
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 	bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
+	bool removeRow(int row, const QModelIndex &parent = QModelIndex());
+	QModelIndex	parent(const QModelIndex &index) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const;
 
 private:
 	Model* model;
 };
 
 #endif // SHAPE_MODEL_HEADER
+

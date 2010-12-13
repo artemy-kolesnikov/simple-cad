@@ -199,7 +199,7 @@ void MainWindow::childWindowActivated(QMdiSubWindow* window)
 	}*/
 
 	currentChild = qobject_cast<ChildWindow*>(window);
-	//shapesTreeView->setModel(currentChild->getShapeModel());
+	shapesTreeView->setModel(currentChild->getShapeModel());
 
 	/*connect(currentChild->getView()->getModel(), SIGNAL(changed()),
 		this, SLOT(modelChanged()));*/
