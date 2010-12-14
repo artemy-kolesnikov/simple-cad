@@ -47,14 +47,14 @@ QVariant QShapeModel::data(const QModelIndex &index, int role) const
 
 QModelIndex QShapeModel::index(int row, int column, const QModelIndex & parent) const
 {
-	if (row < 0 || column < 0 || column >= columnCount(parent)
-			|| parent.column() > 0)
+	if (row < 0 || column < 0 || column >= columnCount(parent))
+			//|| parent.column() > 0)
 		return QModelIndex();
 
-	if (!parent.isValid())
-		return createIndex(row, column, 0);
+	if (parent.isValid())
+		return QModelIndex();
 
-	return createIndex(row, column, parent.row() + 1);
+	return createIndex(row, column, row);
 
 	/*if (!hasIndex(row, column, parent))
 		return QModelIndex();
@@ -70,12 +70,15 @@ QModelIndex QShapeModel::index(int row, int column, const QModelIndex & parent) 
 
 int QShapeModel::columnCount(const QModelIndex &parent) const
 {
-	return (parent.isValid()) ? 0 : 1;
+	return 2;
+	return (parent.isValid()) ? 1 : 2;
 }
 
 int QShapeModel::rowCount(const QModelIndex &parent) const
 {
-	return (parent.isValid()) ? 0 : model->getShapes()->Length();
+	return 10;
+	int res = (parent.isValid()) ? 10 : model->getShapes()->Length();
+	return res;
 }
 
 bool QShapeModel::removeRows(int row, int count, const QModelIndex &parent)
@@ -97,9 +100,11 @@ bool QShapeModel::removeRow(int row, const QModelIndex &parent)
 QModelIndex	QShapeModel::parent(const QModelIndex &index) const
 {
 	int offset = index.internalId();
+
 	if (offset == 0 || !index.isValid())
 		return QModelIndex();
-	return createIndex(offset - 1, 0, 0);
+
+	return createIndex(0, 0, 0);
 }
 
 Qt::ItemFlags QShapeModel::flags(const QModelIndex &index) const

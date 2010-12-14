@@ -25,7 +25,6 @@
 #include <QApplication>
 #include <QTreeView>
 #include <QFileDialog>
-#include <QStringList>
 #include <QDir>
 #include <QMessageBox>
 #include <QToolBar>
@@ -45,6 +44,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 	createMenuAndActions();
 
 	currentChild = 0;
+}
+
+void MainWindow::openFiles(QStringList& files)
+{
+	QString fileName;
+	foreach(fileName, files)
+	{
+		ChildWindow* window = newChildWindow();
+		window->getController()->loadModel(fileName);
+	}
 }
 
 void MainWindow::createUI()
@@ -157,12 +166,7 @@ void MainWindow::openModel()
 
 	try
 	{
-		QString fileName;
-		foreach(fileName, files)
-		{
-			ChildWindow* window = newChildWindow();
-			window->getController()->loadModel(fileName);
-		}
+		openFiles(files);
 	}
 	catch(FileError& err)
 	{

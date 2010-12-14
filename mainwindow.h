@@ -21,6 +21,7 @@
 #include <QMainWindow>
 #include <QList>
 #include <QMap>
+#include <QStringList>
 
 class QMdiArea;
 class QDockWidget;
@@ -38,6 +39,8 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 public:
 	MainWindow(QWidget* parent = 0);
+
+	void openFiles(QStringList& files);
 
 private Q_SLOTS:
 	void shapesVisChanged(bool);

@@ -18,6 +18,7 @@
 #include <QTextCodec>
 #include <QPlastiqueStyle>
 #include <QMessageBox>
+#include <QStringList>
 
 #include <locale.h>
 
@@ -42,6 +43,15 @@ int main(int argc, char *argv[])
 
 		MainWindow w;
 		w.show();
+
+		QStringList args;
+		if (argc > 1)
+		{
+			for (int i = 1; i < argc; ++i)
+				args << argv[i];
+		}
+
+		w.openFiles(args);
 
 		return a.exec();
 	}
