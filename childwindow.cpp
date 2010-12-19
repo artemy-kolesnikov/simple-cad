@@ -47,10 +47,17 @@ void ChildWindow::createUI()
 
 	view->setModel(model);
 
+	connect(view, SIGNAL(selectionChanged()),
+		this, SIGNAL(selectionChanged()));
+
 	connect(controller, SIGNAL(loadModelRequest(QString&)),
 		model, SLOT(loadModel(QString&)));
 
 	shapeModel = new QShapeModel(model, this);
+
+	connect(controller, SIGNAL(setMaterialRequest(Graphic3d_NameOfMaterial)),
+		model, SLOT(setMaterial(Graphic3d_NameOfMaterial)));
+	connect(controller, SIGNAL(setShaddedRequest(bool)), model, SLOT(setShadded(bool)));
 }
 
 Controller* ChildWindow::getController() const

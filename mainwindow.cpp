@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QToolBar>
 #include <QMdiSubWindow>
+#include <QInputDialog>
 
 #include "childwindow.h"
 #include "model.h"
@@ -36,6 +37,7 @@
 #include "error.h"
 #include "view.h"
 #include "qshapemodel.h"
+#include "propertieswidget.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -68,7 +70,7 @@ void MainWindow::createUI()
 
 void MainWindow::createDockWidget()
 {
-	shapesDock = new QDockWidget(tr("Элементы"), this);
+	shapesDock = new QDockWidget(tr("Shapes"), this);
 	shapesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 	addDockWidget(Qt::LeftDockWidgetArea, shapesDock);
 
@@ -77,6 +79,21 @@ void MainWindow::createDockWidget()
 
 	shapesTreeView = new QTreeView(shapesDock);
 	shapesDock->setWidget(shapesTreeView);
+
+	propertiesDock = new QDockWidget(tr("Properties"), this);
+	propertiesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+	addDockWidget(Qt::RightDockWidgetArea, propertiesDock);
+
+	connect(propertiesDock, SIGNAL(visibilityChanged(bool)), this,
+		SLOT(propertiesVisChanged(bool)));
+
+	propertiesWidget = new PropertiesWidget(this);
+	propertiesDock->setWidget(propertiesWidget);
+
+	connect(propertiesWidget, SIGNAL(materialChanged(Graphic3d_NameOfMaterial)),
+		this, SLOT(setMaterial(Graphic3d_NameOfMaterial)));
+	connect(propertiesWidget, SIGNAL(shadedChanged(bool)),
+		this, SLOT(setShadded(bool)));
 }
 
 void MainWindow::createMenuAndActions()
@@ -142,9 +159,17 @@ void MainWindow::createMenuAndActions()
 
 	acSubstract = new QAction(tr("Вычитание"), this);
 	mainToolBar->addAction(acSubstract);
+
+	/*acSetMaterial = new QAction(tr("Материал"), this);
+	mainToolBar->addAction(acSetMaterial);
+	connect(acSetMaterial, SIGNAL(triggered()), this, SLOT(setMaterial()));*/
 }
 
 void MainWindow::shapesVisChanged(bool)
+{
+}
+
+void MainWindow::propertiesVisChanged(bool)
 {
 }
 
@@ -218,5 +243,41 @@ void MainWindow::modelChanged()
 	for (int i = 1; i <= shapes->Length(); ++i)
 	{
 	}
+}
+
+/*void MainWindow::setMaterial()
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	Model* model = window->getModel();
+
+	QStringList materials_list = Model::getMaterials();
+
+	Graphic3d_NameOfMaterial current_material = model->getCurrentMaterial();
+
+	QString material_name = QInputDialog::getItem(this, tr("Материал"), tr("Название"),
+		materials_list, current_material, false);
+
+	model->setMaterial(material_name);
+}*/
+
+void MainWindow::setMaterial(Graphic3d_NameOfMaterial material)
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	window->getController()->setMaterial(material);
+}
+
+void MainWindow::setShadded(bool shadded)
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	window->getController()->setShadded(shadded);
 }
 

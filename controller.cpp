@@ -36,3 +36,13 @@ void Controller::saveModel(QString& fileName)
 	Q_EMIT saveModelRequest(fileName);
 }
 
+void Controller::setMaterial(Graphic3d_NameOfMaterial material)
+{
+	Q_EMIT setMaterialRequest(material);
+}
+
+void Controller::setShadded(bool shadded)
+{
+	Q_EMIT setShaddedRequest(shadded);
+}
+

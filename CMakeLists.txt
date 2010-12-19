@@ -8,6 +8,10 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
+#SET (EXECUTABLE_OUTPUT_PATH out_trash)
+#SET (CMAKE_EXECUTABLE_OUTPUT_PATH out_trash)
+#SET (RUNTIME_OUTPUT_DIRECTORY out_trash)
+
 SET(SOURCES
 	cadapplication.cpp
 	childwindow.cpp
@@ -18,6 +22,7 @@ SET(SOURCES
 	model.cpp
 	view.cpp
 	qshapemodel.cpp
+	propertieswidget.cpp
 )
 
 SET(HEADERS
@@ -28,6 +33,7 @@ SET(HEADERS
 	model.h
 	view.h
 	qshapemodel.h
+	propertieswidget.h
 )
 
 if (UNIX)

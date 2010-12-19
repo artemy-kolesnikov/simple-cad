@@ -20,6 +20,8 @@
 
 #include <QObject>
 
+#include <Graphic3d_NameOfMaterial.hxx>
+
 /**
  * Controller dispatch commands between model and views set
  */
@@ -34,11 +36,15 @@ public Q_SLOTS:
 	void updateView();
 	void loadModel(QString& fileName);
 	void saveModel(QString& fileName);
+	void setMaterial(Graphic3d_NameOfMaterial material);
+	void setShadded(bool shadded);
 
 Q_SIGNALS:
 	void updateViewRequest();
 	void loadModelRequest(QString& fileName);
 	void saveModelRequest(QString& fileName);
+	void setMaterialRequest(Graphic3d_NameOfMaterial material);
+	void setShaddedRequest(bool shadded);
 };
 
 #endif // CONTROOLER_HEADER

@@ -23,6 +23,8 @@
 #include <QMap>
 #include <QStringList>
 
+#include <Graphic3d_NameOfMaterial.hxx>
+
 class QMdiArea;
 class QDockWidget;
 class QMenuBar;
@@ -33,6 +35,7 @@ class QToolBar;
 class QMdiSubWindow;
 
 class ChildWindow;
+class PropertiesWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -44,11 +47,14 @@ public:
 
 private Q_SLOTS:
 	void shapesVisChanged(bool);
+	void propertiesVisChanged(bool);
 	void about();
 	void openModel();
 	ChildWindow* newChildWindow();
 	void childWindowActivated(QMdiSubWindow* window);
 	void modelChanged();
+	void setMaterial(Graphic3d_NameOfMaterial material);
+	void setShadded(bool shadded);
 
 private:
 	void createUI();
@@ -59,6 +65,8 @@ private:
 
 	// Model shapes list
 	QDockWidget* shapesDock;
+	// Model properties
+	QDockWidget* propertiesDock;
 	QMenuBar* mainMenuBar;
 	QToolBar* mainToolBar;
 	QTreeView* shapesTreeView;
@@ -78,9 +86,13 @@ private:
 	QAction* acAddition;
 	QAction* acSubstract;
 
+	//QAction* acSetMaterial;
+
 	QMap<QWidget*, Model*> windowModelMap;
 
 	ChildWindow* currentChild;
+
+	PropertiesWidget* propertiesWidget;
 };
 
 #endif // MAIN_WINDOW_HEADER

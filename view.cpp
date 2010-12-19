@@ -35,7 +35,7 @@
 #include <Graphic3d_GraphicDevice.hxx>
 
 View::View(QWidget* parent) : QWidget(parent),
-	model(0), firstPaint(true), pressedX(0), pressedY(0), curAction(caNone)
+	model(0), firstPaint(true), pressedX(0), pressedY(0), curAction(caNone), modKey(mkNone)
 {
 	createUI();
 }
@@ -211,6 +211,7 @@ void View::mouseMoveEvent(QMouseEvent* event)
 		}
 		default:
 		{
+			model->getContext()->MoveTo(point.x(), point.y(), view);
 			break;
 		}
 	}
@@ -228,27 +229,39 @@ void View::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Space)
 	{
-		if (curAction == caNone)
-			curAction = caRotate;
+		modKey = mkSpace;
 	}
 }
 
 void View::keyReleaseEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Space)
-		curAction = caNone;
+		modKey = mkNone;
 }
 
-void View::onLButtonDown(const int, const QPoint point)
+void View::onLButtonDown(const int flags, const QPoint point)
 {
 	pressedX = point.x();
 	pressedY = point.y();
 
-	if (curAction == caNone)
+	if (flags & Qt::ControlModifier)
 		curAction = caMove;
-	else if (curAction == caRotate)
+	else if (modKey == mkSpace)
 	{
+		curAction = caRotate;
 		view->StartRotation(point.x(), point.y());
+	}
+	else if (flags & Qt::ShiftModifier)
+	{
+		model->getContext()->ShiftSelect();
+
+		Q_EMIT selectionChanged();
+	}
+	else
+	{
+		model->getContext()->Select();
+
+		Q_EMIT selectionChanged();
 	}
 }
 

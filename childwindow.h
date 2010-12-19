@@ -41,6 +41,9 @@ public:
 	View* getView() const;
 	QShapeModel* getShapeModel() const;
 
+Q_SIGNALS:
+	void selectionChanged();
+
 protected:
 	void keyPressEvent(QKeyEvent*);
 	void keyReleaseEvent(QKeyEvent*);
@@ -51,6 +54,9 @@ private Q_SLOTS:
 
 private:
 	void createUI();
+
+	// In usual model is not need
+	//Model* getModel() const;
 
 	Model* model;
 	View* view;

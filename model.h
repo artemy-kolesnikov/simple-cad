@@ -22,6 +22,12 @@
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
+#include <AIS_Shape.hxx>
+
+#include <list>
+#include <map>
+
+#include <QStringList>
 
 #include "error.h"
 
@@ -40,6 +46,12 @@ public:
 	Handle(AIS_InteractiveContext) getContext() const;
 	Handle(TopTools_HSequenceOfShape) getShapes() const;
 
+	static QString getMaterialName(Graphic3d_NameOfMaterial material);
+	static Graphic3d_NameOfMaterial getMaterialType(const QString& name);
+	static QStringList getMaterials();
+
+	Graphic3d_NameOfMaterial getShapeMaterial(const Handle(AIS_InteractiveObject)& shape) const;
+
 Q_SIGNALS:
 	void changed();
 	void fileNameChanged(QString& newFileName);
@@ -47,6 +59,9 @@ Q_SIGNALS:
 public Q_SLOTS:
 	void loadModel(QString& fileName) throw(FileError);
 	void saveModel(QString& fileName) throw(FileError);
+	void setMaterial(Graphic3d_NameOfMaterial material);
+	void setMaterial(const QString& material);
+	void setShadded(bool shadded);
 
 private:
 	QString fileName;
@@ -55,6 +70,13 @@ private:
 	Handle(AIS_InteractiveContext) context;
 
 	Handle(TopTools_HSequenceOfShape) shapes;
+
+	// TODO: Perhaps there is a built-in AIS_Shape list
+	std::list<Handle(AIS_Shape)> ais_shapes;
+
+	// TODO: Perhaps there is a built-in way to get a shape material name
+	std::map<Handle(AIS_InteractiveObject), Graphic3d_NameOfMaterial> shapeMaterialMap;
 };
 
 #endif // MODEL_HEADER
+

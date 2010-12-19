@@ -35,16 +35,25 @@ class View : public QWidget
 
 	enum CurrentAction
 	{
-		caNone = 0,
+		caNone,
 		caMove,
 		caRotate
 	};
+
+	 enum ModifierKey
+	 {
+		 mkNone,
+		 mkSpace
+	 };
 
 public:
 	View(QWidget* parent = 0);
 
 	void setModel(Model* model);
 	Model* getModel() const;
+
+Q_SIGNALS:
+	void selectionChanged();
 
 public Q_SLOTS:
 	void updateView();
@@ -75,6 +84,7 @@ private:
 	int pressedY;
 
 	CurrentAction curAction;
+	ModifierKey modKey;
 };
 
 #endif // VIEW_HEADER
