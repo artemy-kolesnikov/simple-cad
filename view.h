@@ -18,7 +18,7 @@
 #ifndef VIEW_HEADER
 #define VIEW_HEADER
 
-#include <QWidget>
+#include <QGLWidget>
 #include <QPaintEvent>
 #include <QPoint>
 
@@ -29,7 +29,7 @@ class Model;
 /**
  * Display loaded model
  */
-class View : public QWidget
+class View : public QGLWidget
 {
 	Q_OBJECT
 
