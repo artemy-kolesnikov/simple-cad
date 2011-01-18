@@ -55,6 +55,7 @@ private Q_SLOTS:
 	void modelChanged();
 	void setMaterial(Graphic3d_NameOfMaterial material);
 	void setShadded(bool shadded);
+	void viewSelectionChanged();
 
 private:
 	void createUI();
@@ -85,8 +86,6 @@ private:
 	QAction* acRotation;
 	QAction* acAddition;
 	QAction* acSubstract;
-
-	//QAction* acSetMaterial;
 
 	QMap<QWidget*, Model*> windowModelMap;
 

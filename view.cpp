@@ -20,7 +20,6 @@
 
 #include <QColormap>
 #include <QWheelEvent>
-#include <QDebug>
 #include <QRubberBand>
 
 #include <algorithm>
@@ -148,7 +147,10 @@ void View::mouseMoveEvent(QMouseEvent* event)
 		{
 			rectBand->setGeometry(QRect(pressedPoint, point).normalized());
 			model->getContext()->MoveTo(point.x(), point.y(), view);
-			model->getContext()->ShiftSelect(pressedPoint.x(), pressedPoint.y(), point.x(), point.y(), view);
+			model->getContext()->Select(pressedPoint.x(), pressedPoint.y(), point.x(), point.y(), view);
+
+			Q_EMIT selectionChanged();
+
 			break;
 		}
 		default:
@@ -204,14 +206,15 @@ void View::onLButtonDown(const int flags, const QPoint point)
 	else
 	{
 		model->getContext()->Select();
+
+		Q_EMIT selectionChanged();
+
 		curAction = caRectSelect;
 
 		if (!rectBand)
 			rectBand = new QRubberBand(QRubberBand::Rectangle, this);
 		rectBand->setGeometry(QRect(pressedPoint, QSize()));
 		rectBand->show();
-
-		Q_EMIT selectionChanged();
 	}
 }
 

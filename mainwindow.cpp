@@ -30,6 +30,7 @@
 #include <QToolBar>
 #include <QMdiSubWindow>
 #include <QInputDialog>
+#include <QDebug>
 
 #include "childwindow.h"
 #include "model.h"
@@ -159,10 +160,6 @@ void MainWindow::createMenuAndActions()
 
 	acSubstract = new QAction(tr("Вычитание"), this);
 	mainToolBar->addAction(acSubstract);
-
-	/*acSetMaterial = new QAction(tr("Материал"), this);
-	mainToolBar->addAction(acSetMaterial);
-	connect(acSetMaterial, SIGNAL(triggered()), this, SLOT(setMaterial()));*/
 }
 
 void MainWindow::shapesVisChanged(bool)
@@ -221,17 +218,23 @@ void MainWindow::childWindowActivated(QMdiSubWindow* window)
 	if (!window)
 		return;
 
-	/*if (currentChild)
+	if (currentChild)
 	{
 		disconnect(currentChild->getView()->getModel(), SIGNAL(changed()),
 			this, SLOT(modelChanged()));
-	}*/
+
+		disconnect(currentChild, SIGNAL(selectionChanged()),
+			this, SLOT(viewSelectionChanged()));
+	}
 
 	currentChild = qobject_cast<ChildWindow*>(window);
 	shapesTreeView->setModel(currentChild->getShapeModel());
 
-	/*connect(currentChild->getView()->getModel(), SIGNAL(changed()),
-		this, SLOT(modelChanged()));*/
+	connect(currentChild->getView()->getModel(), SIGNAL(changed()),
+		this, SLOT(modelChanged()));
+
+	connect(currentChild, SIGNAL(selectionChanged()),
+		this, SLOT(viewSelectionChanged()));
 }
 
 void MainWindow::modelChanged()
@@ -244,24 +247,6 @@ void MainWindow::modelChanged()
 	{
 	}
 }
-
-/*void MainWindow::setMaterial()
-{
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
-	if (!window)
-		return;
-
-	Model* model = window->getModel();
-
-	QStringList materials_list = Model::getMaterials();
-
-	Graphic3d_NameOfMaterial current_material = model->getCurrentMaterial();
-
-	QString material_name = QInputDialog::getItem(this, tr("Материал"), tr("Название"),
-		materials_list, current_material, false);
-
-	model->setMaterial(material_name);
-}*/
 
 void MainWindow::setMaterial(Graphic3d_NameOfMaterial material)
 {
@@ -279,5 +264,16 @@ void MainWindow::setShadded(bool shadded)
 		return;
 
 	window->getController()->setShadded(shadded);
+}
+
+void MainWindow::viewSelectionChanged()
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	Model* model = window->getView()->getModel();
+
+	Handle(TopTools_HSequenceOfShape) shapes = model->getSelectedShapes();
 }
 

@@ -31,20 +31,6 @@ namespace
 
 	static Handle(Graphic3d_GraphicDevice) defaultDevice;
 
-	/*struct SetMaterial
-	{
-		SetMaterial(const Handle(AIS_InteractiveContext)& context,
-			Graphic3d_NameOfMaterial material) : material(material), context(context) {}
-
-		Handle(AIS_InteractiveContext) context;
-		Graphic3d_NameOfMaterial material;
-
-		void operator() (const Handle(AIS_Shape)& shape)
-		{
-			context->SetMaterial(shape, material);
-		}
-	};*/
-
 	const int MATERIALS_COUNT = 20;
 	const QString material_names[MATERIALS_COUNT] = 
 	{
@@ -107,8 +93,6 @@ void Model::loadModel(QString& fileName) throw(FileError)
 		context->SetDisplayMode(shape, 0, false);
 
 		context->Display(shape, false);
-
-		ais_shapes.push_back(shape);
 	}
 
 	context->UpdateCurrentViewer();
@@ -143,11 +127,26 @@ Handle(TopTools_HSequenceOfShape) Model::getShapes() const
 	return shapes;
 }
 
+Handle(TopTools_HSequenceOfShape) Model::getSelectedShapes() const
+{
+	Handle(TopTools_HSequenceOfShape) selected = new TopTools_HSequenceOfShape();
+
+    for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
+	{
+		Handle(AIS_InteractiveObject) object = context->Current();
+
+		if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
+		{
+			TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(object)->Shape();
+			selected->Append(shape);
+		}
+	}
+
+	return selected;
+}
+
 void Model::setMaterial(Graphic3d_NameOfMaterial material)
 {
-	/*SetMaterial set_material(context, material);
-	std::for_each(ais_shapes.begin(), ais_shapes.end(), set_material);*/
-
     for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
 	{
 		Handle(AIS_InteractiveObject) object = context->Current();
@@ -198,7 +197,7 @@ QStringList Model::getMaterials()
 	return res;
 }
 
-Graphic3d_NameOfMaterial Model::getShapeMaterial(const Handle(AIS_InteractiveObject)& shape) const
+Graphic3d_NameOfMaterial Model::getShapeMaterial(const Handle(AIS_Shape)& shape) const
 {
 	std::map<Handle(AIS_InteractiveObject), Graphic3d_NameOfMaterial>::const_iterator
 		it = shapeMaterialMap.find(shape);
