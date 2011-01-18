@@ -25,6 +25,7 @@
 #include <V3d_View.hxx>
 
 class Model;
+class QRubberBand;
 
 /**
  * Display loaded model
@@ -37,7 +38,8 @@ class View : public QGLWidget
 	{
 		caNone,
 		caMove,
-		caRotate
+		caRotate,
+		caRectSelect
 	};
 
 	 enum ModifierKey
@@ -72,16 +74,17 @@ private:
 	void createUI();
 	void init();
 
-	void onLButtonDown(const int nFlags, const QPoint point);
-	void onRButtonDown(const int nFlags, const QPoint point);
-	void onMButtonDown(const int nFlags, const QPoint point);
+	void onLButtonDown(const int flags, const QPoint point);
+	void onRButtonDown(const int flags, const QPoint point);
+	void onMButtonDown(const int flags, const QPoint point);
 
 	Model* model;
 	Handle(V3d_View) view;
 	bool firstPaint;
 
-	int pressedX;
-	int pressedY;
+	QPoint pressedPoint;
+	QPoint panPoint;
+	QRubberBand* rectBand; 
 
 	CurrentAction curAction;
 	ModifierKey modKey;

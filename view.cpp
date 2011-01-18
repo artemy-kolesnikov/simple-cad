@@ -21,6 +21,9 @@
 #include <QColormap>
 #include <QWheelEvent>
 #include <QDebug>
+#include <QRubberBand>
+
+#include <algorithm>
 
 #include <Xw_Window.hxx>
 #include <Graphic3d_GraphicDevice.hxx>
@@ -35,7 +38,8 @@
 #include <Graphic3d_GraphicDevice.hxx>
 
 View::View(QWidget* parent) : QGLWidget(parent),
-	model(0), firstPaint(true), pressedX(0), pressedY(0), curAction(caNone), modKey(mkNone)
+	model(0), firstPaint(true), rectBand(0), curAction(caNone),
+	modKey(mkNone)
 {
 	createUI();
 }
@@ -131,13 +135,20 @@ void View::mouseMoveEvent(QMouseEvent* event)
 	{
 		case caMove:
 		{
-			view->Pan(point.x() - pressedX, pressedY - point.y());
+			view->Pan(point.x() - panPoint.x(), panPoint.y() - point.y());
 			break;
 		}
 		case caRotate:
 		{
 			view->Rotation(point.x(), point.y());
 			view->Redraw();
+			break;
+		}
+		case caRectSelect:
+		{
+			rectBand->setGeometry(QRect(pressedPoint, point).normalized());
+			model->getContext()->MoveTo(point.x(), point.y(), view);
+			model->getContext()->ShiftSelect(pressedPoint.x(), pressedPoint.y(), point.x(), point.y(), view);
 			break;
 		}
 		default:
@@ -147,13 +158,16 @@ void View::mouseMoveEvent(QMouseEvent* event)
 		}
 	}
 
-	pressedX = point.x();
-	pressedY = point.y();
+	panPoint = point;
 }
 
 void View::mouseReleaseEvent(QMouseEvent*)
 {
 	curAction = caNone;
+
+	Q_ASSERT(rectBand);
+
+	rectBand->hide();
 }
 
 void View::keyPressEvent(QKeyEvent* event)
@@ -172,8 +186,7 @@ void View::keyReleaseEvent(QKeyEvent* event)
 
 void View::onLButtonDown(const int flags, const QPoint point)
 {
-	pressedX = point.x();
-	pressedY = point.y();
+	pressedPoint = point;
 
 	if (flags & Qt::ControlModifier)
 		curAction = caMove;
@@ -191,6 +204,12 @@ void View::onLButtonDown(const int flags, const QPoint point)
 	else
 	{
 		model->getContext()->Select();
+		curAction = caRectSelect;
+
+		if (!rectBand)
+			rectBand = new QRubberBand(QRubberBand::Rectangle, this);
+		rectBand->setGeometry(QRect(pressedPoint, QSize()));
+		rectBand->show();
 
 		Q_EMIT selectionChanged();
 	}
@@ -198,13 +217,11 @@ void View::onLButtonDown(const int flags, const QPoint point)
 
 void View::onRButtonDown(const int, const QPoint point)
 {
-	pressedX = point.x();
-	pressedY = point.y();
+	pressedPoint = point;
 }
 
 void View::onMButtonDown(const int, const QPoint point)
 {
-	pressedX = point.x();
-	pressedY = point.y();
+	pressedPoint = point;
 }
 
