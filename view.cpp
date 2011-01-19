@@ -21,6 +21,8 @@
 #include <QColormap>
 #include <QWheelEvent>
 #include <QRubberBand>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #include <algorithm>
 
@@ -35,6 +37,11 @@
 #include <X11/Xlib.h>
 #include <Xw_Window.hxx>
 #include <Graphic3d_GraphicDevice.hxx>
+
+namespace
+{
+
+}
 
 View::View(QWidget* parent) : QGLWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
@@ -80,7 +87,7 @@ void View::init()
 	hi = (short) (windowHandle >> 16);
 	Handle(Xw_Window) hWnd = new Xw_Window(Handle(Graphic3d_GraphicDevice)::
 		DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo,Xw_WQ_SAMEQUALITY);
-	view->SetWindow(hWnd);
+	view->SetWindow(hWnd, 0, paintCallBack, this);
     if (!hWnd->IsMapped())
 		hWnd->Map();
 	view->SetBackgroundColor(Quantity_NOC_BLACK);
@@ -228,3 +235,56 @@ void View::onMButtonDown(const int, const QPoint point)
 	pressedPoint = point;
 }
 
+void View::paintGl()
+{
+	glDisable(GL_LIGHTING); 
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+    glLoadIdentity();
+
+	GLfloat left   = -1.0f;
+	GLfloat right  =  1.0f;
+	GLfloat bottom = -1.0f;
+	GLfloat top    =  1.0f;
+	GLfloat depth  =  1.0f;
+
+    glOrtho(left, right, bottom, top, 1.0, -1.0);
+
+//#ifndef OCC_PATCHED
+	/*glEnable(GL_BLEND);
+	if (view->ColorScaleIsDisplayed())
+	{
+		// Not needed on patched OCC 6.2 versions, but is the lowest
+		// common denominator working code on collaborators OpenGL
+		// graphics cards.
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	}*/
+//#endif
+
+    glBegin( GL_QUADS);
+    {
+      glColor4f(0.1f, 0.1f, 0.1f, 1.0f);
+      glVertex3d(left, bottom, depth);
+      glVertex3d(right, bottom, depth);
+      glColor4f(0.8f, 0.8f, 0.9f, 1.0f);
+      glVertex3d(right, top, depth);
+      glVertex3d(left, top, depth);
+    }
+    glEnd();
+
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
+int View::paintCallBack(Aspect_Drawable drawable, void* userData,
+	Aspect_GraphicCallbackStruct* data)
+{
+	View* view = static_cast<View*>(userData);
+	view->paintGl();
+
+	return 0;
+}

@@ -21,6 +21,7 @@
 #include <QWidget>
 
 #include <Graphic3d_NameOfMaterial.hxx>
+#include <AIS_Shape.hxx>
 
 class Model;
 class QComboBox;
@@ -36,6 +37,7 @@ public:
 	PropertiesWidget(QWidget* parent = 0);
 
 	void setModel(Model* model);
+	void setShape(Handle(AIS_Shape)& shape);
 
 Q_SIGNALS:
 	void materialChanged(Graphic3d_NameOfMaterial material);
@@ -51,6 +53,7 @@ private:
 
 private:
 	Model* model;
+	Handle(AIS_Shape) shape;
 
 	QComboBox* cbMaterial;
 	QCheckBox* cbShaded;

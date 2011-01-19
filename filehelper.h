@@ -31,10 +31,10 @@ class FileHelper
 {
 public:
 	static void readFile(QString& fileName,
-		Handle(TopTools_HSequenceOfShape)& shapes) throw(FileError);
+		Handle(TopTools_HSequenceOfShape)& shapes);
 
 	static void writeFile(QString& fileName,
-		const Handle(AIS_InteractiveContext)& context) throw(FileError);
+		const Handle(AIS_InteractiveContext)& context);
 };
 
 #endif // FILE_HELPER_HEADER

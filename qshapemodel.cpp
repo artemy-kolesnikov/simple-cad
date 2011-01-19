@@ -48,7 +48,7 @@ QVariant QShapeModel::headerData(int section, Qt::Orientation orientation, int r
 
 QVariant QShapeModel::data(const QModelIndex &index, int role) const
 {
-	Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
+	/*Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
 
 	if (index.row() < 0 || index.row() >= shapes->Length())
 		return QVariant();
@@ -57,7 +57,7 @@ QVariant QShapeModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 
 	if (!index.parent().isValid())
-		return root_title;
+		return root_title;*/
 
 	return QString(tr("Shape_%d").arg(index.row()));
 }

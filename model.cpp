@@ -25,6 +25,7 @@
 #include <QApplication>
 
 #include <Graphic3d_GraphicDevice.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 
 namespace
 {
@@ -77,20 +78,25 @@ Model::Model(QObject* parent) : QObject(parent)
 
 	//context->CurrentViewer()->CreateView();
 
-	shapes = new TopTools_HSequenceOfShape();
+	shapes = boost::shared_ptr<AIS_SequenceOfInteractive>(new AIS_SequenceOfInteractive());
 }
 
-void Model::loadModel(QString& fileName) throw(FileError)
+void Model::loadModel(QString& fileName)
 {
-	FileHelper::readFile(fileName, shapes);
+	Handle(TopTools_HSequenceOfShape) dsShapes = new TopTools_HSequenceOfShape();
+	FileHelper::readFile(fileName, dsShapes);
 
-	if (shapes.IsNull() || !shapes->Length())
+	shapes->Clear();
+
+	if (dsShapes.IsNull() || !dsShapes->Length())
 		throw FileError(QObject::tr("Ошибка чтения элементов"));
 
-	for (int i = 1; i <= shapes->Length(); ++i)
+	for (int i = 1; i <= dsShapes->Length(); ++i)
 	{
-		Handle(AIS_Shape) shape = new AIS_Shape(shapes->Value(i));
+		Handle(AIS_Shape) shape = new AIS_Shape(dsShapes->Value(i));
 		context->SetDisplayMode(shape, 0, false);
+
+		shapes->Append(shape);
 
 		context->Display(shape, false);
 	}
@@ -103,7 +109,7 @@ void Model::loadModel(QString& fileName) throw(FileError)
 	Q_EMIT fileNameChanged(fileName);
 }
 
-void Model::saveModel(QString& fileName) throw(FileError)
+void Model::saveModel(QString& fileName)
 {
 	if (!fileName.isEmpty())
 	{
@@ -122,24 +128,21 @@ Handle(AIS_InteractiveContext) Model::getContext() const
 	return context;
 }
 
-Handle(TopTools_HSequenceOfShape) Model::getShapes() const
+boost::shared_ptr<AIS_SequenceOfInteractive> Model::getShapes() const
 {
 	return shapes;
 }
 
-Handle(TopTools_HSequenceOfShape) Model::getSelectedShapes() const
+boost::shared_ptr<AIS_SequenceOfInteractive> Model::getSelectedShapes() const
 {
-	Handle(TopTools_HSequenceOfShape) selected = new TopTools_HSequenceOfShape();
+	boost::shared_ptr<AIS_SequenceOfInteractive> selected(new AIS_SequenceOfInteractive());
 
     for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
 	{
 		Handle(AIS_InteractiveObject) object = context->Current();
 
 		if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
-		{
-			TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(object)->Shape();
-			selected->Append(shape);
-		}
+			selected->Append(object);
 	}
 
 	return selected;
@@ -150,8 +153,6 @@ void Model::setMaterial(Graphic3d_NameOfMaterial material)
     for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
 	{
 		Handle(AIS_InteractiveObject) object = context->Current();
-
-		shapeMaterialMap[object] = material;
 
         context->SetMaterial(object, material);
 	}
@@ -195,16 +196,5 @@ QStringList Model::getMaterials()
 		res << material_names[i];
 
 	return res;
-}
-
-Graphic3d_NameOfMaterial Model::getShapeMaterial(const Handle(AIS_Shape)& shape) const
-{
-	std::map<Handle(AIS_InteractiveObject), Graphic3d_NameOfMaterial>::const_iterator
-		it = shapeMaterialMap.find(shape);
-
-	if (it == shapeMaterialMap.end())
-		return Graphic3d_NOM_DEFAULT;
-
-	return (*it).second;
 }
 

@@ -34,6 +34,11 @@ PropertiesWidget::PropertiesWidget(QWidget* parent) : QWidget(parent)
 void PropertiesWidget::setModel(Model* model)
 {
 	this->model = model;
+}
+
+void PropertiesWidget::setShape(Handle(AIS_Shape)& shape)
+{
+	this->shape = shape;
 
 	updateView();
 }
@@ -78,6 +83,23 @@ void PropertiesWidget::createUI()
 
 void PropertiesWidget::updateView()
 {
+	if (!model)
+		return;
+
+	if (shape.IsNull())
+	{
+		cbMaterial->setCurrentIndex(-1);
+		cbShaded->setCheckState(Qt::Unchecked);
+	}
+	else
+	{
+		Graphic3d_NameOfMaterial material = shape->Material();
+		cbMaterial->setCurrentIndex(material);
+
+		int shapeDisplayMode = shape->DisplayMode();
+
+		cbShaded->setCheckState(shapeDisplayMode == 1 ? Qt::Checked : Qt::Unchecked);
+	}
 }
 
 void PropertiesWidget::materialChanged(int value)

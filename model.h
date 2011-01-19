@@ -21,11 +21,12 @@
 #include <QObject>
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
+#include <AIS_SequenceOfInteractive.hxx>
 #include <AIS_Shape.hxx>
 
 #include <list>
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 #include <QStringList>
 
@@ -44,22 +45,20 @@ public:
 	QString getFileName() const;
 
 	Handle(AIS_InteractiveContext) getContext() const;
-	Handle(TopTools_HSequenceOfShape) getShapes() const;
-	Handle(TopTools_HSequenceOfShape) getSelectedShapes() const;
+	boost::shared_ptr<AIS_SequenceOfInteractive> getShapes() const;
+	boost::shared_ptr<AIS_SequenceOfInteractive> getSelectedShapes() const;
 
 	static QString getMaterialName(Graphic3d_NameOfMaterial material);
 	static Graphic3d_NameOfMaterial getMaterialType(const QString& name);
 	static QStringList getMaterials();
-
-	Graphic3d_NameOfMaterial getShapeMaterial(const Handle(AIS_Shape)& shape) const;
 
 Q_SIGNALS:
 	void changed();
 	void fileNameChanged(QString& newFileName);
 
 public Q_SLOTS:
-	void loadModel(QString& fileName) throw(FileError);
-	void saveModel(QString& fileName) throw(FileError);
+	void loadModel(QString& fileName);
+	void saveModel(QString& fileName);
 	void setMaterial(Graphic3d_NameOfMaterial material);
 	void setMaterial(const QString& material);
 	void setShadded(bool shadded);
@@ -70,10 +69,7 @@ private:
 	Handle(V3d_Viewer) viewer;
 	Handle(AIS_InteractiveContext) context;
 
-	Handle(TopTools_HSequenceOfShape) shapes;
-
-	// TODO: Perhaps there is a built-in way to get a shape material name
-	std::map<Handle(AIS_InteractiveObject), Graphic3d_NameOfMaterial> shapeMaterialMap;
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes;
 };
 
 #endif // MODEL_HEADER

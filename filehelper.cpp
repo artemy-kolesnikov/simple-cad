@@ -76,7 +76,7 @@ namespace
 }
 
 void FileHelper::readFile(QString& fileName,
-	Handle(TopTools_HSequenceOfShape)& shapes) throw(FileError)
+	Handle(TopTools_HSequenceOfShape)& shapes)
 {
 	FileType ft = getFileType(fileName);
 
@@ -93,7 +93,7 @@ void FileHelper::readFile(QString& fileName,
 }
 
 void FileHelper::writeFile(QString& fileName,
-	const Handle(AIS_InteractiveContext)& context) throw(FileError)
+	const Handle(AIS_InteractiveContext)& context)
 {
 }
 

@@ -32,6 +32,10 @@
 #include <QInputDialog>
 #include <QDebug>
 
+#include <AIS_SequenceOfInteractive.hxx>
+
+#include <boost/shared_ptr.hpp>
+
 #include "childwindow.h"
 #include "model.h"
 #include "controller.h"
@@ -241,11 +245,11 @@ void MainWindow::modelChanged()
 {
 	Model* model = static_cast<Model*>(sender());
 
-	Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
+	/*Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
 
 	for (int i = 1; i <= shapes->Length(); ++i)
 	{
-	}
+	}*/
 }
 
 void MainWindow::setMaterial(Graphic3d_NameOfMaterial material)
@@ -274,6 +278,13 @@ void MainWindow::viewSelectionChanged()
 
 	Model* model = window->getView()->getModel();
 
-	Handle(TopTools_HSequenceOfShape) shapes = model->getSelectedShapes();
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+
+	Handle(AIS_Shape) shape;
+
+	/*if (shapes->Length() == 1)
+		shape = shapes->Value(1);
+
+	propertiesWidget->setShape(shape);*/
 }
 

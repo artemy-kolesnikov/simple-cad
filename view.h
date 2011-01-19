@@ -78,6 +78,11 @@ private:
 	void onRButtonDown(const int flags, const QPoint point);
 	void onMButtonDown(const int flags, const QPoint point);
 
+	void paintGl();
+
+	static int paintCallBack(Aspect_Drawable drawable, void* userData,
+		Aspect_GraphicCallbackStruct* data);
+
 	Model* model;
 	Handle(V3d_View) view;
 	bool firstPaint;
