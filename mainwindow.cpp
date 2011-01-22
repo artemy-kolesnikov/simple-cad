@@ -282,9 +282,9 @@ void MainWindow::viewSelectionChanged()
 
 	Handle(AIS_Shape) shape;
 
-	/*if (shapes->Length() == 1)
-		shape = shapes->Value(1);
+	if (shapes->Length() == 1)
+		shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
 
-	propertiesWidget->setShape(shape);*/
+	propertiesWidget->setShape(shape);
 }
 

@@ -67,14 +67,14 @@ void PropertiesWidget::createUI()
 
 	++row;
 
-	QLabel* lbShadow = new QLabel(tr("Shaded"), this);
+	/*QLabel* lbShadow = new QLabel(tr("Shaded"), this);
 	gridLayout->addWidget(lbShadow, row, 0);
 
 	cbShaded = new QCheckBox(this);
 	gridLayout->addWidget(cbShaded, row, 1);
 
 	connect(cbShaded, SIGNAL(stateChanged(int)),
-		this, SLOT(shaddedChanged(int)));
+		this, SLOT(shaddedChanged(int)));*/
 
 	++row;
 
@@ -89,7 +89,7 @@ void PropertiesWidget::updateView()
 	if (shape.IsNull())
 	{
 		cbMaterial->setCurrentIndex(-1);
-		cbShaded->setCheckState(Qt::Unchecked);
+		//cbShaded->setCheckState(Qt::Unchecked);
 	}
 	else
 	{
@@ -98,7 +98,7 @@ void PropertiesWidget::updateView()
 
 		int shapeDisplayMode = shape->DisplayMode();
 
-		cbShaded->setCheckState(shapeDisplayMode == 1 ? Qt::Checked : Qt::Unchecked);
+		//cbShaded->setCheckState(shapeDisplayMode == 1 ? Qt::Checked : Qt::Unchecked);
 	}
 }
 

@@ -94,7 +94,7 @@ void Model::loadModel(QString& fileName)
 	for (int i = 1; i <= dsShapes->Length(); ++i)
 	{
 		Handle(AIS_Shape) shape = new AIS_Shape(dsShapes->Value(i));
-		context->SetDisplayMode(shape, 0, false);
+		context->SetDisplayMode(shape, 1, false);
 
 		shapes->Append(shape);
 

@@ -43,7 +43,7 @@ namespace
 
 }
 
-View::View(QWidget* parent) : QGLWidget(parent),
+View::View(QWidget* parent) : QWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
 	modKey(mkNone)
 {
@@ -86,7 +86,7 @@ void View::init()
 	lo = (short) windowHandle;
 	hi = (short) (windowHandle >> 16);
 	Handle(Xw_Window) hWnd = new Xw_Window(Handle(Graphic3d_GraphicDevice)::
-		DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo,Xw_WQ_SAMEQUALITY);
+		DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo, Xw_WQ_SAMEQUALITY);
 	view->SetWindow(hWnd, 0, paintCallBack, this);
     if (!hWnd->IsMapped())
 		hWnd->Map();
@@ -102,7 +102,10 @@ void View::paintEvent(QPaintEvent*)
 		firstPaint = false;
 	}
 
-	view->Redraw();
+	if( !view.IsNull() )
+	{
+		view->Redraw();
+	}
 }
 
 void View::resizeEvent(QResizeEvent*)

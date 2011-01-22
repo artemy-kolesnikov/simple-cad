@@ -18,7 +18,7 @@
 #ifndef VIEW_HEADER
 #define VIEW_HEADER
 
-#include <QGLWidget>
+#include <QWidget>
 #include <QPaintEvent>
 #include <QPoint>
 
@@ -30,7 +30,7 @@ class QRubberBand;
 /**
  * Display loaded model
  */
-class View : public QGLWidget
+class View : public QWidget
 {
 	Q_OBJECT
 
@@ -53,6 +53,8 @@ public:
 
 	void setModel(Model* model);
 	Model* getModel() const;
+
+	QPaintEngine* paintEngine() const { return 0; }
 
 Q_SIGNALS:
 	void selectionChanged();
