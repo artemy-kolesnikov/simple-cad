@@ -56,6 +56,8 @@ private Q_SLOTS:
 	void setMaterial(Graphic3d_NameOfMaterial material);
 	void setShadded(bool shadded);
 	void viewSelectionChanged();
+	void createRectangle();
+	void makePrism();
 
 private:
 	void createUI();

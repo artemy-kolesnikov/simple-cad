@@ -21,6 +21,7 @@
 #include <QColormap>
 #include <QWheelEvent>
 #include <QRubberBand>
+#include <QList>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
@@ -37,6 +38,7 @@
 #include <X11/Xlib.h>
 #include <Xw_Window.hxx>
 #include <Graphic3d_GraphicDevice.hxx>
+
 
 namespace
 {
@@ -175,11 +177,13 @@ void View::mouseMoveEvent(QMouseEvent* event)
 
 void View::mouseReleaseEvent(QMouseEvent*)
 {
+	if (caRectSelect == curAction)
+	{
+		Q_ASSERT(rectBand);
+		rectBand->hide();
+	}
+
 	curAction = caNone;
-
-	Q_ASSERT(rectBand);
-
-	rectBand->hide();
 }
 
 void View::keyPressEvent(QKeyEvent* event)

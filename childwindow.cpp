@@ -58,6 +58,10 @@ void ChildWindow::createUI()
 	connect(controller, SIGNAL(setMaterialRequest(Graphic3d_NameOfMaterial)),
 		model, SLOT(setMaterial(Graphic3d_NameOfMaterial)));
 	connect(controller, SIGNAL(setShaddedRequest(bool)), model, SLOT(setShadded(bool)));
+	connect(controller, SIGNAL(createRectangleRequest(gp_Pnt&, float, float)),
+		model, SLOT(createRectangle(gp_Pnt&, float, float)));
+	connect(controller, SIGNAL(makePrismRequest(AIS_Shape*, float)),
+		model, SLOT(makePrism(AIS_Shape*, float)));
 }
 
 Controller* ChildWindow::getController() const

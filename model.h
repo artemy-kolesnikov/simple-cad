@@ -22,6 +22,7 @@
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_Viewer.hxx>
 #include <AIS_SequenceOfInteractive.hxx>
+#include <gp_Pnt.hxx>
 #include <AIS_Shape.hxx>
 
 #include <list>
@@ -31,6 +32,8 @@
 #include <QStringList>
 
 #include "error.h"
+
+class AIS_Shape;
 
 /**
  * Keeps loaded CAD model
@@ -52,6 +55,8 @@ public:
 	static Graphic3d_NameOfMaterial getMaterialType(const QString& name);
 	static QStringList getMaterials();
 
+	void makePrism(Handle(AIS_Shape)& shape, float height);
+
 Q_SIGNALS:
 	void changed();
 	void fileNameChanged(QString& newFileName);
@@ -62,6 +67,8 @@ public Q_SLOTS:
 	void setMaterial(Graphic3d_NameOfMaterial material);
 	void setMaterial(const QString& material);
 	void setShadded(bool shadded);
+	void createRectangle(gp_Pnt& pt, float width, float height);
+	void createCircle(gp_Pnt& pt, float radius);
 
 private:
 	QString fileName;

@@ -25,7 +25,7 @@ class CADApplication : public QApplication
 	Q_OBJECT
 
 public:
-	CADApplication(int argc, char* argv[]);
+	CADApplication(int& argc, char* argv[]);
 };
 
 #endif // CAD_APPLICATION_HEADER

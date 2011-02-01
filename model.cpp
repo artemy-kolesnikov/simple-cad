@@ -26,6 +26,17 @@
 
 #include <Graphic3d_GraphicDevice.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GC_MakeSegment.hxx>
+#include <TopoDS_Edge.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopoDS_Face.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <gp_Vec.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
+#include <AIS_Shape.hxx>
 
 namespace
 {
@@ -171,8 +182,60 @@ void Model::setShadded(bool shadded)
 	{
 		Handle(AIS_InteractiveObject) object = context->Current();
 
-        context->SetDisplayMode(object, shadded, true);
+		context->SetDisplayMode(object, shadded, true);
 	}
+}
+
+void Model::createRectangle(gp_Pnt& pt, float width, float height)
+{
+	gp_Pnt pt1(pt);
+	gp_Pnt pt2(pt.X() + width, pt.Y(), pt.Z());
+	gp_Pnt pt3(pt.X() + width, pt.Y() + height, pt.Z());
+	gp_Pnt pt4(pt.X(), pt.Y() + height, pt.Z());
+
+    Handle(Geom_TrimmedCurve) segment1 = GC_MakeSegment(pt1, pt2);
+    Handle(Geom_TrimmedCurve) segment2 = GC_MakeSegment(pt2, pt3);
+    Handle(Geom_TrimmedCurve) segment3 = GC_MakeSegment(pt3, pt4);
+    Handle(Geom_TrimmedCurve) segment4 = GC_MakeSegment(pt4, pt1);
+
+	TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(segment1);
+	TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(segment2);
+	TopoDS_Edge edge3 = BRepBuilderAPI_MakeEdge(segment3);
+	TopoDS_Edge edge4 = BRepBuilderAPI_MakeEdge(segment4);
+
+	TopoDS_Wire wire  = BRepBuilderAPI_MakeWire(edge1 , edge2 , edge3, edge4);
+
+	TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
+
+	/*gp_Vec prismVec(0, 0, 100);
+	TopoDS_Shape body = BRepPrimAPI_MakePrism(face, prismVec);*/
+
+	Handle(AIS_Shape) rect = new AIS_Shape(face);
+
+	shapes->Append(rect);
+
+	context->Display(rect, false);
+	context->SetDisplayMode(rect, true, true);
+}
+
+void Model::createCircle(gp_Pnt& pt, float radius)
+{
+}
+
+void Model::makePrism(Handle(AIS_Shape)& shape, float height)
+{
+	gp_Vec prismVec(0, 0, height);
+	TopoDS_Shape body = BRepPrimAPI_MakePrism(shape->Shape(), prismVec);
+
+	Handle(AIS_Shape) newShape = new AIS_Shape(body);
+
+	//shapes->Erase(shape);
+	context->Erase(shape);
+
+	shapes->Append(newShape);
+
+	context->Display(newShape, false);
+	context->SetDisplayMode(newShape, true, true);
 }
 
 QString Model::getMaterialName(Graphic3d_NameOfMaterial material)

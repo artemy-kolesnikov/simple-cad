@@ -46,3 +46,13 @@ void Controller::setShadded(bool shadded)
 	Q_EMIT setShaddedRequest(shadded);
 }
 
+void Controller::createRectangle(gp_Pnt& pt, float width, float height)
+{
+	Q_EMIT createRectangleRequest(pt, width, height);
+}
+
+void Controller::makePrism(AIS_Shape* shape, float height)
+{
+	Q_EMIT makePrismRequest(shape, height);
+}
+

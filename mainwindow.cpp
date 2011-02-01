@@ -33,6 +33,7 @@
 #include <QDebug>
 
 #include <AIS_SequenceOfInteractive.hxx>
+#include <gp_Pnt.hxx>
 
 #include <boost/shared_ptr.hpp>
 
@@ -146,6 +147,7 @@ void MainWindow::createMenuAndActions()
 	mainToolBar->addAction(acEllipse);
 
 	acRectangle = new QAction(tr("Прямоугольник"), this);
+	connect(acRectangle, SIGNAL(triggered()), this, SLOT(createRectangle()));
 	mainToolBar->addAction(acRectangle);
 
 	acFunction = new QAction(tr("Функция"), this);
@@ -154,6 +156,7 @@ void MainWindow::createMenuAndActions()
 	mainToolBar->addSeparator();
 
 	acStamp = new QAction(tr("Выдавливание"), this);
+	connect(acStamp, SIGNAL(triggered()), this, SLOT(makePrism()));
 	mainToolBar->addAction(acStamp);
 
 	acRotation = new QAction(tr("Вращение"), this);
@@ -286,5 +289,31 @@ void MainWindow::viewSelectionChanged()
 		shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
 
 	propertiesWidget->setShape(shape);
+}
+
+void MainWindow::createRectangle()
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	gp_Pnt pt(0, 0, 0);
+	window->getController()->createRectangle(pt, 100, 100);
+}
+
+void MainWindow::makePrism()
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	if (!window)
+		return;
+
+	Model* model = window->getView()->getModel();
+
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+	if (shapes->Length() == 1)
+	{
+		Handle(AIS_Shape) shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
+		model->makePrism(shape, 150);
+	}
 }
 
