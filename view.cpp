@@ -17,33 +17,32 @@
 
 #include "view.h"
 #include "model.h"
+#include "cadapplication.h"
 
 #include <QColormap>
 #include <QWheelEvent>
 #include <QRubberBand>
+#include <QX11Info>
+#include <QDebug>
 #include <QList>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glx.h>
 
 #include <algorithm>
 
-#include <Xw_Window.hxx>
-#include <Graphic3d_GraphicDevice.hxx>
-
-#include <QX11Info>
-#include <GL/glx.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xmu/StdCmap.h>
 #include <X11/Xlib.h>
 #include <Xw_Window.hxx>
 #include <Graphic3d_GraphicDevice.hxx>
-
-
-namespace
-{
-
-}
+#include <TopExp_Explorer.hxx> 
+#include <TopoDS_Face.hxx> 
+#include <TopoDS.hxx>
+#include <Geom_Surface.hxx>
+#include <BRep_Tool.hxx>
+#include <Geom_Plane.hxx>
 
 View::View(QWidget* parent) : QWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
@@ -75,12 +74,76 @@ Model* View::getModel() const
 	return model;
 }
 
-void View::updateView()
+void View::showDatumPlane()
 {
+	model->getContext()->CurrentViewer()->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
+	model->getContext()->CurrentViewer()->SetGridEcho(Standard_True);
+}
+
+void View::hideDatumPlane()
+{
+	model->getContext()->CurrentViewer()->DeactivateGrid();
+	model->getContext()->CurrentViewer()->SetGridEcho(Standard_False);
+}
+
+void View::setDatumPlaneXY()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0));
+	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void View::setDatumPlaneXZ()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, -1.0, 0.0));
+	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void View::setDatumPlaneYZ()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0));
+	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void View::viewFront()
+{
+	view->SetProj(V3d_Yneg);
+}
+
+void View::viewBack()
+{
+	view->SetProj(V3d_Ypos);
+}
+
+void View::viewTop()
+{
+	view->SetProj(V3d_Zpos);
+}
+
+void View::viewBottom()
+{
+	view->SetProj(V3d_Zneg);
+}
+
+void View::viewLeft()
+{
+	view->SetProj(V3d_Xneg);
+}
+
+void View::viewRight()
+{
+	view->SetProj(V3d_Xpos);
+}
+
+void View::viewDatumPlane()
+{
+	view->SetFront();
 }
 
 void View::init()
 {
+	showDatumPlane();
+	setDatumPlaneXY();
+
 	view = model->getContext()->CurrentViewer()->CreateView();
 
 	int windowHandle = (int)winId();
@@ -223,6 +286,8 @@ void View::onLButtonDown(const int flags, const QPoint point)
 
 		Q_EMIT selectionChanged();
 
+		selectHook();
+
 		curAction = caRectSelect;
 
 		if (!rectBand)
@@ -295,3 +360,33 @@ int View::paintCallBack(Aspect_Drawable drawable, void* userData,
 
 	return 0;
 }
+
+void View::selectHook()
+{
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+	if (shapes->Length() == 1)
+	{
+		/*Handle(AIS_InteractiveObject) object = shapes->Value(1);
+
+		if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
+			selected->Append(object);*/
+
+		TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(shapes->Value(1))->Shape();
+
+		for(TopExp_Explorer faceExplorer(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next())
+		{
+			TopoDS_Face face = TopoDS::Face(faceExplorer.Current());
+
+			Handle(Geom_Surface) surface = BRep_Tool::Surface(face);
+
+			if(surface->DynamicType() == STANDARD_TYPE(Geom_Plane))
+			{
+				Handle(Geom_Plane) plane = Handle(Geom_Plane)::DownCast(surface);
+				model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane->Position());
+			}
+		}
+	}
+
+	qDebug() << "============" << shapes->Length() << "=================";
+}
+

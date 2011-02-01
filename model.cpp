@@ -17,6 +17,7 @@
 
 #include "model.h"
 #include "filehelper.h"
+#include "cadapplication.h"
 
 #include <stdlib.h>
 #include <algorithm>
@@ -24,7 +25,6 @@
 #include <QDebug>
 #include <QApplication>
 
-#include <Graphic3d_GraphicDevice.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GC_MakeSegment.hxx>
@@ -37,11 +37,13 @@
 #include <gp_Vec.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <AIS_Shape.hxx>
+#include <Graphic3d_GraphicDevice.hxx>
+#include <TCollection_ExtendedString.hxx>
 
 namespace
 {
 
-	static Handle(Graphic3d_GraphicDevice) defaultDevice;
+	Handle(Graphic3d_GraphicDevice) defaultDevice;
 
 	const int MATERIALS_COUNT = 20;
 	const QString material_names[MATERIALS_COUNT] = 
@@ -72,6 +74,7 @@ namespace
 
 Model::Model(QObject* parent) : QObject(parent)
 {
+
 	if(defaultDevice.IsNull())
 		defaultDevice = new Graphic3d_GraphicDevice(getenv("DISPLAY"));
 
@@ -86,8 +89,6 @@ Model::Model(QObject* parent) : QObject(parent)
 	viewer->SetLightOn();
 
 	context = new AIS_InteractiveContext(viewer);
-
-	//context->CurrentViewer()->CreateView();
 
 	shapes = boost::shared_ptr<AIS_SequenceOfInteractive>(new AIS_SequenceOfInteractive());
 }
@@ -152,7 +153,7 @@ boost::shared_ptr<AIS_SequenceOfInteractive> Model::getSelectedShapes() const
 	{
 		Handle(AIS_InteractiveObject) object = context->Current();
 
-		if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
+		//if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
 			selected->Append(object);
 	}
 
@@ -236,6 +237,39 @@ void Model::makePrism(Handle(AIS_Shape)& shape, float height)
 
 	context->Display(newShape, false);
 	context->SetDisplayMode(newShape, true, true);
+}
+
+void Model::selectNeutral()
+{
+	context->CloseAllContexts();
+}
+
+void Model::selectVertex()
+{
+	context->CloseAllContexts();
+	context->OpenLocalContext();
+	context->ActivateStandardMode(TopAbs_VERTEX);
+}
+
+void Model::selectEdge()
+{
+	context->CloseAllContexts();
+	context->OpenLocalContext();
+	context->ActivateStandardMode(TopAbs_EDGE);
+}
+
+void Model::selectFace()
+{
+	context->CloseAllContexts();
+	context->OpenLocalContext();
+	context->ActivateStandardMode(TopAbs_FACE);
+}
+
+void Model::selectSolid()
+{
+	context->CloseAllContexts();
+	context->OpenLocalContext();
+	context->ActivateStandardMode(TopAbs_SOLID);
 }
 
 QString Model::getMaterialName(Graphic3d_NameOfMaterial material)

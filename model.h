@@ -20,10 +20,10 @@
 
 #include <QObject>
 #include <AIS_InteractiveContext.hxx>
-#include <V3d_Viewer.hxx>
 #include <AIS_SequenceOfInteractive.hxx>
 #include <gp_Pnt.hxx>
 #include <AIS_Shape.hxx>
+#include <V3d_Viewer.hxx>
 
 #include <list>
 #include <map>
@@ -56,6 +56,12 @@ public:
 	static QStringList getMaterials();
 
 	void makePrism(Handle(AIS_Shape)& shape, float height);
+
+	void selectNeutral();
+	void selectVertex();
+	void selectEdge();
+	void selectFace();
+	void selectSolid();
 
 Q_SIGNALS:
 	void changed();

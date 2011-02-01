@@ -31,6 +31,7 @@
 #include <QMdiSubWindow>
 #include <QInputDialog>
 #include <QDebug>
+#include <QActionGroup>
 
 #include <AIS_SequenceOfInteractive.hxx>
 #include <gp_Pnt.hxx>
@@ -125,6 +126,96 @@ void MainWindow::createMenuAndActions()
 	fileMenu->addSeparator();
 	fileMenu->addAction(acExit);
 
+	QMenu* actionMenu = new QMenu(mainMenuBar);
+	actionMenu->setTitle(tr("Действия"));
+	mainMenuBar->addMenu(actionMenu);
+
+	acSetDatumPlane = new QAction(tr("Установить плоскость"), this);
+	actionMenu->addAction(acSetDatumPlane);
+	connect(acSetDatumPlane, SIGNAL(triggered()), this, SLOT(setDatumPlane()));
+
+	actionMenu->addSeparator();
+
+	QActionGroup* selectionGroup = new QActionGroup(this);
+
+	acSelectNeutral = new QAction(tr("Нейтральный"), this);
+	acSelectNeutral->setCheckable(true);
+	actionMenu->addAction(acSelectNeutral);
+	connect(acSelectNeutral, SIGNAL(triggered()), this, SLOT(selectNeutral()));
+	selectionGroup->addAction(acSelectNeutral);
+
+	acSelectVertex = new QAction(tr("Вершина"), this);
+	acSelectVertex->setCheckable(true);
+	actionMenu->addAction(acSelectVertex);
+	connect(acSelectVertex, SIGNAL(triggered()), this, SLOT(selectVertex()));
+	selectionGroup->addAction(acSelectVertex);
+
+	acSelectEdge = new QAction(tr("Грань"), this);
+	acSelectEdge->setCheckable(true);
+	actionMenu->addAction(acSelectEdge);
+	connect(acSelectEdge, SIGNAL(triggered()), this, SLOT(selectEdge()));
+	selectionGroup->addAction(acSelectEdge);
+
+	acSelectFace = new QAction(tr("Поверхность"), this);
+	acSelectFace->setCheckable(true);
+	actionMenu->addAction(acSelectFace);
+	connect(acSelectFace, SIGNAL(triggered()), this, SLOT(selectFace()));
+	selectionGroup->addAction(acSelectFace);
+
+	acSelectSolid = new QAction(tr("Объект"), this);
+	acSelectSolid->setCheckable(true);
+	actionMenu->addAction(acSelectSolid);
+	connect(acSelectSolid, SIGNAL(triggered()), this, SLOT(selectSolid()));
+	selectionGroup->addAction(acSelectSolid);
+
+	QMenu* viewMenu = new QMenu(mainMenuBar);
+	viewMenu->setTitle(tr("Вид"));
+	mainMenuBar->addMenu(viewMenu);
+
+	QActionGroup* viewGroup = new QActionGroup(this);
+
+	acViewFront = new QAction(tr("Спереди"), this);
+	acViewFront->setCheckable(true);
+	viewMenu->addAction(acViewFront);
+	connect(acViewFront, SIGNAL(triggered()), this, SLOT(viewFront()));
+	viewGroup->addAction(acViewFront);
+
+	acViewBack = new QAction(tr("Сзади"), this);
+	acViewBack->setCheckable(true);
+	viewMenu->addAction(acViewBack);
+	connect(acViewBack, SIGNAL(triggered()), this, SLOT(viewBack()));
+	viewGroup->addAction(acViewBack);
+
+	acViewTop = new QAction(tr("Сверху"), this);
+	acViewTop->setCheckable(true);
+	viewMenu->addAction(acViewTop);
+	connect(acViewTop, SIGNAL(triggered()), this, SLOT(viewTop()));
+	viewGroup->addAction(acViewTop);
+
+	acViewBottom = new QAction(tr("Снизу"), this);
+	acViewBottom->setCheckable(true);
+	viewMenu->addAction(acViewBottom);
+	connect(acViewBottom, SIGNAL(triggered()), this, SLOT(viewBottom()));
+	viewGroup->addAction(acViewBottom);
+
+	acViewLeft = new QAction(tr("Слева"), this);
+	acViewLeft->setCheckable(true);
+	viewMenu->addAction(acViewLeft);
+	connect(acViewLeft, SIGNAL(triggered()), this, SLOT(viewLeft()));
+	viewGroup->addAction(acViewLeft);
+
+	acViewRight = new QAction(tr("Справа"), this);
+	acViewRight->setCheckable(true);
+	viewMenu->addAction(acViewRight);
+	connect(acViewRight, SIGNAL(triggered()), this, SLOT(viewRight()));
+	viewGroup->addAction(acViewRight);
+
+	acViewDatumPlane = new QAction(tr("По плоскости"), this);
+	acViewDatumPlane->setCheckable(true);
+	viewMenu->addAction(acViewDatumPlane);
+	connect(acViewDatumPlane, SIGNAL(triggered()), this, SLOT(viewDatumPlane()));
+	viewGroup->addAction(acViewDatumPlane);
+
 	acAbout = new QAction(tr("О программе..."), this);
 	connect(acAbout, SIGNAL(triggered(bool)), this, SLOT(about()));
 
@@ -153,8 +244,7 @@ void MainWindow::createMenuAndActions()
 	acFunction = new QAction(tr("Функция"), this);
 	mainToolBar->addAction(acFunction);
 
-	mainToolBar->addSeparator();
-
+	mainToolBar->addSeparator(); 
 	acStamp = new QAction(tr("Выдавливание"), this);
 	connect(acStamp, SIGNAL(triggered()), this, SLOT(makePrism()));
 	mainToolBar->addAction(acStamp);
@@ -167,6 +257,21 @@ void MainWindow::createMenuAndActions()
 
 	acSubstract = new QAction(tr("Вычитание"), this);
 	mainToolBar->addAction(acSubstract);
+}
+
+ChildWindow* MainWindow::currentChildWindow() const
+{
+	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	return window;
+}
+
+Model* MainWindow::currentModel() const
+{
+	ChildWindow* window = currentChildWindow();
+	if (window)
+		return window->getView()->getModel();
+
+	return 0;
 }
 
 void MainWindow::shapesVisChanged(bool)
@@ -257,7 +362,7 @@ void MainWindow::modelChanged()
 
 void MainWindow::setMaterial(Graphic3d_NameOfMaterial material)
 {
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	ChildWindow* window = currentChildWindow();
 	if (!window)
 		return;
 
@@ -266,7 +371,7 @@ void MainWindow::setMaterial(Graphic3d_NameOfMaterial material)
 
 void MainWindow::setShadded(bool shadded)
 {
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	ChildWindow* window = currentChildWindow();
 	if (!window)
 		return;
 
@@ -275,7 +380,7 @@ void MainWindow::setShadded(bool shadded)
 
 void MainWindow::viewSelectionChanged()
 {
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	ChildWindow* window = currentChildWindow();
 	if (!window)
 		return;
 
@@ -293,7 +398,7 @@ void MainWindow::viewSelectionChanged()
 
 void MainWindow::createRectangle()
 {
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
+	ChildWindow* window = currentChildWindow();
 	if (!window)
 		return;
 
@@ -303,11 +408,9 @@ void MainWindow::createRectangle()
 
 void MainWindow::makePrism()
 {
-	ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
-	if (!window)
+	Model* model = currentModel();
+	if (!model)
 		return;
-
-	Model* model = window->getView()->getModel();
 
 	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
 	if (shapes->Length() == 1)
@@ -315,5 +418,107 @@ void MainWindow::makePrism()
 		Handle(AIS_Shape) shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
 		model->makePrism(shape, 150);
 	}
+}
+
+void MainWindow::setDatumPlane()
+{
+}
+
+void MainWindow::viewFront()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewFront();
+}
+
+void MainWindow::viewBack()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewBack();
+}
+
+void MainWindow::viewTop()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewTop();
+}
+
+void MainWindow::viewBottom()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewBottom();
+}
+
+void MainWindow::viewLeft()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewLeft();
+}
+
+void MainWindow::viewRight()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewRight();
+}
+
+void MainWindow::viewDatumPlane()
+{
+	ChildWindow* window = currentChildWindow();
+	if (!window)
+		return;
+
+	window->getView()->viewDatumPlane();
+}
+
+void MainWindow::selectNeutral()
+{
+	Model* model = currentModel();
+	if (model)
+		model->selectNeutral();
+}
+
+void MainWindow::selectVertex()
+{
+	Model* model = currentModel();
+	if (model)
+		model->selectVertex();
+}
+
+void MainWindow::selectEdge()
+{
+	Model* model = currentModel();
+	if (model)
+		model->selectEdge();
+}
+
+void MainWindow::selectFace()
+{
+	Model* model = currentModel();
+	if (model)
+		model->selectFace();
+}
+
+void MainWindow::selectSolid()
+{
+	Model* model = currentModel();
+	if (model)
+		model->selectSolid();
 }
 

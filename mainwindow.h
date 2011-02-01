@@ -59,10 +59,29 @@ private Q_SLOTS:
 	void createRectangle();
 	void makePrism();
 
+	void setDatumPlane();
+
+	void viewFront();
+	void viewBack();
+	void viewTop();
+	void viewBottom();
+	void viewLeft();
+	void viewRight();
+	void viewDatumPlane();
+
+	void selectNeutral();
+	void selectVertex();
+	void selectEdge();
+	void selectFace();
+	void selectSolid();
+
 private:
 	void createUI();
 	void createDockWidget();
 	void createMenuAndActions();
+
+	ChildWindow* currentChildWindow() const;
+	Model* currentModel() const;
 
 	QMdiArea* mdiArea;
 
@@ -88,6 +107,22 @@ private:
 	QAction* acRotation;
 	QAction* acAddition;
 	QAction* acSubstract;
+
+	QAction* acViewFront;
+	QAction* acViewBack;
+	QAction* acViewTop;
+	QAction* acViewBottom;
+	QAction* acViewLeft;
+	QAction* acViewRight;
+	QAction* acViewDatumPlane;
+
+	QAction* acSetDatumPlane;
+
+	QAction* acSelectNeutral;
+	QAction* acSelectVertex;
+	QAction* acSelectEdge;
+	QAction* acSelectFace;
+	QAction* acSelectSolid;
 
 	QMap<QWidget*, Model*> windowModelMap;
 

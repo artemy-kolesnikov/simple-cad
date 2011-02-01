@@ -60,7 +60,19 @@ Q_SIGNALS:
 	void selectionChanged();
 
 public Q_SLOTS:
-	void updateView();
+	void showDatumPlane();
+	void hideDatumPlane();
+	void setDatumPlaneXY();
+	void setDatumPlaneXZ();
+	void setDatumPlaneYZ();
+
+	void viewFront();
+	void viewBack();
+	void viewTop();
+	void viewBottom();
+	void viewLeft();
+	void viewRight();
+	void viewDatumPlane();
 
 protected:
 	void paintEvent(QPaintEvent*);
@@ -84,6 +96,8 @@ private:
 
 	static int paintCallBack(Aspect_Drawable drawable, void* userData,
 		Aspect_GraphicCallbackStruct* data);
+
+	void selectHook();
 
 	Model* model;
 	Handle(V3d_View) view;
