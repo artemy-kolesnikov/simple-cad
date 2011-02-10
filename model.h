@@ -50,18 +50,24 @@ public:
 	Handle(AIS_InteractiveContext) getContext() const;
 	boost::shared_ptr<AIS_SequenceOfInteractive> getShapes() const;
 	boost::shared_ptr<AIS_SequenceOfInteractive> getSelectedShapes() const;
+	boost::shared_ptr<AIS_SequenceOfInteractive> getCurrentShapes() const;
 
 	static QString getMaterialName(Graphic3d_NameOfMaterial material);
 	static Graphic3d_NameOfMaterial getMaterialType(const QString& name);
 	static QStringList getMaterials();
 
-	void makePrism(Handle(AIS_Shape)& shape, float height);
+	void makePrism(const Handle(AIS_Shape)& shape, float height);
+	void fuse(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2);
+	void common(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2);
+	void cut(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2);
 
 	void selectNeutral();
 	void selectVertex();
 	void selectEdge();
 	void selectFace();
 	void selectSolid();
+
+	void removeShape(const Handle(AIS_InteractiveObject)& shape);
 
 Q_SIGNALS:
 	void changed();
@@ -75,6 +81,22 @@ public Q_SLOTS:
 	void setShadded(bool shadded);
 	void createRectangle(gp_Pnt& pt, float width, float height);
 	void createCircle(gp_Pnt& pt, float radius);
+
+	void createPlane(const gp_Ax3& axis, float height, float width);
+	void createBox(const gp_Ax3& axis, float height, float width, float length);
+	void createCylinder(const gp_Ax3& axis, float radius, float height, float angle);
+	void createCone(const gp_Ax3& axis, float radius1, float radius2, float height, float angle);
+	void createSphere(const gp_Ax3& axis, float radius, float angle);
+	void createEllipsoid(const gp_Ax3& axis, float radius1, float radius2, float angle, float uParam, float vParam);
+	void createTorus(const gp_Ax3& axis, float radius1, float radius2, float angle, float uParam, float vParam);
+
+	void showDatumPlane();
+	void hideDatumPlane();
+	void setDatumPlaneXY();
+	void setDatumPlaneXZ();
+	void setDatumPlaneYZ();
+	void setDatumPlane(const gp_Pnt& pt, const gp_Dir& dir);
+	void getDatumPlane(gp_Pnt& pt, gp_Dir& dir) const;
 
 private:
 	QString fileName;

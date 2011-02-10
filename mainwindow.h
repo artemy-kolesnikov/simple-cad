@@ -47,7 +47,6 @@ public:
 
 private Q_SLOTS:
 	void shapesVisChanged(bool);
-	void propertiesVisChanged(bool);
 	void about();
 	void openModel();
 	ChildWindow* newChildWindow();
@@ -56,10 +55,11 @@ private Q_SLOTS:
 	void setMaterial(Graphic3d_NameOfMaterial material);
 	void setShadded(bool shadded);
 	void viewSelectionChanged();
-	void createRectangle();
 	void makePrism();
 
 	void setDatumPlane();
+	void showDatumPlane();
+	void hideDatumPlane();
 
 	void viewFront();
 	void viewBack();
@@ -74,6 +74,19 @@ private Q_SLOTS:
 	void selectEdge();
 	void selectFace();
 	void selectSolid();
+
+	void createBox();
+	void createCylinder();
+	void createSphere();
+	void createCone();
+	void createTorus();
+	void createPlane();
+
+	void removeShape();
+
+	void shapesFusion();
+	void shapesCommon();
+	void shapesCut();
 
 private:
 	void createUI();
@@ -98,15 +111,22 @@ private:
 	QAction* acOpenModel;
 	QAction* acNewModel;
 
-	QAction* acLine;
-	QAction* acCurve;
-	QAction* acEllipse;
-	QAction* acRectangle;
-	QAction* acFunction;
-	QAction* acStamp;
+	QAction* acBox;
+	QAction* acCylinder;
+	QAction* acSphere;
+	QAction* acCone;
+	QAction* acTorus;
+	QAction* acPlane;
+	QAction* acEllipsoid;
+
+	/*QAction* acStamp;
 	QAction* acRotation;
 	QAction* acAddition;
-	QAction* acSubstract;
+	QAction* acSubstract;*/
+
+	QAction* acFusion;
+	QAction* acCommon;
+	QAction* acCut;
 
 	QAction* acViewFront;
 	QAction* acViewBack;
@@ -117,12 +137,16 @@ private:
 	QAction* acViewDatumPlane;
 
 	QAction* acSetDatumPlane;
+	QAction* acShowDatumPlane;
+	QAction* acHideDatumPlane;
 
 	QAction* acSelectNeutral;
 	QAction* acSelectVertex;
 	QAction* acSelectEdge;
 	QAction* acSelectFace;
 	QAction* acSelectSolid;
+
+	QAction* acRemoveShape;
 
 	QMap<QWidget*, Model*> windowModelMap;
 

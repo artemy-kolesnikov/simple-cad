@@ -23,6 +23,10 @@ SET(SOURCES
 	view.cpp
 	qshapemodel.cpp
 	propertieswidget.cpp
+	positionsettingswidget.cpp
+	pointsettingswidget.cpp
+	widgetdialog.cpp
+	primitivesettingswidget.cpp
 )
 
 SET(HEADERS
@@ -34,6 +38,10 @@ SET(HEADERS
 	view.h
 	qshapemodel.h
 	propertieswidget.h
+	positionsettingswidget.h
+	pointsettingswidget.h
+	widgetdialog.h
+	primitivesettingswidget.h
 )
 
 if (UNIX)

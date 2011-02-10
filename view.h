@@ -60,12 +60,6 @@ Q_SIGNALS:
 	void selectionChanged();
 
 public Q_SLOTS:
-	void showDatumPlane();
-	void hideDatumPlane();
-	void setDatumPlaneXY();
-	void setDatumPlaneXZ();
-	void setDatumPlaneYZ();
-
 	void viewFront();
 	void viewBack();
 	void viewTop();

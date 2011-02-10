@@ -32,6 +32,7 @@
 #include <QInputDialog>
 #include <QDebug>
 #include <QActionGroup>
+#include <QVBoxLayout>
 
 #include <AIS_SequenceOfInteractive.hxx>
 #include <gp_Pnt.hxx>
@@ -45,6 +46,9 @@
 #include "view.h"
 #include "qshapemodel.h"
 #include "propertieswidget.h"
+#include "positionsettingswidget.h"
+#include "widgetdialog.h"
+#include "primitivesettingswidget.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
@@ -84,18 +88,15 @@ void MainWindow::createDockWidget()
 	connect(shapesDock, SIGNAL(visibilityChanged(bool)), this,
 		SLOT(shapesVisChanged(bool)));
 
+	QWidget* shapesWidget = new QWidget(shapesDock);
+	QVBoxLayout* shapesLayout = new QVBoxLayout(shapesWidget);
+	shapesDock->setWidget(shapesWidget);
+
 	shapesTreeView = new QTreeView(shapesDock);
-	shapesDock->setWidget(shapesTreeView);
-
-	propertiesDock = new QDockWidget(tr("Properties"), this);
-	propertiesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	addDockWidget(Qt::RightDockWidgetArea, propertiesDock);
-
-	connect(propertiesDock, SIGNAL(visibilityChanged(bool)), this,
-		SLOT(propertiesVisChanged(bool)));
+	shapesLayout->addWidget(shapesTreeView);
 
 	propertiesWidget = new PropertiesWidget(this);
-	propertiesDock->setWidget(propertiesWidget);
+	shapesLayout->addWidget(propertiesWidget);
 
 	connect(propertiesWidget, SIGNAL(materialChanged(Graphic3d_NameOfMaterial)),
 		this, SLOT(setMaterial(Graphic3d_NameOfMaterial)));
@@ -130,41 +131,57 @@ void MainWindow::createMenuAndActions()
 	actionMenu->setTitle(tr("Действия"));
 	mainMenuBar->addMenu(actionMenu);
 
+	QMenu* planeMenu = new QMenu(mainMenuBar);
+	planeMenu->setTitle(tr("Плоскость"));
+	actionMenu->addMenu(planeMenu);
+
 	acSetDatumPlane = new QAction(tr("Установить плоскость"), this);
-	actionMenu->addAction(acSetDatumPlane);
+	planeMenu->addAction(acSetDatumPlane);
 	connect(acSetDatumPlane, SIGNAL(triggered()), this, SLOT(setDatumPlane()));
 
+	acShowDatumPlane = new QAction(tr("Показать плоскость"), this);
+	planeMenu->addAction(acShowDatumPlane);
+	connect(acShowDatumPlane, SIGNAL(triggered()), this, SLOT(showDatumPlane()));
+
+	acHideDatumPlane = new QAction(tr("Спрятать плоскость"), this);
+	planeMenu->addAction(acHideDatumPlane);
+	connect(acHideDatumPlane, SIGNAL(triggered()), this, SLOT(hideDatumPlane()));
+
 	actionMenu->addSeparator();
+
+	QMenu* selectionMenu = new QMenu(mainMenuBar);
+	selectionMenu->setTitle(tr("Выбор"));
+	actionMenu->addMenu(selectionMenu);
 
 	QActionGroup* selectionGroup = new QActionGroup(this);
 
 	acSelectNeutral = new QAction(tr("Нейтральный"), this);
 	acSelectNeutral->setCheckable(true);
-	actionMenu->addAction(acSelectNeutral);
+	selectionMenu->addAction(acSelectNeutral);
 	connect(acSelectNeutral, SIGNAL(triggered()), this, SLOT(selectNeutral()));
 	selectionGroup->addAction(acSelectNeutral);
 
 	acSelectVertex = new QAction(tr("Вершина"), this);
 	acSelectVertex->setCheckable(true);
-	actionMenu->addAction(acSelectVertex);
+	selectionMenu->addAction(acSelectVertex);
 	connect(acSelectVertex, SIGNAL(triggered()), this, SLOT(selectVertex()));
 	selectionGroup->addAction(acSelectVertex);
 
 	acSelectEdge = new QAction(tr("Грань"), this);
 	acSelectEdge->setCheckable(true);
-	actionMenu->addAction(acSelectEdge);
+	selectionMenu->addAction(acSelectEdge);
 	connect(acSelectEdge, SIGNAL(triggered()), this, SLOT(selectEdge()));
 	selectionGroup->addAction(acSelectEdge);
 
 	acSelectFace = new QAction(tr("Поверхность"), this);
 	acSelectFace->setCheckable(true);
-	actionMenu->addAction(acSelectFace);
+	selectionMenu->addAction(acSelectFace);
 	connect(acSelectFace, SIGNAL(triggered()), this, SLOT(selectFace()));
 	selectionGroup->addAction(acSelectFace);
 
 	acSelectSolid = new QAction(tr("Объект"), this);
 	acSelectSolid->setCheckable(true);
-	actionMenu->addAction(acSelectSolid);
+	selectionMenu->addAction(acSelectSolid);
 	connect(acSelectSolid, SIGNAL(triggered()), this, SLOT(selectSolid()));
 	selectionGroup->addAction(acSelectSolid);
 
@@ -225,38 +242,73 @@ void MainWindow::createMenuAndActions()
 
 	helpMenu->addAction(acAbout);
 
-	mainToolBar = new QToolBar(this);
-	addToolBar(mainToolBar);
+	QMenu* menuCreate = new QMenu(mainMenuBar);
+	menuCreate->setTitle(tr("Создать"));
+	actionMenu->addMenu(menuCreate);
 
-	acLine = new QAction(tr("Линия"), this);
-	mainToolBar->addAction(acLine);
+	acBox = new QAction(tr("Брусок"), this);
+	connect(acBox, SIGNAL(triggered()), this, SLOT(createBox()));
+	menuCreate->addAction(acBox);
 
-	acCurve = new QAction(tr("Ломаная линия"), this);
-	mainToolBar->addAction(acCurve);
+	acCylinder = new QAction(tr("Цилиндр"), this);
+	connect(acCylinder, SIGNAL(triggered()), this, SLOT(createCylinder()));
+	menuCreate->addAction(acCylinder);
 
-	acEllipse = new QAction(tr("Эллипс"), this);
-	mainToolBar->addAction(acEllipse);
+	acSphere = new QAction(tr("Сфера"), this);
+	connect(acSphere, SIGNAL(triggered()), this, SLOT(createSphere()));
+	menuCreate->addAction(acSphere);
 
-	acRectangle = new QAction(tr("Прямоугольник"), this);
-	connect(acRectangle, SIGNAL(triggered()), this, SLOT(createRectangle()));
-	mainToolBar->addAction(acRectangle);
+	acCone = new QAction(tr("Конус"), this);
+	connect(acCone, SIGNAL(triggered()), this, SLOT(createCone()));
+	menuCreate->addAction(acCone);
 
-	acFunction = new QAction(tr("Функция"), this);
-	mainToolBar->addAction(acFunction);
+	acTorus = new QAction(tr("Тор"), this);
+	connect(acTorus, SIGNAL(triggered()), this, SLOT(createTorus()));
+	menuCreate->addAction(acTorus);
 
-	mainToolBar->addSeparator(); 
-	acStamp = new QAction(tr("Выдавливание"), this);
+	acPlane = new QAction(tr("Плоскость"), this);
+	connect(acPlane, SIGNAL(triggered()), this, SLOT(createPlane()));
+	menuCreate->addAction(acPlane);
+
+	acEllipsoid = new QAction(tr("Еллипсоид"), this);
+	connect(acEllipsoid, SIGNAL(triggered()), this, SLOT(createEllipsoid()));
+	menuCreate->addAction(acEllipsoid);
+
+	QMenu* menuOperations = new QMenu(mainMenuBar);
+	menuOperations->setTitle(tr("Операции"));
+	actionMenu->addMenu(menuOperations);
+
+	/*acStamp = new QAction(tr("Выдавливание"), this);
 	connect(acStamp, SIGNAL(triggered()), this, SLOT(makePrism()));
-	mainToolBar->addAction(acStamp);
+	menuOperations->addAction(acStamp);
 
 	acRotation = new QAction(tr("Вращение"), this);
-	mainToolBar->addAction(acRotation);
+	menuOperations->addAction(acRotation);
 
 	acAddition = new QAction(tr("Сложение"), this);
-	mainToolBar->addAction(acAddition);
+	menuOperations->addAction(acAddition);
 
 	acSubstract = new QAction(tr("Вычитание"), this);
-	mainToolBar->addAction(acSubstract);
+	menuOperations->addAction(acSubstract);*/
+
+	acFusion = new QAction(tr("Сложение"), this);
+	connect(acFusion, SIGNAL(triggered()), this, SLOT(shapesFusion()));
+	menuOperations->addAction(acFusion);
+
+	acCommon = new QAction(tr("Пересечение"), this);
+	connect(acCommon, SIGNAL(triggered()), this, SLOT(shapesCommon()));
+	menuOperations->addAction(acCommon);
+
+	acCut = new QAction(tr("Вычитание"), this);
+	connect(acCut, SIGNAL(triggered()), this, SLOT(shapesCut()));
+	menuOperations->addAction(acCut);
+
+	acRemoveShape = new QAction(tr("Удалить"), this);
+	connect(acRemoveShape, SIGNAL(triggered()), this, SLOT(removeShape()));
+	actionMenu->addAction(acRemoveShape);
+
+	mainToolBar = new QToolBar(this);
+	addToolBar(mainToolBar);
 }
 
 ChildWindow* MainWindow::currentChildWindow() const
@@ -275,10 +327,6 @@ Model* MainWindow::currentModel() const
 }
 
 void MainWindow::shapesVisChanged(bool)
-{
-}
-
-void MainWindow::propertiesVisChanged(bool)
 {
 }
 
@@ -386,7 +434,7 @@ void MainWindow::viewSelectionChanged()
 
 	Model* model = window->getView()->getModel();
 
-	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
 
 	Handle(AIS_Shape) shape;
 
@@ -396,23 +444,13 @@ void MainWindow::viewSelectionChanged()
 	propertiesWidget->setShape(shape);
 }
 
-void MainWindow::createRectangle()
-{
-	ChildWindow* window = currentChildWindow();
-	if (!window)
-		return;
-
-	gp_Pnt pt(0, 0, 0);
-	window->getController()->createRectangle(pt, 100, 100);
-}
-
 void MainWindow::makePrism()
 {
 	Model* model = currentModel();
 	if (!model)
 		return;
 
-	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
 	if (shapes->Length() == 1)
 	{
 		Handle(AIS_Shape) shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
@@ -422,6 +460,46 @@ void MainWindow::makePrism()
 
 void MainWindow::setDatumPlane()
 {
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PositionSettingsWidget* planeWidget = new PositionSettingsWidget(this);
+
+	gp_Pnt pt;
+	gp_Dir dir;
+	model->getDatumPlane(pt, dir);
+	planeWidget->setPoint(pt);	
+	planeWidget->setDirection(dir);
+
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(planeWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Pnt pt = planeWidget->getPoint();
+		gp_Dir dir = planeWidget->getDirection();
+
+		model->setDatumPlane(pt, dir);
+		model->showDatumPlane();
+	}
+}
+
+void MainWindow::showDatumPlane()
+{	
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	model->showDatumPlane();
+}
+
+void MainWindow::hideDatumPlane()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	model->hideDatumPlane();
 }
 
 void MainWindow::viewFront()
@@ -520,5 +598,203 @@ void MainWindow::selectSolid()
 	Model* model = currentModel();
 	if (model)
 		model->selectSolid();
+}
+
+void MainWindow::createBox()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptBox);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float height = settingsWidget->getHeight();
+		float width = settingsWidget->getWidth();
+		float lenght = settingsWidget->getLength();
+		model->createBox(axis, height, width, lenght);
+	}
+}
+
+void MainWindow::createCylinder()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptCylinder);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float radius = settingsWidget->getRadius1();
+		float height = settingsWidget->getHeight();
+		float angle = settingsWidget->getAngle();
+		model->createCylinder(axis, radius, height, angle);
+	}
+}
+
+void MainWindow::createSphere()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptSphere);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float radius = settingsWidget->getRadius1();
+		float angle = settingsWidget->getAngle();
+		model->createSphere(axis, radius, angle);
+	}
+}
+
+void MainWindow::createCone()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptCone);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float radius1 = settingsWidget->getRadius1();
+		float radius2 = settingsWidget->getRadius2();
+		float height = settingsWidget->getHeight();
+		float angle = settingsWidget->getAngle();
+		model->createCone(axis, radius1, radius2, height, angle);
+	}
+}
+
+void MainWindow::createTorus()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptTorus);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float radius1 = settingsWidget->getRadius1();
+		float radius2 = settingsWidget->getRadius2();
+		float angle = settingsWidget->getAngle();
+		model->createTorus(axis, radius1, radius2, angle, 0, 0);
+	}
+}
+
+void MainWindow::createPlane()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptPlane);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float height = settingsWidget->getHeight();
+		float width = settingsWidget->getWidth();
+		model->createPlane(axis, height, width);
+	}
+}
+
+void MainWindow::removeShape()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	QString msgText("Вы действительно хотите удалить %1");
+
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
+	if (shapes->Length() == 1)
+		msgText = msgText.arg(tr("объект"));
+	else
+		msgText = msgText.arg(tr("выбранные объекты"));
+
+	if (QMessageBox::question(this, tr("Удаление объекта"),
+		msgText,
+		QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel) == QMessageBox::Yes)
+	{
+		for (int i = 1; i <= shapes->Length(); ++i)
+		{
+			model->removeShape(shapes->Value(i));
+		}
+	}
+}
+
+void MainWindow::shapesFusion()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
+	if (shapes->Length() == 2)
+	{
+		Handle(AIS_Shape) shape1 = Handle(AIS_Shape)::DownCast(shapes->Value(1));
+		Handle(AIS_Shape) shape2 = Handle(AIS_Shape)::DownCast(shapes->Value(2));
+
+		model->fuse(shape1, shape2);
+	}
+	else
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
+}
+
+void MainWindow::shapesCommon()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
+	if (shapes->Length() == 2)
+	{
+		Handle(AIS_Shape) shape1 = Handle(AIS_Shape)::DownCast(shapes->Value(1));
+		Handle(AIS_Shape) shape2 = Handle(AIS_Shape)::DownCast(shapes->Value(2));
+
+		model->common(shape1, shape2);
+	}
+	else
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
+}
+
+void MainWindow::shapesCut()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
+	if (shapes->Length() == 2)
+	{
+		Handle(AIS_Shape) shape1 = Handle(AIS_Shape)::DownCast(shapes->Value(1));
+		Handle(AIS_Shape) shape2 = Handle(AIS_Shape)::DownCast(shapes->Value(2));
+
+		model->cut(shape1, shape2);
+	}
+	else
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
 }
 

@@ -37,8 +37,20 @@
 #include <gp_Vec.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <AIS_Shape.hxx>
+#include <AIS_Plane.hxx>
 #include <Graphic3d_GraphicDevice.hxx>
 #include <TCollection_ExtendedString.hxx>
+#include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeCone.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeTorus.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Cut.hxx>
+#include <Geom_Plane.hxx>
+#include <GC_MakePlane.hxx>
+#include <gp_Pln.hxx>
 
 namespace
 {
@@ -91,6 +103,8 @@ Model::Model(QObject* parent) : QObject(parent)
 	context = new AIS_InteractiveContext(viewer);
 
 	shapes = boost::shared_ptr<AIS_SequenceOfInteractive>(new AIS_SequenceOfInteractive());
+
+	context->UpdateCurrentViewer();
 }
 
 void Model::loadModel(QString& fileName)
@@ -149,15 +163,30 @@ boost::shared_ptr<AIS_SequenceOfInteractive> Model::getSelectedShapes() const
 {
 	boost::shared_ptr<AIS_SequenceOfInteractive> selected(new AIS_SequenceOfInteractive());
 
-    for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
+    for (context->InitSelected(); context->MoreSelected(); context->NextSelected())
 	{
-		Handle(AIS_InteractiveObject) object = context->Current();
+		Handle(AIS_InteractiveObject) object = new AIS_Shape(context->SelectedShape());
 
 		//if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
 			selected->Append(object);
 	}
 
 	return selected;
+}
+
+boost::shared_ptr<AIS_SequenceOfInteractive> Model::getCurrentShapes() const
+{
+	boost::shared_ptr<AIS_SequenceOfInteractive> currentList(new AIS_SequenceOfInteractive());
+
+    for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
+	{
+		Handle(AIS_InteractiveObject) object = context->Current();
+
+		//if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
+			currentList->Append(object);
+	}
+
+	return currentList;
 }
 
 void Model::setMaterial(Graphic3d_NameOfMaterial material)
@@ -208,9 +237,6 @@ void Model::createRectangle(gp_Pnt& pt, float width, float height)
 
 	TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
 
-	/*gp_Vec prismVec(0, 0, 100);
-	TopoDS_Shape body = BRepPrimAPI_MakePrism(face, prismVec);*/
-
 	Handle(AIS_Shape) rect = new AIS_Shape(face);
 
 	shapes->Append(rect);
@@ -223,7 +249,133 @@ void Model::createCircle(gp_Pnt& pt, float radius)
 {
 }
 
-void Model::makePrism(Handle(AIS_Shape)& shape, float height)
+void Model::createPlane(const gp_Ax3& axis, float height, float width)
+{
+	GC_MakePlane makePlane(axis.Location(), axis.Direction());
+	/*TopoDS_Face face = BRepBuilderAPI_MakeFace(makePlane.Value()->Pln());
+
+	Handle(AIS_Shape) shape = new AIS_Shape(face);
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);*/
+
+	Handle(Geom_Plane) plane = new Geom_Plane(axis);
+	plane->SetPln(makePlane.Value()->Pln());
+
+	Handle(AIS_Plane) aisPlane = new AIS_Plane(plane);
+	shapes->Append(aisPlane);
+	context->Display(aisPlane, false);
+	context->SetDisplayMode(aisPlane, true, true);
+}
+
+void Model::createBox(const gp_Ax3& axis, float height, float width,
+	float length)
+{
+	gp_Ax2 ax2(axis.Location(), axis.Direction());
+	BRepPrimAPI_MakeBox makeBox(ax2, height, width, length);
+	Handle(AIS_Shape) shape = new AIS_Shape(makeBox.Shape());
+
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
+}
+
+void Model::createCylinder(const gp_Ax3& axis, float radius, float height,
+	float angle)
+{
+	gp_Ax2 ax2(axis.Location(), axis.Direction());
+	BRepPrimAPI_MakeCylinder makeCylinder(ax2, radius, height);
+	Handle(AIS_Shape) shape = new AIS_Shape(makeCylinder.Shape());
+
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
+}
+
+void Model::createCone(const gp_Ax3& axis, float radius1, float radius2,
+	float height, float angle)
+{
+	gp_Ax2 ax2(axis.Location(), axis.Direction());
+	BRepPrimAPI_MakeCone makeCone(ax2, radius1, radius2, height, angle/180.0f*Standard_PI);
+	Handle(AIS_Shape) shape = new AIS_Shape(makeCone.Shape());
+
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
+}
+
+void Model::createSphere(const gp_Ax3& axis, float radius, float angle)
+{
+	gp_Ax2 ax2(axis.Location(), axis.Direction());
+	BRepPrimAPI_MakeSphere makeSphere(ax2, radius);
+	Handle(AIS_Shape) shape = new AIS_Shape(makeSphere.Shape());
+
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
+}
+
+void Model::createEllipsoid(const gp_Ax3& axis, float radius1, float radius2,
+	float angle, float uParam, float vParam)
+{
+}
+
+void Model::createTorus(const gp_Ax3& axis, float radius1, float radius2,
+	float angle, float uParam, float vParam)
+{
+	gp_Ax2 ax2(axis.Location(), axis.Direction());
+	BRepPrimAPI_MakeTorus makeTorus(ax2, radius1, radius2, angle/180.0f*Standard_PI);
+	Handle(AIS_Shape) shape = new AIS_Shape(makeTorus.Shape());
+
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
+}
+
+void Model::showDatumPlane()
+{
+	context->CurrentViewer()->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
+	context->CurrentViewer()->SetGridEcho(Standard_True);
+}
+
+void Model::hideDatumPlane()
+{
+	context->CurrentViewer()->DeactivateGrid();
+	context->CurrentViewer()->SetGridEcho(Standard_False);
+}
+
+void Model::setDatumPlaneXY()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0));
+	context->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void Model::setDatumPlaneXZ()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, -1.0, 0.0));
+	context->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void Model::setDatumPlaneYZ()
+{
+	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0));
+	context->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void Model::setDatumPlane(const gp_Pnt& pt, const gp_Dir& dir)
+{
+	gp_Ax3 plane(pt, dir);
+	context->CurrentViewer()->SetPrivilegedPlane(plane);
+}
+
+void Model::getDatumPlane(gp_Pnt& pt, gp_Dir& dir) const
+{
+	gp_Ax3 axis = context->CurrentViewer()->PrivilegedPlane();
+	pt = axis.Location();
+	dir = axis.Direction();
+}
+
+void Model::makePrism(const Handle(AIS_Shape)& shape, float height)
 {
 	gp_Vec prismVec(0, 0, height);
 	TopoDS_Shape body = BRepPrimAPI_MakePrism(shape->Shape(), prismVec);
@@ -232,6 +384,51 @@ void Model::makePrism(Handle(AIS_Shape)& shape, float height)
 
 	//shapes->Erase(shape);
 	context->Erase(shape);
+
+	shapes->Append(newShape);
+
+	context->Display(newShape, false);
+	context->SetDisplayMode(newShape, true, true);
+}
+
+void Model::fuse(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2)
+{
+	TopoDS_Shape shape = BRepAlgoAPI_Fuse(shape1->Shape(), shape2->Shape());
+
+	removeShape(shape1);
+	removeShape(shape2);
+
+	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
+
+	shapes->Append(newShape);
+
+	context->Display(newShape, false);
+	context->SetDisplayMode(newShape, true, true);
+}
+
+void Model::common(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2)
+{
+	TopoDS_Shape shape = BRepAlgoAPI_Common(shape1->Shape(), shape2->Shape());
+
+	removeShape(shape1);
+	removeShape(shape2);
+
+	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
+
+	shapes->Append(newShape);
+
+	context->Display(newShape, false);
+	context->SetDisplayMode(newShape, true, true);
+}
+
+void Model::cut(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2)
+{
+	TopoDS_Shape shape = BRepAlgoAPI_Cut(shape1->Shape(), shape2->Shape());
+
+	removeShape(shape1);
+	removeShape(shape2);
+
+	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
 
 	shapes->Append(newShape);
 
@@ -270,6 +467,12 @@ void Model::selectSolid()
 	context->CloseAllContexts();
 	context->OpenLocalContext();
 	context->ActivateStandardMode(TopAbs_SOLID);
+}
+
+void Model::removeShape(const Handle(AIS_InteractiveObject)& shape)
+{
+	// TODO: Удаление шейпа из коллекции
+	context->Erase(shape);
 }
 
 QString Model::getMaterialName(Graphic3d_NameOfMaterial material)

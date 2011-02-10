@@ -43,6 +43,9 @@
 #include <Geom_Surface.hxx>
 #include <BRep_Tool.hxx>
 #include <Geom_Plane.hxx>
+#include <gp_Ax3.hxx>
+#include <Geom_Axis2Placement.hxx>
+#include <AIS_Trihedron.hxx>
 
 View::View(QWidget* parent) : QWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
@@ -72,36 +75,6 @@ void View::setModel(Model* model)
 Model* View::getModel() const
 {
 	return model;
-}
-
-void View::showDatumPlane()
-{
-	model->getContext()->CurrentViewer()->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
-	model->getContext()->CurrentViewer()->SetGridEcho(Standard_True);
-}
-
-void View::hideDatumPlane()
-{
-	model->getContext()->CurrentViewer()->DeactivateGrid();
-	model->getContext()->CurrentViewer()->SetGridEcho(Standard_False);
-}
-
-void View::setDatumPlaneXY()
-{
-	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0));
-	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
-}
-
-void View::setDatumPlaneXZ()
-{
-	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, -1.0, 0.0));
-	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
-}
-
-void View::setDatumPlaneYZ()
-{
-	gp_Ax3 plane(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(1.0, 0.0, 0.0));
-	model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane);
 }
 
 void View::viewFront()
@@ -141,9 +114,6 @@ void View::viewDatumPlane()
 
 void View::init()
 {
-	showDatumPlane();
-	setDatumPlaneXY();
-
 	view = model->getContext()->CurrentViewer()->CreateView();
 
 	int windowHandle = (int)winId();
@@ -153,10 +123,17 @@ void View::init()
 	Handle(Xw_Window) hWnd = new Xw_Window(Handle(Graphic3d_GraphicDevice)::
 		DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo, Xw_WQ_SAMEQUALITY);
 	view->SetWindow(hWnd, 0, paintCallBack, this);
+
     if (!hWnd->IsMapped())
 		hWnd->Map();
 	view->SetBackgroundColor(Quantity_NOC_BLACK);
 	view->MustBeResized();
+
+	/*Handle(Geom_Axis2Placement) trihedronAxis = new Geom_Axis2Placement(gp::XOY());
+	Handle(AIS_Trihedron) trihedron = new AIS_Trihedron(trihedronAxis);
+	model->getContext()->Display(trihedron);*/
+
+	//view->TriedronDisplay(Aspect_TOTP_LEFT_LOWER, Quantity_NOC_WHITE, 0.1, V3d_ZBUFFER);
 }
 
 void View::paintEvent(QPaintEvent*)
@@ -363,14 +340,9 @@ int View::paintCallBack(Aspect_Drawable drawable, void* userData,
 
 void View::selectHook()
 {
-	boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
+	/*boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
 	if (shapes->Length() == 1)
 	{
-		/*Handle(AIS_InteractiveObject) object = shapes->Value(1);
-
-		if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
-			selected->Append(object);*/
-
 		TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(shapes->Value(1))->Shape();
 
 		for(TopExp_Explorer faceExplorer(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next())
@@ -382,11 +354,17 @@ void View::selectHook()
 			if(surface->DynamicType() == STANDARD_TYPE(Geom_Plane))
 			{
 				Handle(Geom_Plane) plane = Handle(Geom_Plane)::DownCast(surface);
-				model->getContext()->CurrentViewer()->SetPrivilegedPlane(plane->Position());
+				gp_Ax3 pos = plane->Position();
+				gp_Dir dir = pos.Direction();
+				gp_Vec vec(dir);
+
+				//gp_Vec v(gp_Pnt(2, 34, 54), gp_Pnt(45, 65, 22));
+				gp_Vec v(gp_Pnt(0, 0, 0), gp_Pnt(1, 0, 0));
+				gp_Dir d(v);
+
+				model->getContext()->CurrentViewer()->SetPrivilegedPlane(pos);
 			}
 		}
-	}
-
-	qDebug() << "============" << shapes->Length() << "=================";
+	}*/
 }
 
