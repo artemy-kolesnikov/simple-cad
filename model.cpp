@@ -48,9 +48,11 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <Geom_Plane.hxx>
 #include <GC_MakePlane.hxx>
 #include <gp_Pln.hxx>
+#include <gp_GTrsf.hxx>
 
 namespace
 {
@@ -251,21 +253,13 @@ void Model::createCircle(gp_Pnt& pt, float radius)
 
 void Model::createPlane(const gp_Ax3& axis, float height, float width)
 {
-	GC_MakePlane makePlane(axis.Location(), axis.Direction());
-	/*TopoDS_Face face = BRepBuilderAPI_MakeFace(makePlane.Value()->Pln());
+	Handle(Geom_Plane) plane = new Geom_Plane(axis);
+	TopoDS_Face face = BRepBuilderAPI_MakeFace(plane, 0.0, height, 0.0, width);
 
 	Handle(AIS_Shape) shape = new AIS_Shape(face);
 	shapes->Append(shape);
 	context->Display(shape, false);
-	context->SetDisplayMode(shape, true, true);*/
-
-	Handle(Geom_Plane) plane = new Geom_Plane(axis);
-	plane->SetPln(makePlane.Value()->Pln());
-
-	Handle(AIS_Plane) aisPlane = new AIS_Plane(plane);
-	shapes->Append(aisPlane);
-	context->Display(aisPlane, false);
-	context->SetDisplayMode(aisPlane, true, true);
+	context->SetDisplayMode(shape, true, true);
 }
 
 void Model::createBox(const gp_Ax3& axis, float height, float width,
@@ -307,7 +301,7 @@ void Model::createCone(const gp_Ax3& axis, float radius1, float radius2,
 void Model::createSphere(const gp_Ax3& axis, float radius, float angle)
 {
 	gp_Ax2 ax2(axis.Location(), axis.Direction());
-	BRepPrimAPI_MakeSphere makeSphere(ax2, radius);
+	BRepPrimAPI_MakeSphere makeSphere(ax2, radius, angle/180.0f*Standard_PI);
 	Handle(AIS_Shape) shape = new AIS_Shape(makeSphere.Shape());
 
 	shapes->Append(shape);
@@ -318,6 +312,31 @@ void Model::createSphere(const gp_Ax3& axis, float radius, float angle)
 void Model::createEllipsoid(const gp_Ax3& axis, float radius1, float radius2,
 	float angle, float uParam, float vParam)
 {
+    gp_Pnt pnt(axis.Location());
+    gp_Dir dir(axis.Direction());
+    gp_Ax2 ax2(pnt, dir);
+
+	BRepPrimAPI_MakeSphere makeSphere(ax2, radius2, angle/180.0f*Standard_PI);
+
+	float scale = radius1 / radius2;
+	gp_Dir xDir = ax2.XDirection();
+	gp_Dir yDir = ax2.YDirection();
+	gp_GTrsf mat;
+	mat.SetValue(1, 1, xDir.X());
+	mat.SetValue(2, 1, xDir.Y());
+	mat.SetValue(3, 1, xDir.Z());
+	mat.SetValue(1, 2, yDir.X());
+	mat.SetValue(2, 2, yDir.Y());
+	mat.SetValue(3, 2, yDir.Z());
+	mat.SetValue(1, 3, dir.X()*scale);
+	mat.SetValue(2, 3, dir.Y()*scale);
+	mat.SetValue(3, 3, dir.Z()*scale);
+	BRepBuilderAPI_GTransform makeTrsf(makeSphere.Shape(), mat);
+
+	Handle(AIS_Shape) shape = new AIS_Shape(makeTrsf.Shape());
+	shapes->Append(shape);
+	context->Display(shape, false);
+	context->SetDisplayMode(shape, true, true);
 }
 
 void Model::createTorus(const gp_Ax3& axis, float radius1, float radius2,
@@ -325,8 +344,8 @@ void Model::createTorus(const gp_Ax3& axis, float radius1, float radius2,
 {
 	gp_Ax2 ax2(axis.Location(), axis.Direction());
 	BRepPrimAPI_MakeTorus makeTorus(ax2, radius1, radius2, angle/180.0f*Standard_PI);
-	Handle(AIS_Shape) shape = new AIS_Shape(makeTorus.Shape());
 
+	Handle(AIS_Shape) shape = new AIS_Shape(makeTorus.Shape());
 	shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);

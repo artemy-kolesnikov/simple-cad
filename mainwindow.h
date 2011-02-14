@@ -81,6 +81,7 @@ private Q_SLOTS:
 	void createCone();
 	void createTorus();
 	void createPlane();
+	void createEllipsoid();
 
 	void removeShape();
 

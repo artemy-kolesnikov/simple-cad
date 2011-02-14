@@ -304,6 +304,7 @@ void MainWindow::createMenuAndActions()
 	menuOperations->addAction(acCut);
 
 	acRemoveShape = new QAction(tr("Удалить"), this);
+	acRemoveShape->setShortcut(Qt::Key_Delete);
 	connect(acRemoveShape, SIGNAL(triggered()), this, SLOT(removeShape()));
 	actionMenu->addAction(acRemoveShape);
 
@@ -716,6 +717,26 @@ void MainWindow::createPlane()
 		float height = settingsWidget->getHeight();
 		float width = settingsWidget->getWidth();
 		model->createPlane(axis, height, width);
+	}
+}
+
+void MainWindow::createEllipsoid()
+{
+	Model* model = currentModel();
+	if (!model)
+		return;
+
+	PrimitiveSettingsWidget* settingsWidget = new PrimitiveSettingsWidget(this);
+	settingsWidget->setType(PrimitiveSettingsWidget::ptEllipsoid);
+	WidgetDialog* dlg = new WidgetDialog(this);
+	dlg->setCentralWidget(settingsWidget);
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		gp_Ax3 axis(settingsWidget->getPoint(), settingsWidget->getDir());
+		float radius1 = settingsWidget->getRadius1();
+		float radius2 = settingsWidget->getRadius2();
+		float angle = settingsWidget->getAngle();
+		model->createEllipsoid(axis, radius1, radius2, angle, 0, 0);
 	}
 }
 
