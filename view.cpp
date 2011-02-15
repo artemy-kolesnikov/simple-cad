@@ -22,21 +22,11 @@
 #include <QColormap>
 #include <QWheelEvent>
 #include <QRubberBand>
-#include <QX11Info>
 #include <QDebug>
 #include <QList>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glx.h>
 
 #include <algorithm>
 
-#include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/Xmu/StdCmap.h>
-#include <X11/Xlib.h>
-#include <Xw_Window.hxx>
-#include <Graphic3d_GraphicDevice.hxx>
 #include <TopExp_Explorer.hxx> 
 #include <TopoDS_Face.hxx> 
 #include <TopoDS.hxx>
@@ -47,6 +37,27 @@
 #include <Geom_Axis2Placement.hxx>
 #include <AIS_Trihedron.hxx>
 
+#ifdef Q_OS_LINUX
+
+#include <QX11Info>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/Xmu/StdCmap.h>
+#include <X11/Xlib.h>
+#include <Xw_Window.hxx>
+#include <Graphic3d_GraphicDevice.hxx>
+
+#elif defined Q_OS_WIN32 
+
+#include <WNT_Window.hxx>
+#include <Graphic3d_WNTGraphicDevice.hxx>
+#include <windows.h>
+
+#endif
+
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 View::View(QWidget* parent) : QWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
 	modKey(mkNone)
@@ -56,7 +67,9 @@ View::View(QWidget* parent) : QWidget(parent),
 
 void View::createUI()
 {
+#ifdef Q_OS_LINUX
 	XSynchronize(x11Info().display(), true);
+#endif
 
 	setAttribute(Qt::WA_PaintOnScreen);
 	setAttribute(Qt::WA_NoSystemBackground);
@@ -120,8 +133,16 @@ void View::init()
 	short hi, lo;
 	lo = (short) windowHandle;
 	hi = (short) (windowHandle >> 16);
+
+#ifdef Q_OS_WIN32 
+    Handle(WNT_Window) hWnd = new WNT_Window( Handle(Graphic3d_WNTGraphicDevice)
+		::DownCast(myContext->CurrentViewer()->Device()), (int) hi, (int) lo);
+	hWnd->SetFlags(WDF_NOERASEBKGRND);
+#elif defined Q_OS_LINUX
 	Handle(Xw_Window) hWnd = new Xw_Window(Handle(Graphic3d_GraphicDevice)::
 		DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo, Xw_WQ_SAMEQUALITY);
+#endif
+
 	view->SetWindow(hWnd, 0, paintCallBack, this);
 
     if (!hWnd->IsMapped())

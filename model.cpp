@@ -38,7 +38,6 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <AIS_Shape.hxx>
 #include <AIS_Plane.hxx>
-#include <Graphic3d_GraphicDevice.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeCone.hxx>
@@ -54,10 +53,20 @@
 #include <gp_Pln.hxx>
 #include <gp_GTrsf.hxx>
 
+#ifdef Q_OS_LINUX
+	#include <Graphic3d_GraphicDevice.hxx>
+#elif defined Q_OS_WIN32 
+	#include <Graphic3d_WNTGraphicDevice.hxx>
+#endif
+
 namespace
 {
 
+#ifdef Q_OS_LINUX
 	Handle(Graphic3d_GraphicDevice) defaultDevice;
+#elif defined Q_OS_WIN32 
+	Handle(Graphic3d_WNTGraphicDevice) defaultDevice;
+#endif
 
 	const int MATERIALS_COUNT = 20;
 	const QString material_names[MATERIALS_COUNT] = 
@@ -88,9 +97,14 @@ namespace
 
 Model::Model(QObject* parent) : QObject(parent)
 {
-
 	if(defaultDevice.IsNull())
+	{
+#ifdef Q_OS_LINUX
 		defaultDevice = new Graphic3d_GraphicDevice(getenv("DISPLAY"));
+#elif defined Q_OS_WIN32 
+		defaultDevice = new Graphic3d_WNTGraphicDevice();
+#endif
+	}
 
 	TCollection_ExtendedString v3DName("Visu3D");
 

@@ -25,6 +25,10 @@
 #include "mainwindow.h"
 #include "cadapplication.h"
 
+#if !defined Q_OS_WIN32 && !defined Q_OS_LINUX
+	#error "Supported only Linux and Windows"
+#endif
+
 int main(int argc, char *argv[])
 {
 	try
