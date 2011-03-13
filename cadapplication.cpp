@@ -17,8 +17,11 @@
 
 #include "cadapplication.h"
 
+#include <Inventor/Qt/SoQt.h>
+
 CADApplication::CADApplication(int& argc, char* argv[]) :
 	QApplication(argc, argv)
 {
+	SoQt::init(argc, argv, argv[0]);
 }
 

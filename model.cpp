@@ -59,6 +59,11 @@
 	#include <Graphic3d_WNTGraphicDevice.hxx>
 #endif
 
+#include <Inventor/Qt/viewers/SoQtPlaneViewer.h>
+#include <Inventor/nodes/SoSeparator.h>
+#include "viewprovider.h"
+#include "inventorviewer.h"
+
 namespace
 {
 
@@ -97,30 +102,16 @@ namespace
 
 Model::Model(QObject* parent) : QObject(parent)
 {
-	if(defaultDevice.IsNull())
-	{
-#ifdef Q_OS_LINUX
-		defaultDevice = new Graphic3d_GraphicDevice(getenv("DISPLAY"));
-#elif defined Q_OS_WIN32 
-		defaultDevice = new Graphic3d_WNTGraphicDevice();
-#endif
-	}
+	viewer = new InventorViewer();
+	separator = new SoSeparator();
+	separator->ref();
+	viewer->setSceneGraph(separator);
+}
 
-	TCollection_ExtendedString v3DName("Visu3D");
-
-	viewer = new V3d_Viewer(defaultDevice, v3DName.ToExtString(), "", 1000.0, V3d_XposYnegZpos,
-						Quantity_NOC_GRAY30, V3d_ZBUFFER, V3d_GOURAUD, V3d_WAIT,
-						Standard_True, Standard_True, V3d_TEX_NONE);
-
-	viewer->Init();
-	viewer->SetDefaultLights();
-	viewer->SetLightOn();
-
-	context = new AIS_InteractiveContext(viewer);
-
-	shapes = boost::shared_ptr<AIS_SequenceOfInteractive>(new AIS_SequenceOfInteractive());
-
-	context->UpdateCurrentViewer();
+Model::~Model()
+{
+	separator->unref();
+	delete viewer;
 }
 
 void Model::loadModel(QString& fileName)
@@ -128,27 +119,43 @@ void Model::loadModel(QString& fileName)
 	Handle(TopTools_HSequenceOfShape) dsShapes = new TopTools_HSequenceOfShape();
 	FileHelper::readFile(fileName, dsShapes);
 
-	shapes->Clear();
 
 	if (dsShapes.IsNull() || !dsShapes->Length())
 		throw FileError(QObject::tr("Ошибка чтения элементов"));
 
+	ViewProvider provider;
+
 	for (int i = 1; i <= dsShapes->Length(); ++i)
 	{
-		Handle(AIS_Shape) shape = new AIS_Shape(dsShapes->Value(i));
+		/*Handle(AIS_Shape) shape = new AIS_Shape(dsShapes->Value(i));
 		context->SetDisplayMode(shape, 1, false);
 
 		shapes->Append(shape);
 
-		context->Display(shape, false);
+		context->Display(shape, false);*/
+
+		SoGroup* faces = new SoGroup();
+		faces->ref();
+		/*SoGroup* vert = new SoGroup();
+		vert->ref();
+		SoGroup* edges = new SoGroup();
+		edges->ref();*/
+
+		provider.computeFaces(faces, dsShapes->Value(i), .2);
+		/*computeVertices(vert, dsShapes->Value(i));
+		computeEdges(edges, dsShapes->Value(i));*/
+
+		separator->addChild(faces);
+		/*separator->addChild(vert);
+		separator->addChild(edges);*/
 	}
 
-	context->UpdateCurrentViewer();
+	//context->UpdateCurrentViewer();
 
 	this->fileName = fileName;
 
-	Q_EMIT changed();
-	Q_EMIT fileNameChanged(fileName);
+	/*Q_EMIT changed();
+	Q_EMIT fileNameChanged(fileName);*/
 }
 
 void Model::saveModel(QString& fileName)
@@ -170,7 +177,7 @@ Handle(AIS_InteractiveContext) Model::getContext() const
 	return context;
 }
 
-boost::shared_ptr<AIS_SequenceOfInteractive> Model::getShapes() const
+/*boost::shared_ptr<AIS_SequenceOfInteractive> Model::getShapes() const
 {
 	return shapes;
 }
@@ -230,7 +237,7 @@ void Model::setShadded(bool shadded)
 
 		context->SetDisplayMode(object, shadded, true);
 	}
-}
+}*/
 
 void Model::createRectangle(gp_Pnt& pt, float width, float height)
 {
@@ -255,7 +262,7 @@ void Model::createRectangle(gp_Pnt& pt, float width, float height)
 
 	Handle(AIS_Shape) rect = new AIS_Shape(face);
 
-	shapes->Append(rect);
+	//shapes->Append(rect);
 
 	context->Display(rect, false);
 	context->SetDisplayMode(rect, true, true);
@@ -271,7 +278,7 @@ void Model::createPlane(const gp_Ax3& axis, float height, float width)
 	TopoDS_Face face = BRepBuilderAPI_MakeFace(plane, 0.0, height, 0.0, width);
 
 	Handle(AIS_Shape) shape = new AIS_Shape(face);
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -283,7 +290,7 @@ void Model::createBox(const gp_Ax3& axis, float height, float width,
 	BRepPrimAPI_MakeBox makeBox(ax2, height, width, length);
 	Handle(AIS_Shape) shape = new AIS_Shape(makeBox.Shape());
 
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -295,7 +302,7 @@ void Model::createCylinder(const gp_Ax3& axis, float radius, float height,
 	BRepPrimAPI_MakeCylinder makeCylinder(ax2, radius, height);
 	Handle(AIS_Shape) shape = new AIS_Shape(makeCylinder.Shape());
 
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -307,7 +314,7 @@ void Model::createCone(const gp_Ax3& axis, float radius1, float radius2,
 	BRepPrimAPI_MakeCone makeCone(ax2, radius1, radius2, height, angle/180.0f*Standard_PI);
 	Handle(AIS_Shape) shape = new AIS_Shape(makeCone.Shape());
 
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -318,7 +325,7 @@ void Model::createSphere(const gp_Ax3& axis, float radius, float angle)
 	BRepPrimAPI_MakeSphere makeSphere(ax2, radius, angle/180.0f*Standard_PI);
 	Handle(AIS_Shape) shape = new AIS_Shape(makeSphere.Shape());
 
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -348,7 +355,7 @@ void Model::createEllipsoid(const gp_Ax3& axis, float radius1, float radius2,
 	BRepBuilderAPI_GTransform makeTrsf(makeSphere.Shape(), mat);
 
 	Handle(AIS_Shape) shape = new AIS_Shape(makeTrsf.Shape());
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -360,7 +367,7 @@ void Model::createTorus(const gp_Ax3& axis, float radius1, float radius2,
 	BRepPrimAPI_MakeTorus makeTorus(ax2, radius1, radius2, angle/180.0f*Standard_PI);
 
 	Handle(AIS_Shape) shape = new AIS_Shape(makeTorus.Shape());
-	shapes->Append(shape);
+	//shapes->Append(shape);
 	context->Display(shape, false);
 	context->SetDisplayMode(shape, true, true);
 }
@@ -418,7 +425,7 @@ void Model::makePrism(const Handle(AIS_Shape)& shape, float height)
 	//shapes->Erase(shape);
 	context->Erase(shape);
 
-	shapes->Append(newShape);
+	//shapes->Append(newShape);
 
 	context->Display(newShape, false);
 	context->SetDisplayMode(newShape, true, true);
@@ -433,7 +440,7 @@ void Model::fuse(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape
 
 	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
 
-	shapes->Append(newShape);
+	//shapes->Append(newShape);
 
 	context->Display(newShape, false);
 	context->SetDisplayMode(newShape, true, true);
@@ -448,7 +455,7 @@ void Model::common(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& sha
 
 	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
 
-	shapes->Append(newShape);
+	//shapes->Append(newShape);
 
 	context->Display(newShape, false);
 	context->SetDisplayMode(newShape, true, true);
@@ -463,7 +470,7 @@ void Model::cut(const Handle(AIS_Shape)& shape1, const Handle(AIS_Shape)& shape2
 
 	Handle(AIS_Shape) newShape = new AIS_Shape(shape);
 
-	shapes->Append(newShape);
+	//shapes->Append(newShape);
 
 	context->Display(newShape, false);
 	context->SetDisplayMode(newShape, true, true);

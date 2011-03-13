@@ -24,6 +24,7 @@
 #include <QRubberBand>
 #include <QDebug>
 #include <QList>
+#include <QHBoxLayout>
 
 #include <algorithm>
 
@@ -58,6 +59,9 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include <Inventor/Qt/viewers/SoQtViewer.h>
+#include "inventorviewer.h"
+
 View::View(QWidget* parent) : QWidget(parent),
 	model(0), firstPaint(true), rectBand(0), curAction(caNone),
 	modKey(mkNone)
@@ -65,16 +69,21 @@ View::View(QWidget* parent) : QWidget(parent),
 	createUI();
 }
 
+View::~View()
+{
+}
+
 void View::createUI()
 {
 #ifdef Q_OS_LINUX
-	XSynchronize(x11Info().display(), true);
+	//XSynchronize(x11Info().display(), true);
 #endif
 
-	setAttribute(Qt::WA_PaintOnScreen);
-	setAttribute(Qt::WA_NoSystemBackground);
+	//setAttribute(Qt::WA_PaintOnScreen);
+	//setAttribute(Qt::WA_NoSystemBackground);
 
 	setMouseTracking(true);
+
 }
 
 void View::setModel(Model* model)
@@ -83,6 +92,9 @@ void View::setModel(Model* model)
 
 	connect(model, SIGNAL(changed()),
 		this, SLOT(updateView()));
+
+	QHBoxLayout *layout = new QHBoxLayout(this);
+	layout->addWidget(model->getViewer()->getWidget());
 }
 
 Model* View::getModel() const
@@ -92,40 +104,40 @@ Model* View::getModel() const
 
 void View::viewFront()
 {
-	view->SetProj(V3d_Yneg);
+	//view->SetProj(V3d_Yneg);
 }
 
 void View::viewBack()
 {
-	view->SetProj(V3d_Ypos);
+	//view->SetProj(V3d_Ypos);
 }
 
 void View::viewTop()
 {
-	view->SetProj(V3d_Zpos);
+	//view->SetProj(V3d_Zpos);
 }
 
 void View::viewBottom()
 {
-	view->SetProj(V3d_Zneg);
+	//view->SetProj(V3d_Zneg);
 }
 
 void View::viewLeft()
 {
-	view->SetProj(V3d_Xneg);
+	//view->SetProj(V3d_Xneg);
 }
 
 void View::viewRight()
 {
-	view->SetProj(V3d_Xpos);
+	//view->SetProj(V3d_Xpos);
 }
 
 void View::viewDatumPlane()
 {
-	view->SetFront();
+	//view->SetFront();
 }
 
-void View::init()
+/*void View::init()
 {
 	view = model->getContext()->CurrentViewer()->CreateView();
 
@@ -150,9 +162,9 @@ void View::init()
 	view->SetBackgroundColor(Quantity_NOC_BLACK);
 	view->MustBeResized();
 
-	/*Handle(Geom_Axis2Placement) trihedronAxis = new Geom_Axis2Placement(gp::XOY());
-	Handle(AIS_Trihedron) trihedron = new AIS_Trihedron(trihedronAxis);
-	model->getContext()->Display(trihedron);*/
+	//Handle(Geom_Axis2Placement) trihedronAxis = new Geom_Axis2Placement(gp::XOY());
+	//Handle(AIS_Trihedron) trihedron = new AIS_Trihedron(trihedronAxis);
+	//model->getContext()->Display(trihedron);
 
 	//view->TriedronDisplay(Aspect_TOTP_LEFT_LOWER, Quantity_NOC_WHITE, 0.1, V3d_ZBUFFER);
 }
@@ -177,9 +189,9 @@ void View::resizeEvent(QResizeEvent*)
 	{
 		view->MustBeResized();
 	}
-}
+}*/
 
-void View::wheelEvent(QWheelEvent* event)
+/*void View::wheelEvent(QWheelEvent* event)
 {
 	if (event->delta() < 0)
 		view->SetScale(1.05);
@@ -303,7 +315,7 @@ void View::onRButtonDown(const int, const QPoint point)
 void View::onMButtonDown(const int, const QPoint point)
 {
 	pressedPoint = point;
-}
+}*/
 
 void View::paintGl()
 {

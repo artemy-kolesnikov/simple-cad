@@ -50,6 +50,7 @@ class View : public QWidget
 
 public:
 	View(QWidget* parent = 0);
+	~View();
 
 	void setModel(Model* model);
 	Model* getModel() const;
@@ -69,14 +70,14 @@ public Q_SLOTS:
 	void viewDatumPlane();
 
 protected:
-	void paintEvent(QPaintEvent*);
+	/*void paintEvent(QPaintEvent*);
 	void resizeEvent(QResizeEvent*);
 	void wheelEvent(QWheelEvent*);
 	void mousePressEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
 	void mouseMoveEvent(QMouseEvent*);
 	void keyPressEvent(QKeyEvent*);
-	void keyReleaseEvent(QKeyEvent*);
+	void keyReleaseEvent(QKeyEvent*);*/
 
 private:
 	void createUI();
@@ -94,7 +95,7 @@ private:
 	void selectHook();
 
 	Model* model;
-	Handle(V3d_View) view;
+	//Handle(V3d_View) view;
 	bool firstPaint;
 
 	QPoint pressedPoint;

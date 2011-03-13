@@ -429,7 +429,7 @@ void MainWindow::setShadded(bool shadded)
 
 void MainWindow::viewSelectionChanged()
 {
-	ChildWindow* window = currentChildWindow();
+	/*ChildWindow* window = currentChildWindow();
 	if (!window)
 		return;
 
@@ -442,12 +442,12 @@ void MainWindow::viewSelectionChanged()
 	if (shapes->Length() == 1)
 		shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
 
-	propertiesWidget->setShape(shape);
+	propertiesWidget->setShape(shape);*/
 }
 
 void MainWindow::makePrism()
 {
-	Model* model = currentModel();
+	/*Model* model = currentModel();
 	if (!model)
 		return;
 
@@ -456,7 +456,7 @@ void MainWindow::makePrism()
 	{
 		Handle(AIS_Shape) shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
 		model->makePrism(shape, 150);
-	}
+	}*/
 }
 
 void MainWindow::setDatumPlane()
@@ -742,7 +742,7 @@ void MainWindow::createEllipsoid()
 
 void MainWindow::removeShape()
 {
-	Model* model = currentModel();
+	/*Model* model = currentModel();
 	if (!model)
 		return;
 
@@ -762,12 +762,12 @@ void MainWindow::removeShape()
 		{
 			model->removeShape(shapes->Value(i));
 		}
-	}
+	}*/
 }
 
 void MainWindow::shapesFusion()
 {
-	Model* model = currentModel();
+	/*Model* model = currentModel();
 	if (!model)
 		return;
 
@@ -780,12 +780,12 @@ void MainWindow::shapesFusion()
 		model->fuse(shape1, shape2);
 	}
 	else
-		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));*/
 }
 
 void MainWindow::shapesCommon()
 {
-	Model* model = currentModel();
+	/*Model* model = currentModel();
 	if (!model)
 		return;
 
@@ -798,12 +798,12 @@ void MainWindow::shapesCommon()
 		model->common(shape1, shape2);
 	}
 	else
-		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));*/
 }
 
 void MainWindow::shapesCut()
 {
-	Model* model = currentModel();
+	/*Model* model = currentModel();
 	if (!model)
 		return;
 
@@ -816,6 +816,6 @@ void MainWindow::shapesCut()
 		model->cut(shape1, shape2);
 	}
 	else
-		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));
+		QMessageBox::critical(this, tr("Ошибка"), tr("Выберите два объекта"));*/
 }
 

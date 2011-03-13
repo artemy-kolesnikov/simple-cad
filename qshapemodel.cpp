@@ -94,8 +94,8 @@ int QShapeModel::columnCount(const QModelIndex &parent) const
 int QShapeModel::rowCount(const QModelIndex &parent) const
 {
 	return 10;
-	int res = (parent.isValid()) ? 10 : model->getShapes()->Length();
-	return res;
+	//int res = (parent.isValid()) ? 10 : model->getShapes()->Length();
+	//return res;
 }
 
 bool QShapeModel::removeRows(int row, int count, const QModelIndex &parent)

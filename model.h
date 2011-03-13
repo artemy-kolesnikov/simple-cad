@@ -19,7 +19,7 @@
 #define MODEL_HEADER
 
 #include <QObject>
-#include <AIS_InteractiveContext.hxx>
+//#include <AIS_InteractiveContext.hxx>
 #include <AIS_SequenceOfInteractive.hxx>
 #include <gp_Pnt.hxx>
 #include <AIS_Shape.hxx>
@@ -34,6 +34,9 @@
 #include "error.h"
 
 class AIS_Shape;
+class SoQtViewer;
+class SoSeparator;
+class InventorViewer;
 
 /**
  * Keeps loaded CAD model
@@ -44,13 +47,14 @@ class Model : public QObject
 
 public:
 	Model(QObject* parent = 0);
+	~Model();
 
 	QString getFileName() const;
 
 	Handle(AIS_InteractiveContext) getContext() const;
-	boost::shared_ptr<AIS_SequenceOfInteractive> getShapes() const;
+	/*boost::shared_ptr<AIS_SequenceOfInteractive> getShapes() const;
 	boost::shared_ptr<AIS_SequenceOfInteractive> getSelectedShapes() const;
-	boost::shared_ptr<AIS_SequenceOfInteractive> getCurrentShapes() const;
+	boost::shared_ptr<AIS_SequenceOfInteractive> getCurrentShapes() const;*/
 
 	static QString getMaterialName(Graphic3d_NameOfMaterial material);
 	static Graphic3d_NameOfMaterial getMaterialType(const QString& name);
@@ -69,6 +73,8 @@ public:
 
 	void removeShape(const Handle(AIS_InteractiveObject)& shape);
 
+	InventorViewer* getViewer() const { return viewer; }
+
 Q_SIGNALS:
 	void changed();
 	void fileNameChanged(QString& newFileName);
@@ -76,9 +82,9 @@ Q_SIGNALS:
 public Q_SLOTS:
 	void loadModel(QString& fileName);
 	void saveModel(QString& fileName);
-	void setMaterial(Graphic3d_NameOfMaterial material);
+	/*void setMaterial(Graphic3d_NameOfMaterial material);
 	void setMaterial(const QString& material);
-	void setShadded(bool shadded);
+	void setShadded(bool shadded);*/
 	void createRectangle(gp_Pnt& pt, float width, float height);
 	void createCircle(gp_Pnt& pt, float radius);
 
@@ -101,10 +107,10 @@ public Q_SLOTS:
 private:
 	QString fileName;
 
-	Handle(V3d_Viewer) viewer;
 	Handle(AIS_InteractiveContext) context;
 
-	boost::shared_ptr<AIS_SequenceOfInteractive> shapes;
+	InventorViewer* viewer;
+	SoSeparator* separator;
 };
 
 #endif // MODEL_HEADER
