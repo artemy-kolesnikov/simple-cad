@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -22,18 +21,20 @@
 
 #include <locale.h>
 
-#include "mainwindow.h"
-#include "cadapplication.h"
+#include <gui/mainwindow.h>
+#include <gui/cadapplication.h>
 
 #if !defined Q_OS_WIN32 && !defined Q_OS_LINUX
 	#error "Supported only Linux and Windows"
 #endif
 
+using namespace Gui;
+
 int main(int argc, char *argv[])
 {
 	try
 	{
-		CADApplication a(argc, argv);
+		CADApplication app(argc, argv);
 
 		CADApplication::setStyle(new QPlastiqueStyle());
 
@@ -45,8 +46,8 @@ int main(int argc, char *argv[])
 		QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf-8"));
 
-		MainWindow w;
-		w.show();
+		MainWindow* win = CADApplication::getMainWindow();
+		win->show();
 
 		QStringList args;
 		if (argc > 1)
@@ -55,14 +56,14 @@ int main(int argc, char *argv[])
 				args << argv[i];
 		}
 
-		w.openFiles(args);
+		win->openFiles(args);
 
-		return a.exec();
+		return app.exec();
 	}
 	catch(...)
 	{
-		QMessageBox::critical(0, QObject::tr("Ошибка"),
-			QObject::tr("Необработанное исключение"));
+		QMessageBox::critical(0, QObject::tr("Error"),
+			QObject::tr("Unhandled exception"));
 		return -1;
 	}
 }

@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -15,29 +14,30 @@
  * GNU General Public License for more details.
  */
 
-#ifndef ERROR_HEADER
-#define ERROR_HEADER
+#include "cadapplication.h"
 
-#include <QString>
-#include <exception>
+#include <Inventor/Qt/SoQt.h>
 
-class CadError : public std::exception
+#include <mainwindow.h>
+
+namespace Gui
 {
-public:
-	CadError(QString what) : whatStr(what) {}
-	~CadError() throw() {}
 
-	const char* what() { return whatStr.toStdString().c_str(); }
+	MainWindow* CADApplication::mainWindow = 0;
 
-private:
-	QString whatStr;
-};
+	CADApplication::CADApplication(int& argc, char* argv[]) :
+		QApplication(argc, argv)
+	{
+		SoQt::init(argc, argv, argv[0]);
+	}
 
-class FileError : public CadError
-{
-public:
-	FileError(QString what) : CadError(what) {}
-};
+	MainWindow* CADApplication::getMainWindow()
+	{
+		if (!mainWindow)
+			mainWindow = new MainWindow();
 
-#endif // ERROR_HEADER
+		return mainWindow;
+	}
+
+}
 

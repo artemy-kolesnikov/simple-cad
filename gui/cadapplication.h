@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -15,28 +14,30 @@
  * GNU General Public License for more details.
  */
 
-#ifndef WIDGET_DIALOG_HEADER
-#define WIDGET_DIALOG_HEADER
+#ifndef CAD_APPLICATION_HEADER
+#define CAD_APPLICATION_HEADER
 
-#include <QDialog>
+#include <QApplication>
 
-class QVBoxLayout;
-
-class WidgetDialog : public QDialog
+namespace Gui
 {
-	Q_OBJECT
-public:
-	WidgetDialog(QWidget* parent = 0);
 
-	void setCentralWidget(QWidget* widget);
-	QWidget* getCentralWidget() const;
+	class MainWindow;
 
-private:
-	void createUI();
+	class CADApplication : public QApplication
+	{
+		Q_OBJECT
 
-	QVBoxLayout* layout;
-	QWidget* centralWidget;
-};
+	public:
+		CADApplication(int& argc, char* argv[]);
 
-#endif // WIDGET_DIALOG_HEADER
+		static MainWindow* getMainWindow();
+
+	private:
+		static MainWindow* mainWindow;
+	};
+
+}
+
+#endif // CAD_APPLICATION_HEADER
 

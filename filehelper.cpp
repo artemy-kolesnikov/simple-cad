@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -36,11 +35,10 @@
 #include <MgtBRep.hxx>
 #include <IGESControl_Writer.hxx>
 #include <STEPControl_Writer.hxx>
-#include <StlAPI_Writer.hxx>
-#include <VrmlAPI_Writer.hxx>
 #include <IGESControl_Controller.hxx>
 #include <Interface_Static.hxx>
 #include <AIS_Shape.hxx>
+#include <common/exception.h>
 
 namespace
 {
@@ -81,15 +79,10 @@ void FileHelper::readFile(QString& fileName,
 	FileType ft = getFileType(fileName);
 
     if (!importModel(ft, fileName, shapes))
-		throw FileError(QObject::tr("Ошибка импорта элементов"));
-
-	/*if (shapes.IsNull() || !shapes->Length())
-		throw FileError(QObject::tr("Ошибка чтения элементов"));
-
-	for (int i = 1; i <= shapes->Length(); ++i)
-		context->Display(new AIS_Shape(shapes->Value(i)), false);
-
-	context->UpdateCurrentViewer();*/
+	{
+		//shapes.Clear();
+		throw Common::FileException(QObject::tr("Import file error"));
+	}
 }
 
 void FileHelper::writeFile(QString& fileName,

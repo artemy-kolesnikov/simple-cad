@@ -21,47 +21,54 @@
 #include <QMdiSubWindow>
 #include <QString>
 
-class Model;
-class View;
-class Controller;
 class QShapeModel;
+class QFocusEvent;
 
-/**
- * Child MDI window.
- * Keeps pointers to model, set of views and controller
- */
-class ChildWindow : public QMdiSubWindow
+namespace Gui
 {
-	Q_OBJECT
 
-public:
-	ChildWindow(Model* model, QWidget* parent = 0);
+	class View;
+	class Controller;
+	class Model;
 
-	Controller* getController() const;
-	View* getView() const;
-	QShapeModel* getShapeModel() const;
+	/**
+	 * Child MDI window.
+	 * Keeps pointers to model, set of views and controller
+	 */
+	class ChildWindow : public QMdiSubWindow
+	{
+		Q_OBJECT
 
-Q_SIGNALS:
-	void selectionChanged();
+	public:
+		ChildWindow(Model* model, QWidget* parent = 0);
 
-protected:
-	void keyPressEvent(QKeyEvent*);
-	void keyReleaseEvent(QKeyEvent*);
+		Controller* getController() const;
+		View* getView() const;
+		QShapeModel* getShapeModel() const;
 
-private Q_SLOTS:
-	void modelChanged();
-	void modelFileNameChanged(QString& fileName);
+	Q_SIGNALS:
+		void selectionChanged();
 
-private:
-	void createUI();
+	protected:
+		virtual void keyPressEvent(QKeyEvent*);
+		virtual void keyReleaseEvent(QKeyEvent*);
 
-	// In usual model is not need
-	//Model* getModel() const;
+	private Q_SLOTS:
+		void modelChanged();
+		void modelFileNameChanged(QString& fileName);
 
-	Model* model;
-	View* view;
-	Controller* controller;
-	QShapeModel* shapeModel;
-};
+	private:
+		void createUI();
+
+		// In usual model is not need
+		//Model* getModel() const;
+
+		Model* model;
+		View* view;
+		Controller* controller;
+		QShapeModel* shapeModel;
+	};
+
+}
 
 #endif // CHILD_WINDOW_HEADER

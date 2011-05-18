@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -15,17 +14,20 @@
  * GNU General Public License for more details.
  */
 
-#ifndef CAD_APPLICATION_HEADER
-#define CAD_APPLICATION_HEADER
+#ifndef COMMAND_HEADER
+#define COMMAND_HEADER
 
-#include <QApplication>
-
-class CADApplication : public QApplication
+namespace Common
 {
-	Q_OBJECT
 
-public:
-	CADApplication(int& argc, char* argv[]);
-};
+	class Command
+	{
+	public:
+		virtual ~Command() {}
+		virtual void execute() = 0;
+	};
 
-#endif // CAD_APPLICATION_HEADER
+}
+
+#endif // COMMAND_HEADER
+

@@ -8,42 +8,52 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
-#SET (EXECUTABLE_OUTPUT_PATH out_trash)
-#SET (CMAKE_EXECUTABLE_OUTPUT_PATH out_trash)
-#SET (RUNTIME_OUTPUT_DIRECTORY out_trash)
-
 SET(SOURCES
-	cadapplication.cpp
-	childwindow.cpp
-	controller.cpp
+	action/boolean.cpp
+	action/common.cpp
+	action/create3dprimitive.cpp
+	action/createbox.cpp
+	action/createcone.cpp
+	action/createcylinder.cpp
+	action/createellipsoid.cpp
+	action/createplane.cpp
+	action/createrectangle.cpp
+	action/createsphere.cpp
+	action/createtorus.cpp
+	action/cut.cpp
+	action/fuse.cpp
 	filehelper.cpp
+	gui/cadapplication.cpp
+	gui/childwindow.cpp
+	gui/controller.cpp
+	gui/createcommand.cpp
+	gui/interactiveview.cpp
+	gui/inventorviewer.cpp
+	gui/mainwindow.cpp
+	gui/model.cpp
+	gui/view.cpp
+	gui/viewprovider.cpp
+	gui/widget/createprimitivewidget.cpp
+	gui/widget/pointsettingswidget.cpp
+	gui/widget/positionsettingswidget.cpp
+	gui/widget/propertieswidget.cpp
+	gui/widget/widgetdialog.cpp
 	main.cpp
-	mainwindow.cpp
-	model.cpp
-	view.cpp
-	qshapemodel.cpp
-	propertieswidget.cpp
-	positionsettingswidget.cpp
-	pointsettingswidget.cpp
-	widgetdialog.cpp
-	primitivesettingswidget.cpp
-	viewprovider.cpp
-	inventorviewer.cpp
 )
 
 SET(HEADERS
-	cadapplication.h
-	childwindow.h
-	controller.h
-	mainwindow.h
-	model.h
-	view.h
-	qshapemodel.h
-	propertieswidget.h
-	positionsettingswidget.h
-	pointsettingswidget.h
-	widgetdialog.h
-	primitivesettingswidget.h
+	gui/cadapplication.h
+	gui/childwindow.h
+	gui/controller.h
+	gui/interactiveview.h
+	gui/mainwindow.h
+	gui/model.h
+	gui/view.h
+	gui/widget/createprimitivewidget.h
+	gui/widget/pointsettingswidget.h
+	gui/widget/positionsettingswidget.h
+	gui/widget/propertieswidget.h
+	gui/widget/widgetdialog.h
 )
 
 if (UNIX)
@@ -95,7 +105,12 @@ set (coin3d_lib
 	SoQt4
 )
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE} ${QT_QTOPENGL_INCLUDE_DIR})
+set (base_directory .)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE}
+	${QT_QTOPENGL_INCLUDE_DIR} ${base_directory} ${base_directory}/gui
+	${base_directory}/gui/widget ${base_directory}/operation
+	${base_directory}/common ${base_directory}/action)
 
 QT4_WRAP_CPP(SOURCES ${HEADERS})
 
