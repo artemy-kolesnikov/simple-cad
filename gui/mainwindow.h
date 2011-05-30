@@ -29,6 +29,7 @@ class QMdiSubWindow;
 class QMenuBar;
 class QToolBar;
 class QTreeView;
+class QShowEvent;
 
 namespace Gui
 {
@@ -37,6 +38,7 @@ namespace Gui
 	class PropertiesWidget;
 	class Controller;
 	class Model;
+	class View;
 
 	class MainWindow : public QMainWindow
 	{
@@ -48,6 +50,9 @@ namespace Gui
 
 		/*virtual Model* getActiveModel() const;
 		virtual View* getActiveView() const;*/
+
+	protected:
+		virtual void showEvent(QShowEvent* event);
 
 	private Q_SLOTS:
 		void shapesVisChanged(bool);
@@ -86,6 +91,14 @@ namespace Gui
 		void createPlane();
 		void createEllipsoid();
 
+		void createSketch();
+
+		void sketchPolyline();
+		void sketchRectangle();
+		void sketchCircle();
+		void sketchArc();
+		void sketchNurbs();
+
 	private:
 		void createUI();
 		void createDockWidget();
@@ -93,9 +106,11 @@ namespace Gui
 		void createCommonActions();
 		void createOperationActions();
 		void createViewActions();
+		void createSketcherAction();
 
-		ChildWindow* currentChildWindow() const;
-		Model* currentModel() const;
+		ChildWindow& currentChildWindow() const;
+		Model& currentModel() const;
+		View& currentView() const;
 
 		QMdiArea* mdiArea;
 
@@ -114,6 +129,7 @@ namespace Gui
 		QMenu* helpMenu;
 		QMenu* creationMenu;
 		QMenu* operationMenu;
+		QMenu* sketcherMenu;
 
 		/*QAction* acExit;
 		QAction* acAbout;

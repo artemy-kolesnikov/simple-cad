@@ -21,18 +21,21 @@
 
 #include <TopoDS_Shape.hxx>
 
+#include <messagereceiver.h>
+
 class SbVec2f;
 class SbVec3f;
 class SoEventCallback;
 class SoPath;
 class SoPickedPoint;
+class SoQtViewer;
 class SoSelection;
 class SoSeparator;
 
 namespace Gui
 {
 
-	class InteractiveView : public QObject
+	class InteractiveView : public QObject, public Common::MessageReceiver
 	{
 		Q_OBJECT
 	public:
@@ -40,6 +43,9 @@ namespace Gui
 		virtual ~InteractiveView();
 
 		SoSeparator* getSeparator() const;
+
+		const SoQtViewer& getViewer() const;
+		void setViewer(SoQtViewer* viewer);
 
 	Q_SIGNALS:
 		void shapeCreated(TopoDS_Shape& shape);
@@ -53,7 +59,7 @@ namespace Gui
     	virtual bool mouseButtonPressed(int Button, bool pressed, const SbVec2f &pos,
 			const SbVec3f& norm, const SoPickedPoint* pp) = 0;
 
-		void emitShapeCreated(TopoDS_Shape& shape) const;
+		void emitShapeCreated(TopoDS_Shape& shape);
 
 	private:
 		static void eventCallback(void* data, SoEventCallback* callback);
@@ -66,6 +72,7 @@ namespace Gui
 		SoSeparator* selectableSeparator;
 		SoSeparator* unselectableSeparator;
 		SoEventCallback* eventCallbacker;
+		SoQtViewer* viewer;
 	};
 
 }

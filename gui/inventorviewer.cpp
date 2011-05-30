@@ -20,6 +20,8 @@
 #include <Inventor/nodes/SoNode.h>
 #include <Inventor/nodes/SoSelection.h>
 
+#include <GL/gl.h>
+
 namespace Gui
 {
 
@@ -45,6 +47,7 @@ namespace Gui
 			rootSelection->removeChild(interactiveView->getSeparator());
 
 		interactiveView = view;
+		interactiveView->setViewer(this);
 		rootSelection->addChild(interactiveView->getSeparator());
 	}
 

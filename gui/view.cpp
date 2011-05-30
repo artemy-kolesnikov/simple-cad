@@ -18,6 +18,7 @@
 #include "model.h"
 #include "cadapplication.h"
 #include "inventorviewer.h"
+#include "interactiveview.h"
 
 #include <QColormap>
 #include <QWheelEvent>
@@ -41,6 +42,8 @@
 #include <Inventor/nodes/SoGroup.h>
 #include <Inventor/nodes/SoSeparator.h>
 #include <Inventor/nodes/SoSelection.h>
+
+#include <commandmessage.h>
 
 namespace Gui
 {
@@ -80,6 +83,19 @@ namespace Gui
 	Model* View::getModel() const
 	{
 		return model;
+	}
+
+	void View::setInteractiveView(InteractiveView* view)
+	{
+		interactiveView.reset(view);
+		inventorViewer->setInteractiveView(interactiveView.get());
+	}
+
+	void View::receive(Common::Message* msg)
+	{
+		Sketcher::CommandMessage* message = dynamic_cast<Sketcher::CommandMessage*>(msg);
+		if (message && interactiveView.get())
+			interactiveView->receive(message);
 	}
 
 	void View::viewFront()

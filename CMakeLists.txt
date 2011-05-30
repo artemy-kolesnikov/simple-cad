@@ -26,7 +26,8 @@ SET(SOURCES
 	gui/cadapplication.cpp
 	gui/childwindow.cpp
 	gui/controller.cpp
-	gui/createcommand.cpp
+	gui/command/createprimitivecommand.cpp
+	gui/command/createsketchcommand.cpp
 	gui/interactiveview.cpp
 	gui/inventorviewer.cpp
 	gui/mainwindow.cpp
@@ -39,6 +40,13 @@ SET(SOURCES
 	gui/widget/propertieswidget.cpp
 	gui/widget/widgetdialog.cpp
 	main.cpp
+	sketcher/gui/sketcherview.cpp
+	sketcher/mod/primitive2d.cpp
+	sketcher/mod/rectangle.cpp
+	sketcher/mod/polyline.cpp
+	sketcher/mod/circle.cpp
+	sketcher/mod/resizepolygon.cpp
+	common/sendmessagecommand.cpp
 )
 
 SET(HEADERS
@@ -54,6 +62,8 @@ SET(HEADERS
 	gui/widget/positionsettingswidget.h
 	gui/widget/propertieswidget.h
 	gui/widget/widgetdialog.h
+	sketcher/mod/primitive2d.h
+	sketcher/gui/sketcherview.h
 )
 
 if (UNIX)
@@ -110,7 +120,9 @@ set (base_directory .)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE}
 	${QT_QTOPENGL_INCLUDE_DIR} ${base_directory} ${base_directory}/gui
 	${base_directory}/gui/widget ${base_directory}/operation
-	${base_directory}/common ${base_directory}/action)
+	${base_directory}/common ${base_directory}/action
+	${base_directory}/sketcher/gui ${base_directory}/sketcher/mod ${base_directory}/gui/command
+	${base_directory}/sketcher/command ${base_directory}/sketcher)
 
 QT4_WRAP_CPP(SOURCES ${HEADERS})
 

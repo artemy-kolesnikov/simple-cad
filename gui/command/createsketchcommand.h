@@ -14,59 +14,34 @@
  * GNU General Public License for more details.
  */
 
-#ifndef CREATE_COMMAND_HEADER
-#define CREATE_COMMAND_HEADER
+#ifndef CREATE_SKETCH_COMMAND_HEADER
+#define CREATE_SKETCH_COMMAND_HEADER
+
+#include <Inventor/SbPlane.h>
 
 #include <command.h>
-#include <QStringList>
 
 namespace Gui
 {
 
-	class Model;
+	class View;
 
-	class CreateCommand : public Common::Command
+	class CreateSketchCommand : public Common::Command
 	{
 	public:
-		enum ObjectType
-		{
-			Rectangle,
-			Circle,
-			Plane,
-			Box,
-			Cylinder,
-			Cone,
-			Sphere,
-			Ellipsoid,
-			Torus
-		};
-
-		static QStringList getObjectNames();
-
-		CreateCommand(Model* model, ObjectType type) :
-			model(model), type(type)
+		CreateSketchCommand(SbPlane sketchPlane, View& view) :
+			sketchPlane(sketchPlane), view(view)
 		{
 		}
 
 		virtual void execute();
 
 	private:
-		void createRectangle();
-		void createCircle();
-		void createBox();
-		void createCylinder();
-		void createSphere();
-		void createCone();
-		void createTorus();
-		void createPlane();
-		void createEllipsoid();
-
-	private:
-		Model* model;
-		ObjectType type;
+		SbPlane sketchPlane;
+		View& view;
 	};
 
 }
 
-#endif // CREATE_COMMAND_HEADER
+#endif // CREATE_SKETCH_COMMAND_HEADER
 

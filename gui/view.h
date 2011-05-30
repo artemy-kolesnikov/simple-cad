@@ -25,18 +25,21 @@
 
 #include "viewprovider.h"
 
+#include <messagereceiver.h>
+
 class QFocusEvent;
 class TopoDS_Shape;
 
 namespace Gui
 {
 	class InventorViewer;
+	class InteractiveView;
 	class Model;
 
 	/**
 	 * Display loaded model
 	 */
-	class View : public QWidget
+	class View : public QWidget, public Common::MessageReceiver
 	{
 		Q_OBJECT
 
@@ -60,6 +63,10 @@ namespace Gui
 
 		void setModel(Model* model);
 		Model* getModel() const;
+
+		void setInteractiveView(InteractiveView* view);
+
+		virtual void receive(Common::Message* msg);
 
 	Q_SIGNALS:
 		void selectionChanged();
@@ -92,6 +99,7 @@ namespace Gui
 		ModifierKey modKey;
 
 		std::auto_ptr<InventorViewer> inventorViewer;
+		std::auto_ptr<InteractiveView> interactiveView;
 
 		ViewProvider viewProvider;
 	};

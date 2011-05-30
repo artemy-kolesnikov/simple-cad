@@ -43,7 +43,7 @@ namespace Gui
 		ChildWindow(Model* model, QWidget* parent = 0);
 
 		Controller* getController() const;
-		View* getView() const;
+		View& getView() const;
 		QShapeModel* getShapeModel() const;
 
 	Q_SIGNALS:

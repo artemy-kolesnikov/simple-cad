@@ -16,6 +16,7 @@
 
 #include "interactiveview.h"
 
+#include <Inventor/Qt/viewers/SoQtViewer.h>
 #include <Inventor/SoPath.h>
 #include <Inventor/events/SoEvents.h>
 #include <Inventor/nodes/SoEventCallback.h>
@@ -115,9 +116,20 @@ namespace Gui
 		self->pathDeselected(path);
 	}
 
-	void InteractiveView::emitShapeCreated(TopoDS_Shape& shape) const
+	void InteractiveView::emitShapeCreated(TopoDS_Shape& shape)
 	{
 		Q_EMIT shapeCreated(shape);
 	}
+
+	const SoQtViewer& InteractiveView::getViewer() const
+	{
+		return *viewer;
+	}
+
+	void InteractiveView::setViewer(SoQtViewer* viewer)
+	{
+		this->viewer = viewer;
+	}
+
 }
 

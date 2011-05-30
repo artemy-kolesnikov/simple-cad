@@ -33,8 +33,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 
-#include <AIS_SequenceOfInteractive.hxx>
 #include <gp_Pnt.hxx>
+#include <Inventor/SbPlane.h>
 
 #include <boost/shared_ptr.hpp>
 
@@ -48,7 +48,11 @@
 #include "widgetdialog.h"
 #include <exception.h>
 
-#include <createcommand.h>
+#include <createprimitivecommand.h>
+#include <createsketchcommand.h>
+#include <commandmessage.h>
+#include <sendmessagecommand.h>
+#include <sketchcommon.h>
 
 namespace Gui
 {
@@ -63,8 +67,17 @@ namespace Gui
 		createCommonActions();
 		createOperationActions();
 		createViewActions();
+		createSketcherAction();
 
 		currentChild = 0;
+	}
+
+	void MainWindow::showEvent(QShowEvent* event)
+	{
+		newChildWindow();
+		createSketch();
+
+		QWidget::showEvent(event);
 	}
 
 	void MainWindow::openFiles(QStringList& files)
@@ -113,7 +126,7 @@ namespace Gui
 
 	void MainWindow::createMenu()
 	{
-		QMenuBar* mainMenuBar = new QMenuBar(this);
+		mainMenuBar = new QMenuBar(this);
 		setMenuBar(mainMenuBar);
 
 		fileMenu = new QMenu(mainMenuBar);
@@ -127,6 +140,10 @@ namespace Gui
 		planeMenu = new QMenu(mainMenuBar);
 		planeMenu->setTitle(tr("Плоскость"));
 		actionMenu->addMenu(planeMenu);
+
+		sketcherMenu = new QMenu(mainMenuBar);
+		sketcherMenu->setTitle(tr("Эскиз"));
+		mainMenuBar->addMenu(sketcherMenu);
 
 		/*acSetDatumPlane = new QAction(tr("Установить плоскость"), this);
 		planeMenu->addAction(acSetDatumPlane);
@@ -221,33 +238,41 @@ namespace Gui
 
 	void MainWindow::createOperationActions()
 	{
-		QAction* acBox = new QAction(tr("Box"), this);
+		QMenu* primitivesMenu = new QMenu(mainMenuBar);
+		primitivesMenu->setTitle(tr("Примитивы"));
+		creationMenu->addMenu(primitivesMenu);
+
+		QAction* acBox = new QAction(tr("Брусок"), this);
 		connect(acBox, SIGNAL(triggered()), this, SLOT(createBox()));
-		creationMenu->addAction(acBox);
+		primitivesMenu->addAction(acBox);
 
-		QAction* acCylinder = new QAction(tr("Cylinder"), this);
+		QAction* acCylinder = new QAction(tr("Цилиндр"), this);
 		connect(acCylinder, SIGNAL(triggered()), this, SLOT(createCylinder()));
-		creationMenu->addAction(acCylinder);
+		primitivesMenu->addAction(acCylinder);
 
-		QAction* acSphere = new QAction(tr("Sphere"), this);
+		QAction* acSphere = new QAction(tr("Сфера"), this);
 		connect(acSphere, SIGNAL(triggered()), this, SLOT(createSphere()));
-		creationMenu->addAction(acSphere);
+		primitivesMenu->addAction(acSphere);
 
-		QAction* acCone = new QAction(tr("Cone"), this);
+		QAction* acCone = new QAction(tr("Конус"), this);
 		connect(acCone, SIGNAL(triggered()), this, SLOT(createCone()));
-		creationMenu->addAction(acCone);
+		primitivesMenu->addAction(acCone);
 
-		QAction* acTorus = new QAction(tr("Torus"), this);
+		QAction* acTorus = new QAction(tr("Тор"), this);
 		connect(acTorus, SIGNAL(triggered()), this, SLOT(createTorus()));
-		creationMenu->addAction(acTorus);
+		primitivesMenu->addAction(acTorus);
 
-		QAction* acPlane = new QAction(tr("Plane"), this);
+		QAction* acPlane = new QAction(tr("Плоскость"), this);
 		connect(acPlane, SIGNAL(triggered()), this, SLOT(createPlane()));
-		creationMenu->addAction(acPlane);
+		primitivesMenu->addAction(acPlane);
 
-		QAction* acEllipsoid = new QAction(tr("Ellipsoid"), this);
+		QAction* acEllipsoid = new QAction(tr("Еллипсоид"), this);
 		connect(acEllipsoid, SIGNAL(triggered()), this, SLOT(createEllipsoid()));
-		creationMenu->addAction(acEllipsoid);
+		primitivesMenu->addAction(acEllipsoid);
+
+		QAction* acSketch = new QAction(tr("Эскиз"), this);
+		connect(acSketch, SIGNAL(triggered()), this, SLOT(createSketch()));
+		creationMenu->addAction(acSketch);
 	}
 
 	void MainWindow::createViewActions()
@@ -297,18 +322,49 @@ namespace Gui
 		viewGroup->addAction(acViewDatumPlane);
 	}
 
-	ChildWindow* MainWindow::currentChildWindow() const
+	void MainWindow::createSketcherAction()
+	{
+		QAction* acPolyline = new QAction(tr("Ломанаия линия"), this);
+		connect(acPolyline, SIGNAL(triggered()), this, SLOT(sketchPolyline()));
+		sketcherMenu->addAction(acPolyline);
+
+		QAction* acRectangle = new QAction(tr("Прямоугольник"), this);
+		connect(acRectangle, SIGNAL(triggered()), this, SLOT(sketchRectangle()));
+		sketcherMenu->addAction(acRectangle);
+
+		QAction* acCircle = new QAction(tr("Окружность"), this);
+		connect(acCircle, SIGNAL(triggered()), this, SLOT(sketchCircle()));
+		sketcherMenu->addAction(acCircle);
+
+		QAction* acArc = new QAction(tr("Дуга"), this);
+		connect(acArc, SIGNAL(triggered()), this, SLOT(sketchArc()));
+		sketcherMenu->addAction(acArc);
+
+		QAction* acNurbs = new QAction(tr("NURBS кривая"), this);
+		connect(acNurbs, SIGNAL(triggered()), this, SLOT(sketchNurbs()));
+		sketcherMenu->addAction(acNurbs);
+	}
+
+	ChildWindow& MainWindow::currentChildWindow() const
 	{
 		qDebug() << mdiArea->activeSubWindow();
 		ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
 		assert(window);
-		return window;
+		return *window;
 	}
 
-	Model* MainWindow::currentModel() const
+	Model& MainWindow::currentModel() const
 	{
-		ChildWindow* window = currentChildWindow();
-		return window->getView()->getModel();
+		const ChildWindow& window = currentChildWindow();
+		Model* model = window.getView().getModel();
+		assert(model);
+		return *model;
+	}
+
+	View& MainWindow::currentView() const
+	{
+		const ChildWindow& window = currentChildWindow();
+		return window.getView();
 	}
 
 	void MainWindow::shapesVisChanged(bool)
@@ -365,7 +421,7 @@ namespace Gui
 
 		if (currentChild)
 		{
-			disconnect(currentChild->getView()->getModel(), SIGNAL(changed()),
+			disconnect(currentChild->getView().getModel(), SIGNAL(changed()),
 				this, SLOT(modelChanged()));
 
 			disconnect(currentChild, SIGNAL(selectionChanged()),
@@ -375,7 +431,7 @@ namespace Gui
 		currentChild = qobject_cast<ChildWindow*>(window);
 		//shapesTreeView->setModel(currentChild->getShapeModel());
 
-		connect(currentChild->getView()->getModel(), SIGNAL(changed()),
+		connect(currentChild->getView().getModel(), SIGNAL(changed()),
 			this, SLOT(modelChanged()));
 
 		connect(currentChild, SIGNAL(selectionChanged()),
@@ -395,7 +451,7 @@ namespace Gui
 
 	void MainWindow::setShadded(bool shadded)
 	{
-		ChildWindow* window = currentChildWindow();
+		const ChildWindow& window = currentChildWindow();
 
 		//window->getController()->setShadded(shadded);
 	}
@@ -434,9 +490,7 @@ namespace Gui
 
 	void MainWindow::setDatumPlane()
 	{
-		Model* model = currentModel();
-		if (!model)
-			return;
+		const Model& model = currentModel();
 
 		PositionSettingsWidget* planeWidget = new PositionSettingsWidget(this);
 
@@ -460,153 +514,217 @@ namespace Gui
 
 	void MainWindow::showDatumPlane()
 	{	
-		Model* model = currentModel();
-		if (!model)
-			return;
+		const Model& model = currentModel();
 
 		//model->showDatumPlane();
 	}
 
 	void MainWindow::hideDatumPlane()
 	{
-		Model* model = currentModel();
-		if (!model)
-			return;
+		const Model& model = currentModel();
 
 		//model->hideDatumPlane();
 	}
 
 	void MainWindow::viewFront()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewFront();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewFront();
 	}
 
 	void MainWindow::viewBack()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewBack();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewBack();
 	}
 
 	void MainWindow::viewTop()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewTop();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewTop();
 	}
 
 	void MainWindow::viewBottom()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewBottom();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewBottom();
 	}
 
 	void MainWindow::viewLeft()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewLeft();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewLeft();
 	}
 
 	void MainWindow::viewRight()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewRight();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewRight();
 	}
 
 	void MainWindow::viewDatumPlane()
 	{
-		ChildWindow* window = currentChildWindow();
-		window->getView()->viewDatumPlane();
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewDatumPlane();
 	}
 
 	void MainWindow::selectNeutral()
 	{
-		Model* model = currentModel();
+		Model& model = currentModel();
 		//if (model)
 			//model->selectNeutral();
 	}
 
 	void MainWindow::selectVertex()
 	{
-		Model* model = currentModel();
+		const Model& model = currentModel();
 		//if (model)
 			//model->selectVertex();
 	}
 
 	void MainWindow::selectEdge()
 	{
-		Model* model = currentModel();
+		const Model& model = currentModel();
 		//if (model)
 			//model->selectEdge();
 	}
 
 	void MainWindow::selectFace()
 	{
-		Model* model = currentModel();
+		const Model& model = currentModel();
 		//if (model)
 			//model->selectFace();
 	}
 
 	void MainWindow::selectSolid()
 	{
-		Model* model = currentModel();
+		const Model& model = currentModel();
 		//if (model)
 			//model->selectSolid();
 	}
 
 	void MainWindow::createBox()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Box);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Box);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createCylinder()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Cylinder);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Cylinder);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createSphere()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Sphere);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Sphere);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createCone()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Cone);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Cone);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createTorus()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Torus);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Torus);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createPlane()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Plane);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Plane);
 		controller->execCommand(cmd);
 	}
 
 	void MainWindow::createEllipsoid()
 	{
-		Model* model = currentModel();
-		CreateCommand* cmd = new CreateCommand(model,
-			CreateCommand::Ellipsoid);
+		Model& model = currentModel();
+		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
+			CreatePrimitiveCommand::Ellipsoid);
 		controller->execCommand(cmd);
 	}
+
+	void MainWindow::createSketch()
+	{
+		View& view = currentView();
+		CreateSketchCommand* cmd = new CreateSketchCommand(SbPlane(SbVec3f(0, 0, 1), 0), view);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::sketchPolyline()
+	{
+		using namespace Sketcher;
+		using namespace Common;
+
+		View& view = currentView();
+
+		CommandMessage* msg = new CommandMessage(Sketcher::ptPolyline);
+		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::sketchRectangle()
+	{
+		using namespace Sketcher;
+		using namespace Common;
+
+		View& view = currentView();
+
+		CommandMessage* msg = new CommandMessage(Sketcher::ptRectangle);
+		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::sketchCircle()
+	{
+		using namespace Sketcher;
+		using namespace Common;
+
+		View& view = currentView();
+
+		CommandMessage* msg = new CommandMessage(Sketcher::ptCircle);
+		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::sketchArc()
+	{
+		using namespace Sketcher;
+		using namespace Common;
+
+		View& view = currentView();
+
+		CommandMessage* msg = new CommandMessage(Sketcher::ptArc);
+		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::sketchNurbs()
+	{
+		/*using namespace Sketcher;
+		using namespace Common;
+
+		View& view = currentView();
+
+		CommandMessage* msg = new CommandMessage(CommandMessage::CreateNurbs);
+		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
+		controller->execCommand(cmd);*/
+	}
+
 }
 

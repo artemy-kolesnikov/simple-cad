@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  */
 
-#include "createcommand.h"
+#include "createprimitivecommand.h"
 
 #include <cadapplication.h>
 #include <create3dprimitive.h>
@@ -26,7 +26,7 @@
 namespace Gui
 {
 
-	void CreateCommand::execute()
+	void CreatePrimitiveCommand::execute()
 	{
 		MainWindow* win = CADApplication::getMainWindow();
 
@@ -39,11 +39,11 @@ namespace Gui
 			std::auto_ptr<Action::Create3dPrimitive> createAction;
 			settingsWidget->getCreationAction(createAction);
 			createAction->execute();
-			model->addShape(createAction->getShape());
+			model.addShape(createAction->getShape());
 		}
 	}
 
-	QStringList CreateCommand::getObjectNames()
+	QStringList CreatePrimitiveCommand::getObjectNames()
 	{
 		QStringList objectNames;
 		objectNames 

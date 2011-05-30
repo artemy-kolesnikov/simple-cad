@@ -75,9 +75,9 @@ namespace Gui
 		return controller;
 	}
 
-	View* ChildWindow::getView() const
+	View& ChildWindow::getView() const
 	{
-		return view;
+		return *view;
 	}
 
 	QShapeModel* ChildWindow::getShapeModel() const
