@@ -34,12 +34,13 @@ namespace Gui
 		typedef SoQtExaminerViewer inherited;
 	public:
 		InventorViewer(QWidget* parent = 0);
-		~InventorViewer();
 
 		void setInteractiveView(InteractiveView* view);
 		InteractiveView* getInteractiveView() const;
 
 		SoSelection* getRootNode();
+
+		void setCameraOrientation(const SbRotation& rotation);
 
 	private:
 		virtual void setSceneGraph(SoNode* root);

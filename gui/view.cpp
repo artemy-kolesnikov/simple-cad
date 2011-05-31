@@ -100,32 +100,52 @@ namespace Gui
 
 	void View::viewFront()
 	{
-		//view->SetProj(V3d_Yneg);
+		float root = (float)(sqrt(2.0)/2.0);
+		inventorViewer->setCameraOrientation(SbRotation(-root, 0, 0, -root));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewBack()
 	{
-		//view->SetProj(V3d_Ypos);
+		float root = (float)(sqrt(2.0)/2.0);
+		inventorViewer->setCameraOrientation(SbRotation(0, root, root, 0));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewTop()
 	{
-		//view->SetProj(V3d_Zpos);
+		inventorViewer->setCameraOrientation(SbRotation(0, 0, 0, 1));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewBottom()
 	{
-		//view->SetProj(V3d_Zneg);
+		inventorViewer->setCameraOrientation(SbRotation(-1, 0, 0, 0));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewLeft()
 	{
-		//view->SetProj(V3d_Xneg);
+		inventorViewer->setCameraOrientation(SbRotation(-0.5, 0, 0, -0.5));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewRight()
 	{
-		//view->SetProj(V3d_Xpos);
+		inventorViewer->setCameraOrientation(SbRotation(0.5, 0, 0, 0.5));
+		inventorViewer->viewAll();
+	}
+
+	void View::viewAll()
+	{
+		inventorViewer->viewAll();
+	}
+
+	void View::viewAxometric()
+	{
+        inventorViewer->setCameraOrientation(SbRotation
+            (-0.353553f, -0.146447f, -0.353553f, -0.853553f));
+		inventorViewer->viewAll();
 	}
 
 	void View::viewDatumPlane()

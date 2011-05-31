@@ -78,6 +78,8 @@ namespace Gui
 		void viewBottom();
 		void viewLeft();
 		void viewRight();
+		void viewAll();
+		void viewAxometric();
 		void viewDatumPlane();
 		void shapeAdded(const TopoDS_Shape& shape);
 		void shapeRemoved(const TopoDS_Shape& shape);

@@ -19,6 +19,7 @@
 
 #include <Inventor/nodes/SoNode.h>
 #include <Inventor/nodes/SoSelection.h>
+#include <Inventor/nodes/SoOrthographicCamera.h>
 
 #include <GL/gl.h>
 
@@ -30,15 +31,16 @@ namespace Gui
 			SoQtFullViewer::BUILD_NONE, SoQtViewer::EDITOR),
 		interactiveView(0)
 	{
-		rootSelection = new SoSelection();
-		rootSelection->ref();
+		setBackgroundColor(SbColor(0.39, 0.58, 0.93));
+		setCamera(new SoOrthographicCamera());
 
+		rootSelection = new SoSelection();
 		setSceneGraph(rootSelection);
 	}
 
-	InventorViewer::~InventorViewer()
+	void InventorViewer::setCameraOrientation(const SbRotation& rotation)
 	{
-		rootSelection->unref();
+		getCamera()->orientation.setValue(rotation);
 	}
 
 	void InventorViewer::setInteractiveView(InteractiveView* view)

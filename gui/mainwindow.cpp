@@ -75,7 +75,7 @@ namespace Gui
 	void MainWindow::showEvent(QShowEvent* event)
 	{
 		newChildWindow();
-		createSketch();
+		//createSketch();
 
 		QWidget::showEvent(event);
 	}
@@ -315,11 +315,15 @@ namespace Gui
 		connect(acViewRight, SIGNAL(triggered()), this, SLOT(viewRight()));
 		viewGroup->addAction(acViewRight);
 
-		QAction* acViewDatumPlane = new QAction(tr("По плоскости"), this);
-		acViewDatumPlane->setCheckable(true);
-		viewMenu->addAction(acViewDatumPlane);
-		connect(acViewDatumPlane, SIGNAL(triggered()), this, SLOT(viewDatumPlane()));
-		viewGroup->addAction(acViewDatumPlane);
+		QAction* acAxometric = new QAction(tr("Аксометрически"), this);
+		acAxometric->setCheckable(true);
+		viewMenu->addAction(acAxometric);
+		connect(acAxometric, SIGNAL(triggered()), this, SLOT(viewAxometric()));
+		viewGroup->addAction(acAxometric);
+
+		QAction* acViewAll = new QAction(tr("Смотреть всё"), this);
+		viewMenu->addAction(acViewAll);
+		connect(acViewAll, SIGNAL(triggered()), this, SLOT(viewAll()));
 	}
 
 	void MainWindow::createSketcherAction()
@@ -562,10 +566,16 @@ namespace Gui
 		window.getView().viewRight();
 	}
 
-	void MainWindow::viewDatumPlane()
+	void MainWindow::viewAll()
 	{
 		ChildWindow& window = currentChildWindow();
-		window.getView().viewDatumPlane();
+		window.getView().viewAll();
+	}
+
+	void MainWindow::viewAxometric()
+	{
+		ChildWindow& window = currentChildWindow();
+		window.getView().viewAxometric();
 	}
 
 	void MainWindow::selectNeutral()

@@ -75,7 +75,8 @@ namespace Gui
 		void viewBottom();
 		void viewLeft();
 		void viewRight();
-		void viewDatumPlane();
+		void viewAll();
+		void viewAxometric();
 
 		void selectNeutral();
 		void selectVertex();
