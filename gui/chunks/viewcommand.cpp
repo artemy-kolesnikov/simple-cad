@@ -14,21 +14,36 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#include "viewcommand.h"
 
-#include <sketcherview.h>
 #include <view.h>
 
-namespace Gui
+namespace Common
 {
 
-	void CreateSketchCommand::execute()
+	void ViewCommand::Execute()
 	{
-		using namespace Sketcher;
-
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
+		switch (type)
+		{
+			case ViewFront:
+				view->viewFront();
+				break;
+			case ViewBack:
+				view->viewBack();
+				break;
+			case ViewTop:
+				view->viewTop();
+				break;
+			case ViewBottom:
+				view->viewBottom();
+				break;
+			case ViewLeft:
+				view->viewLeft();
+				break;
+			case ViewRight:
+				view->viewRight();
+				break;
+		}
 	}
 
 }

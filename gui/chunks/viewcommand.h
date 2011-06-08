@@ -14,22 +14,44 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef VIEW_COMMAND_HEADER
+#define VIEW_COMMAND_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <command.h>
 
 namespace Gui
 {
+	class View;
+}
 
-	void CreateSketchCommand::execute()
+namespace Common
+{
+
+	class ViewCommand : public Command
 	{
-		using namespace Sketcher;
+	public:
+		enum CommandType
+		{
+			ViewFront,
+			ViewBack,
+			ViewTop,
+			ViewBottom,
+			ViewLeft,
+			ViewRight
+		};
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+		ViewCommand(View* view, CommandType type) : view(view), type(type)
+		{
+		}
+
+		virtual void Execute();
+
+	private:
+		ViewCommandType type;
+		Gui::View* view;
+	};
 
 }
+
+#endif // VIEW_COMMAND_HEADER
 

@@ -19,6 +19,7 @@
 #include "cadapplication.h"
 #include "inventorviewer.h"
 #include "interactiveview.h"
+#include "viewershape.h"
 
 #include <QColormap>
 #include <QWheelEvent>
@@ -44,6 +45,7 @@
 #include <Inventor/nodes/SoSelection.h>
 
 #include <commandmessage.h>
+#include "viewprovider.h"
 
 namespace Gui
 {
@@ -68,6 +70,8 @@ namespace Gui
 		layout->addWidget(inventorViewer->getWidget());
 
 		//setMouseTracking(true);
+
+		viewProvider.reset(new ViewProvider(*inventorViewer.get()));
 	}
 
 	void View::setModel(Model* model)
@@ -155,11 +159,13 @@ namespace Gui
 
 	void View::shapeAdded(const TopoDS_Shape& shape)
 	{
-		SoGroup* faces = new SoGroup();
+		/*SoGroup* faces = new SoGroup();
 		viewProvider.computeFaces(faces, shape, 1);
 		SoSelection* root = inventorViewer->getRootNode();
-		root->addChild(faces);
+		root->addChild(faces);*/
 		//inventorViewer->setSceneGraph(faces);
+		viewProvider->display(new ViewerShape("", shape));
+		inventorViewer->viewAll();
 	}
 
 	void View::shapeRemoved(const TopoDS_Shape& shape)

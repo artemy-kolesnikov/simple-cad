@@ -17,9 +17,10 @@
 #include "inventorviewer.h"
 #include "interactiveview.h"
 
+#include <Inventor/nodes/SoEventCallback.h>
 #include <Inventor/nodes/SoNode.h>
-#include <Inventor/nodes/SoSelection.h>
 #include <Inventor/nodes/SoOrthographicCamera.h>
+#include <Inventor/nodes/SoSelection.h>
 
 #include <GL/gl.h>
 
@@ -35,7 +36,19 @@ namespace Gui
 		setCamera(new SoOrthographicCamera());
 
 		rootSelection = new SoSelection();
+		rootSelection->addSelectionCallback(&InventorViewer::selectionCallback, this);
+		rootSelection->addDeselectionCallback(&InventorViewer::deselectionCallback, this);
 		setSceneGraph(rootSelection);
+
+		eventCallbacker = new SoEventCallback();
+		eventCallbacker->ref();
+		eventCallbacker->addEventCallback(SoEvent::getClassTypeId(),
+			&InventorViewer::eventCallback, this);
+	}
+
+	InventorViewer::~InventorViewer()
+	{
+		eventCallbacker->unref();
 	}
 
 	void InventorViewer::setCameraOrientation(const SbRotation& rotation)
@@ -71,6 +84,39 @@ namespace Gui
 	SoNode* InventorViewer::getSceneGraph()
 	{
 		return inherited::getSceneGraph();
+	}
+
+	void InventorViewer::eventCallback(void* data, SoEventCallback* callback)
+	{
+		InventorViewer* self = reinterpret_cast<InventorViewer*>(data);
+		assert(self);
+		self->eventHandler(callback);
+	}
+
+	void InventorViewer::selectionCallback(void* data, SoPath* path)
+	{
+		InventorViewer* self = reinterpret_cast<InventorViewer*>(data);
+		assert(self);
+		self->selectionHandler(path);
+	}
+
+	void InventorViewer::deselectionCallback(void* data, SoPath* path)
+	{
+		InventorViewer* self = reinterpret_cast<InventorViewer*>(data);
+		assert(self);
+		self->deselectionHandler(path);
+	}
+
+	void InventorViewer::eventHandler(SoEventCallback* callback)
+	{
+	}
+
+	void InventorViewer::selectionHandler(SoPath* path)
+	{
+	}
+
+	void InventorViewer::deselectionHandler(SoPath* path)
+	{
 	}
 
 }

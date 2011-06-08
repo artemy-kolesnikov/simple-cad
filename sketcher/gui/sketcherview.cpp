@@ -282,6 +282,8 @@ namespace Sketcher
 			c->ref();
 			currentPrimitive = c;
 		}
+		else
+			return;
 
 		currentPrimitive->handleEvents(true);
 		selectableSeparator->addChild(currentPrimitive);

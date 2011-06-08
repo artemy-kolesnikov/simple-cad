@@ -1,5 +1,6 @@
 /*
  * Simple CAD System
+ * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -14,22 +15,36 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef ACTION_LISTSET_HEADER
+#define ACTION_LISTSET_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <QList>
+#include <QObject>
+
+#include "actionlist.h"
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
+	/**
+	 * Action list set for main window
+	 */
+	class ActionListSet : public QObject
 	{
-		using namespace Sketcher;
+	public:
+		ActionListSet(QObject* parent = 0);
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+		void getActionListSet(QList<ActionList*>& acLists);
+
+	private:
+		void createActionListSet();
+
+	private:
+		bool ActionListSetCreated;
+		QList<ActionList*> actionListSet;
+	};
 
 }
+
+#endif // ACTION_LISTSET_HEADER
 

@@ -48,384 +48,520 @@
 #include <Inventor/nodes/SoGroup.h>
 #include <Inventor/nodes/SoSphere.h>
 #include <Inventor/nodes/SoScale.h>
+#include <Inventor/nodes/SoSelection.h>
 
-TopoDS_Shape ViewProvider::getShape(SoVertexShape* shape) const
+#include "inventorviewer.h"
+#include "viewershape.h"
+
+#include <algorithm>
+
+namespace
 {
-	std::map<SoVertexShape*, TopoDS_Shape>::const_iterator it = soShapeMap.find(shape);
-	if (soShapeMap.end() != it)
-		return it->second;
+	/*bool operator < (const Gui::ViewProvider::SoShapePair& left, const Gui::ViewProvider::SoShapePair& right)
+	{
+		return left.first == right.first;
+	}
 
-	return TopoDS_Shape();
+	bool operator < (const Gui::ViewProvider::TopoShapePair& left, const Gui::ViewProvider::TopoShapePair& right)
+	{
+		return left.first == right.first;
+	}*/
 }
 
-void ViewProvider::computeEdges(SoGroup* edgeRoot, const TopoDS_Shape &shape)
+namespace Gui
 {
-	//edgeRoot->addChild(pcLineMaterial);  
-	//edgeRoot->addChild(pcLineStyle);
 
-	// get a indexed map of edges
-	TopTools_IndexedMapOfShape M;
-	TopExp::MapShapes(shape, TopAbs_EDGE, M);
-
-	// build up map edge->face
-	TopTools_IndexedDataMapOfShapeListOfShape edge2Face;
-	TopExp::MapShapesAndAncestors(shape, TopAbs_EDGE, TopAbs_FACE, edge2Face);
-
-	for (int i = 0; i < M.Extent(); i++)
+	ViewProvider::ViewProvider(InventorViewer& viewer) : viewer(viewer)
 	{
-        // get the shape and mesh it
-        const TopoDS_Edge& aEdge = TopoDS::Edge(M(i+1));
+	}
 
-        // getting the transformation of the shape/face
-        gp_Trsf myTransf;
-        Standard_Boolean identity = true;
-        TopLoc_Location aLoc;
+	ViewProvider::~ViewProvider()
+	{
+		/*SoShapeList::const_iterator soIt = soShapeList.begin();
+		for (; soIt < soShapeList.end(); ++soIt)
+			soIt->first->unref();
 
-        // try to triangulate the edge
-        Handle(Poly_Polygon3D) aPoly = BRep_Tool::Polygon3D(aEdge, aLoc);
+		TopoShapeList::const_iterator topoIt = topoShapeList.begin();
+		for (; topoIt < topoShapeList.end(); ++topoIt)
+			topoIt->second->unref();*/
+	}
 
-        SbVec3f* vertices;
-        Standard_Integer nbNodesInFace;
+	TopoDS_Shape ViewProvider::getTopoShape(const ViewerShape* shape) const
+	{
+		std::map<const ViewerShape*, TopoDS_Shape>::const_iterator it = viewerShapeMap.find(shape);
+		if (it != viewerShapeMap.end())
+			return it->second;
 
-        // triangulation succeeded?
-        if (!aPoly.IsNull())
+		return TopoDS_Shape();
+	}
+
+	const ViewerShape* ViewProvider::getViewerShape(const TopoDS_Shape& shape) const
+	{
+		TopoShapeList::const_iterator it = findViewerShape(shape);
+		if (it != topoShapeList.end())
+			return it->second;
+
+		return 0;
+	}
+
+	void ViewProvider::display(ViewerShape* shape)
+	{
+		//addSoShapePair(SoShapePair(group, shape))
+		//soShapeMap[group] = shape;
+
+		//TODO: будут ли равны два одинаковых по размеру и положению TopoDS_Shape?
+		//topoShapeMap[shape] = group;
+		//addTopoShape(TopoShapePair(shape, group));
+
+		viewerShapeMap[shape] = shape->getShape();
+		addTopoShapePair(TopoShapePair(shape->getShape(), shape));
+
+		viewer.getRootNode()->addChild(shape->getSoGroup());
+	}
+
+	void ViewProvider::remove(ViewerShape* shape)
+	{
+		/*SoShapeList::const_iterator soIt = findTopoShape(shape);
+		assert(soShapeList.end() != soIt);
+
+		TopoShapeList::const_iterator topoIt = findSoShape(soIt->second);
+		assert(topoShapeList.end() != topoIt);
+
+		soShapeList.erase(soIt);
+		topoShapeList.erase(topoIt);*/
+
+		std::map<const ViewerShape*, TopoDS_Shape>::iterator it = viewerShapeMap.find(shape);
+		if (it != viewerShapeMap.end())
 		{
-            if (!aLoc.IsIdentity())
+			delete it->first;
+			viewerShapeMap.erase(it);
+		}
+
+		removeTopoShapePair(TopoShapePair(shape->getShape(), shape));
+
+		viewer.getRootNode()->removeChild(shape->getSoGroup());
+	}
+
+	ViewProvider::TopoShapeList::const_iterator ViewProvider::findViewerShape(const TopoDS_Shape& shape) const
+	{
+		return std::find(topoShapeList.begin(), topoShapeList.end(), TopoShapePair(shape, 0));
+	}
+
+	ViewProvider::TopoShapeList::iterator ViewProvider::findViewerShape(const TopoDS_Shape& shape)
+	{
+		return std::find(topoShapeList.begin(), topoShapeList.end(), TopoShapePair(shape, 0));
+	}
+
+	void ViewProvider::addTopoShapePair(const TopoShapePair& shapePair)
+	{
+		TopoShapeList::const_iterator it = findViewerShape(shapePair.first);
+		if (it == topoShapeList.end())
+			topoShapeList.push_back(shapePair);
+	}
+
+	void ViewProvider::removeTopoShapePair(const TopoShapePair& shapePair)
+	{
+		TopoShapeList::iterator it = findViewerShape(shapePair.first);
+		if (it != topoShapeList.end())
+			topoShapeList.erase(it);
+	}
+
+	/*ViewProvider::SoShapeList::const_iterator ViewProvider::findTopoShape(const SoGroup* shape)
+	{
+		return std::find(soShapeList.begin(), soShapeList.end(), SoShapePair(shape, TopoDS_Shape()));
+	}
+
+	ViewProvider::TopoShapeList::const_iterator ViewProvider::findSoShape(const TopoDS_Shape& shape)
+	{
+		return std::find(topoShapeList.begin(), topoShapeList.end(), TopoShapePair(shape, 0));
+	}
+
+	void ViewProvider::addSoShapePair(const SoShapePair& shapePair)
+	{
+	}
+
+	void ViewProvider::addTopoShapePair(const TopoShapePair& shapePair)
+	{
+	}
+
+	void ViewProvider::removeSoShapePair(const SoShapePair& shapePair)
+	{
+	}
+
+	void ViewProvider::removeTopoShapePair(const TopoShapePair& shapePair)
+	{
+	}*/
+
+	void ViewProvider::computeEdges(SoGroup* edgeRoot, const TopoDS_Shape &shape)
+	{
+		//edgeRoot->addChild(pcLineMaterial);  
+		//edgeRoot->addChild(pcLineStyle);
+
+		// get a indexed map of edges
+		TopTools_IndexedMapOfShape M;
+		TopExp::MapShapes(shape, TopAbs_EDGE, M);
+
+		// build up map edge->face
+		TopTools_IndexedDataMapOfShapeListOfShape edge2Face;
+		TopExp::MapShapesAndAncestors(shape, TopAbs_EDGE, TopAbs_FACE, edge2Face);
+
+		for (int i = 0; i < M.Extent(); i++)
+		{
+			// get the shape and mesh it
+			const TopoDS_Edge& aEdge = TopoDS::Edge(M(i+1));
+
+			// getting the transformation of the shape/face
+			gp_Trsf myTransf;
+			Standard_Boolean identity = true;
+			TopLoc_Location aLoc;
+
+			// try to triangulate the edge
+			Handle(Poly_Polygon3D) aPoly = BRep_Tool::Polygon3D(aEdge, aLoc);
+
+			SbVec3f* vertices;
+			Standard_Integer nbNodesInFace;
+
+			// triangulation succeeded?
+			if (!aPoly.IsNull())
 			{
-                identity = false;
-                myTransf = aLoc.Transformation();
-            }
-            // take the edge's triangulation
-            //
-            // getting size and create the array
-            nbNodesInFace = aPoly->NbNodes();
-            vertices = new SbVec3f[nbNodesInFace];
+				if (!aLoc.IsIdentity())
+				{
+					identity = false;
+					myTransf = aLoc.Transformation();
+				}
+				// take the edge's triangulation
+				//
+				// getting size and create the array
+				nbNodesInFace = aPoly->NbNodes();
+				vertices = new SbVec3f[nbNodesInFace];
 
-            const TColgp_Array1OfPnt& Nodes = aPoly->Nodes();
+				const TColgp_Array1OfPnt& Nodes = aPoly->Nodes();
 
-            gp_Pnt V;
-            for (Standard_Integer i=0;i < nbNodesInFace;i++)
+				gp_Pnt V;
+				for (Standard_Integer i=0;i < nbNodesInFace;i++)
+				{
+					V = Nodes(i+1);
+					V.Transform(myTransf);
+					vertices[i].setValue((float)(V.X()),(float)(V.Y()),(float)(V.Z()));
+				}
+			}
+			else
 			{
-                V = Nodes(i+1);
-                V.Transform(myTransf);
-                vertices[i].setValue((float)(V.X()),(float)(V.Y()),(float)(V.Z()));
-            }
-        }
-        else
+				// the edge has not its own triangulation, but then a face the edge is attached to
+				// must provide this triangulation
+
+				// Look for one face in our map (it doesn't care which one we take)
+				const TopoDS_Face& aFace = TopoDS::Face(edge2Face.FindFromKey(aEdge).First());
+
+				// take the face's triangulation instead
+				Handle(Poly_Triangulation) aPolyTria = BRep_Tool::Triangulation(aFace,aLoc);
+				if (!aLoc.IsIdentity())
+				{
+					identity = false;
+					myTransf = aLoc.Transformation();
+				}
+
+				//if (aPolyTria.IsNull()) // actually this shouldn't happen at all
+				//    throw Base::Exception("Empty face trianglutaion\n");
+				if (aPolyTria.IsNull()) return;
+
+				// this holds the indices of the edge's triangulation to the actual points
+				Handle(Poly_PolygonOnTriangulation) aPoly = BRep_Tool::PolygonOnTriangulation(aEdge, aPolyTria, aLoc);
+				if (aPoly.IsNull())
+					continue; // polygon does not exist
+
+				// getting size and create the array
+				nbNodesInFace = aPoly->NbNodes();
+				vertices = new SbVec3f[nbNodesInFace];
+
+				const TColStd_Array1OfInteger& indices = aPoly->Nodes();
+				const TColgp_Array1OfPnt& Nodes = aPolyTria->Nodes();
+
+				gp_Pnt V;
+				int pos = 0;
+				// go through the index array
+				for (Standard_Integer i=indices.Lower();i <= indices.Upper();i++)
+				{
+					V = Nodes(indices(i));
+					V.Transform(myTransf);
+					vertices[pos++].setValue((float)(V.X()),(float)(V.Y()),(float)(V.Z()));
+				}
+			}
+
+			// define vertices
+			SoCoordinate3 * coords = new SoCoordinate3;
+			coords->point.setValues(0,nbNodesInFace, vertices);
+			delete [] vertices;
+			edgeRoot->addChild(coords);
+
+			// define the indexed face set
+			/*Gui::SoFCSelection* sel = createFromSettings();
+			SbString name("Edge");
+			name += SbString(i+1);
+			sel->objectName = pcObject->getNameInDocument();
+			sel->documentName = pcObject->getDocument()->getName();
+			sel->subElementName = name;
+			sel->style = Gui::SoFCSelection::EMISSIVE_DIFFUSE;
+			//sel->highlightMode = Gui::SoFCSelection::AUTO;
+			//sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
+
+			SoLocateHighlight* h = new SoLocateHighlight();
+
+			SoLineSet * lineset = new SoLineSet;
+			h->addChild(lineset);
+			edgeRoot->addChild(h);
+			//vertexShapeMap[lineset] = aEdge;
+		}
+	}
+
+	void ViewProvider::computeVertices(SoGroup* vertexRoot, const TopoDS_Shape &shape)
+	{
+		//vertexRoot->addChild(pcPointMaterial);  
+		//vertexRoot->addChild(pcPointStyle);
+
+		// get a indexed map of edges
+		TopTools_IndexedMapOfShape M;
+		TopExp::MapShapes(shape, TopAbs_VERTEX, M);
+		
+		for (int i=0; i<M.Extent(); i++)
 		{
-            // the edge has not its own triangulation, but then a face the edge is attached to
-            // must provide this triangulation
+			const TopoDS_Vertex& aVertex = TopoDS::Vertex(M(i+1));
 
-            // Look for one face in our map (it doesn't care which one we take)
-            const TopoDS_Face& aFace = TopoDS::Face(edge2Face.FindFromKey(aEdge).First());
+			// each point has its own selection node
+			/*Gui::SoFCSelection* sel = createFromSettings();
+			SbString name("Point");
+			name += SbString(i+1);
+			sel->objectName = pcObject->getNameInDocument();
+			sel->documentName = pcObject->getDocument()->getName();
+			sel->subElementName = name;
+			sel->style = Gui::SoFCSelection::EMISSIVE_DIFFUSE;
+			//sel->highlightMode = Gui::SoFCSelection::AUTO;
+			//sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
 
-            // take the face's triangulation instead
-            Handle(Poly_Triangulation) aPolyTria = BRep_Tool::Triangulation(aFace,aLoc);
-            if (!aLoc.IsIdentity())
+			// define the vertices
+			SoCoordinate3 * coords = new SoCoordinate3;
+			coords->point.setNum(1);
+			vertexRoot->addChild(coords);
+
+
+			// get the shape
+			gp_Pnt pnt = BRep_Tool::Pnt(aVertex);
+			coords->point.set1Value(0, (float)pnt.X(), (float)pnt.Y(), (float)pnt.Z());
+
+			SoLocateHighlight* h = new SoLocateHighlight();
+
+			SoPointSet * pointset = new SoPointSet;
+			h->addChild(pointset);
+			vertexRoot->addChild(h);
+		}
+	}
+
+	void transferToArray(const TopoDS_Face& aFace,SbVec3f** vertices,SbVec3f** vertexnormals,
+										   int32_t** cons,int &nbNodesInFace,int &nbTriInFace )
+	{
+		TopLoc_Location aLoc;
+
+		// doing the meshing and checking the result
+		//BRepMesh_IncrementalMesh MESH(aFace,fdeflectionection);
+		Handle(Poly_Triangulation) aPoly = BRep_Tool::Triangulation(aFace,aLoc);
+		//if (aPoly.IsNull()) throw Base::Exception("Empty face trianglutaion\n");
+		if (aPoly.IsNull()) return;
+
+		// getting the transformation of the shape/face
+		gp_Trsf myTransf;
+		Standard_Boolean identity = true;
+		if (!aLoc.IsIdentity())
+		{
+			identity = false;
+			myTransf = aLoc.Transformation();
+		}
+
+		Standard_Integer i;
+		// geting size and create the array
+		nbNodesInFace = aPoly->NbNodes();
+		nbTriInFace = aPoly->NbTriangles();
+		*vertices = new SbVec3f[nbNodesInFace];
+		*vertexnormals = new SbVec3f[nbNodesInFace];
+		for(i=0;i < nbNodesInFace;i++)
+		{
+			(*vertexnormals)[i]= SbVec3f(0.0,0.0,0.0);
+		}
+
+		*cons = new int32_t[4*(nbTriInFace)];
+
+		// check orientation
+		TopAbs_Orientation orient = aFace.Orientation();
+
+		// cycling through the poly mesh
+		const Poly_Array1OfTriangle& Triangles = aPoly->Triangles();
+		const TColgp_Array1OfPnt& Nodes = aPoly->Nodes();
+		for (i=1;i<=nbTriInFace;i++)
+		{
+			// Get the triangle
+			Standard_Integer N1,N2,N3;
+			Triangles(i).Get(N1,N2,N3);
+
+			// change orientation of the triangles
+			if ( orient != TopAbs_FORWARD )
 			{
-                identity = false;
-                myTransf = aLoc.Transformation();
-            }
+				Standard_Integer tmp = N1;
+				N1 = N2;
+				N2 = tmp;
+			}
 
-            //if (aPolyTria.IsNull()) // actually this shouldn't happen at all
-            //    throw Base::Exception("Empty face trianglutaion\n");
-            if (aPolyTria.IsNull()) return;
+			gp_Pnt V1 = Nodes(N1);
+			gp_Pnt V2 = Nodes(N2);
+			gp_Pnt V3 = Nodes(N3);
 
-            // this holds the indices of the edge's triangulation to the actual points
-            Handle(Poly_PolygonOnTriangulation) aPoly = BRep_Tool::PolygonOnTriangulation(aEdge, aPolyTria, aLoc);
-            if (aPoly.IsNull())
-                continue; // polygon does not exist
-
-            // getting size and create the array
-            nbNodesInFace = aPoly->NbNodes();
-            vertices = new SbVec3f[nbNodesInFace];
-
-            const TColStd_Array1OfInteger& indices = aPoly->Nodes();
-            const TColgp_Array1OfPnt& Nodes = aPolyTria->Nodes();
-
-            gp_Pnt V;
-            int pos = 0;
-            // go through the index array
-            for (Standard_Integer i=indices.Lower();i <= indices.Upper();i++)
+			// transform the vertices to the place of the face
+			if (!identity)
 			{
-                V = Nodes(indices(i));
-                V.Transform(myTransf);
-                vertices[pos++].setValue((float)(V.X()),(float)(V.Y()),(float)(V.Z()));
-            }
-        }
+				V1.Transform(myTransf);
+				V2.Transform(myTransf);
+				V3.Transform(myTransf);
+			}
 
-        // define vertices
-        SoCoordinate3 * coords = new SoCoordinate3;
-        coords->point.setValues(0,nbNodesInFace, vertices);
-        delete [] vertices;
-        edgeRoot->addChild(coords);
-
-        // define the indexed face set
-        /*Gui::SoFCSelection* sel = createFromSettings();
-        SbString name("Edge");
-        name += SbString(i+1);
-        sel->objectName = pcObject->getNameInDocument();
-        sel->documentName = pcObject->getDocument()->getName();
-        sel->subElementName = name;
-        sel->style = Gui::SoFCSelection::EMISSIVE_DIFFUSE;
-        //sel->highlightMode = Gui::SoFCSelection::AUTO;
-        //sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
-
-		SoLocateHighlight* h = new SoLocateHighlight();
-
-        SoLineSet * lineset = new SoLineSet;
-        h->addChild(lineset);
-        edgeRoot->addChild(h);
-        //vertexShapeMap[lineset] = aEdge;
-    }
-}
-
-void ViewProvider::computeVertices(SoGroup* vertexRoot, const TopoDS_Shape &shape)
-{
-    //vertexRoot->addChild(pcPointMaterial);  
-    //vertexRoot->addChild(pcPointStyle);
-
-    // get a indexed map of edges
-    TopTools_IndexedMapOfShape M;
-    TopExp::MapShapes(shape, TopAbs_VERTEX, M);
-    
-    for (int i=0; i<M.Extent(); i++)
-    {
-        const TopoDS_Vertex& aVertex = TopoDS::Vertex(M(i+1));
-
-        // each point has its own selection node
-        /*Gui::SoFCSelection* sel = createFromSettings();
-        SbString name("Point");
-        name += SbString(i+1);
-        sel->objectName = pcObject->getNameInDocument();
-        sel->documentName = pcObject->getDocument()->getName();
-        sel->subElementName = name;
-        sel->style = Gui::SoFCSelection::EMISSIVE_DIFFUSE;
-        //sel->highlightMode = Gui::SoFCSelection::AUTO;
-        //sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
-
-        // define the vertices
-        SoCoordinate3 * coords = new SoCoordinate3;
-        coords->point.setNum(1);
-        vertexRoot->addChild(coords);
-
-
-        // get the shape
-        gp_Pnt pnt = BRep_Tool::Pnt(aVertex);
-        coords->point.set1Value(0, (float)pnt.X(), (float)pnt.Y(), (float)pnt.Z());
-
-		SoLocateHighlight* h = new SoLocateHighlight();
-
-        SoPointSet * pointset = new SoPointSet;
-        h->addChild(pointset);
-        vertexRoot->addChild(h);
-    }
-}
-
-void transferToArray(const TopoDS_Face& aFace,SbVec3f** vertices,SbVec3f** vertexnormals,
-                                       int32_t** cons,int &nbNodesInFace,int &nbTriInFace )
-{
-    TopLoc_Location aLoc;
-
-    // doing the meshing and checking the result
-    //BRepMesh_IncrementalMesh MESH(aFace,fdeflectionection);
-    Handle(Poly_Triangulation) aPoly = BRep_Tool::Triangulation(aFace,aLoc);
-    //if (aPoly.IsNull()) throw Base::Exception("Empty face trianglutaion\n");
-    if (aPoly.IsNull()) return;
-
-    // getting the transformation of the shape/face
-    gp_Trsf myTransf;
-    Standard_Boolean identity = true;
-    if (!aLoc.IsIdentity())
-	{
-        identity = false;
-        myTransf = aLoc.Transformation();
-    }
-
-    Standard_Integer i;
-    // geting size and create the array
-    nbNodesInFace = aPoly->NbNodes();
-    nbTriInFace = aPoly->NbTriangles();
-    *vertices = new SbVec3f[nbNodesInFace];
-    *vertexnormals = new SbVec3f[nbNodesInFace];
-    for(i=0;i < nbNodesInFace;i++)
-	{
-        (*vertexnormals)[i]= SbVec3f(0.0,0.0,0.0);
-    }
-
-    *cons = new int32_t[4*(nbTriInFace)];
-
-    // check orientation
-    TopAbs_Orientation orient = aFace.Orientation();
-
-    // cycling through the poly mesh
-    const Poly_Array1OfTriangle& Triangles = aPoly->Triangles();
-    const TColgp_Array1OfPnt& Nodes = aPoly->Nodes();
-    for (i=1;i<=nbTriInFace;i++)
-	{
-        // Get the triangle
-        Standard_Integer N1,N2,N3;
-        Triangles(i).Get(N1,N2,N3);
-
-        // change orientation of the triangles
-        if ( orient != TopAbs_FORWARD )
-		{
-            Standard_Integer tmp = N1;
-            N1 = N2;
-            N2 = tmp;
-        }
-
-        gp_Pnt V1 = Nodes(N1);
-        gp_Pnt V2 = Nodes(N2);
-        gp_Pnt V3 = Nodes(N3);
-
-        // transform the vertices to the place of the face
-        if (!identity)
-		{
-            V1.Transform(myTransf);
-            V2.Transform(myTransf);
-            V3.Transform(myTransf);
-        }
-
-        //if (!this->noPerVertexNormals)
-		{
-            // Calculate triangle normal
-            gp_Vec v1(V1.X(),V1.Y(),V1.Z()),v2(V2.X(),V2.Y(),V2.Z()),v3(V3.X(),V3.Y(),V3.Z());
-            gp_Vec Normal = (v2-v1)^(v3-v1); 
-
-            //Standard_Real Area = 0.5 * Normal.Magnitude();
-
-            // add the triangle normal to the vertex normal for all points of this triangle
-            (*vertexnormals)[N1-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
-            (*vertexnormals)[N2-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
-            (*vertexnormals)[N3-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
-        }
-
-        (*vertices)[N1-1].setValue((float)(V1.X()),(float)(V1.Y()),(float)(V1.Z()));
-        (*vertices)[N2-1].setValue((float)(V2.X()),(float)(V2.Y()),(float)(V2.Z()));
-        (*vertices)[N3-1].setValue((float)(V3.X()),(float)(V3.Y()),(float)(V3.Z()));
-
-        int j = i - 1;
-        N1--; N2--; N3--;
-        (*cons)[4*j] = N1; (*cons)[4*j+1] = N2; (*cons)[4*j+2] = N3; (*cons)[4*j+3] = SO_END_FACE_INDEX;
-    }
-
-    // normalize all vertex normals
-    for(i=0;i < nbNodesInFace;i++)
-	{
-        //if (this->qualityNormals)
-		{
-            gp_Dir clNormal;
-
-            try
+			//if (!this->noPerVertexNormals)
 			{
-                Handle_Geom_Surface Surface = BRep_Tool::Surface(aFace);
+				// Calculate triangle normal
+				gp_Vec v1(V1.X(),V1.Y(),V1.Z()),v2(V2.X(),V2.Y(),V2.Z()),v3(V3.X(),V3.Y(),V3.Z());
+				gp_Vec Normal = (v2-v1)^(v3-v1); 
 
-                gp_Pnt vertex((*vertices)[i][0], (*vertices)[i][1], (*vertices)[i][2]);
-                GeomAPI_ProjectPointOnSurf ProPntSrf(vertex, Surface);
-                Standard_Real fU, fV; ProPntSrf.Parameters(1, fU, fV);
+				//Standard_Real Area = 0.5 * Normal.Magnitude();
 
-                GeomLProp_SLProps clPropOfFace(Surface, fU, fV, 2, gp::Resolution());
+				// add the triangle normal to the vertex normal for all points of this triangle
+				(*vertexnormals)[N1-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
+				(*vertexnormals)[N2-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
+				(*vertexnormals)[N3-1] += SbVec3f(Normal.X(),Normal.Y(),Normal.Z());
+			}
 
-                clNormal = clPropOfFace.Normal();
-                SbVec3f temp = SbVec3f(clNormal.X(),clNormal.Y(),clNormal.Z());
-                //Base::Console().Log("unterschied:%.2f",temp.dot((*vertexnormals)[i]));
+			(*vertices)[N1-1].setValue((float)(V1.X()),(float)(V1.Y()),(float)(V1.Z()));
+			(*vertices)[N2-1].setValue((float)(V2.X()),(float)(V2.Y()),(float)(V2.Z()));
+			(*vertices)[N3-1].setValue((float)(V3.X()),(float)(V3.Y()),(float)(V3.Z()));
 
-                if ( temp.dot((*vertexnormals)[i]) < 0 )
-                    temp = -temp;
-                (*vertexnormals)[i] = temp;
+			int j = i - 1;
+			N1--; N2--; N3--;
+			(*cons)[4*j] = N1; (*cons)[4*j+1] = N2; (*cons)[4*j+2] = N3; (*cons)[4*j+3] = SO_END_FACE_INDEX;
+		}
 
-            }
-            catch(...){}
-        }
-        /*else if ((*vertexnormals)[i].sqrLength() > 0.001)
+		// normalize all vertex normals
+		for(i=0;i < nbNodesInFace;i++)
 		{
-            (*vertexnormals)[i].normalize();
-        }*/
-    }
-}
+			//if (this->qualityNormals)
+			{
+				gp_Dir clNormal;
 
-void ViewProvider::computeFaces(SoGroup* faceRoot, const TopoDS_Shape &shape, double deflection)
-{
-    TopExp_Explorer ex;
+				try
+				{
+					Handle_Geom_Surface Surface = BRep_Tool::Surface(aFace);
 
-    //faceRoot->addChild(pcShapeMaterial);
+					gp_Pnt vertex((*vertices)[i][0], (*vertices)[i][1], (*vertices)[i][2]);
+					GeomAPI_ProjectPointOnSurf ProPntSrf(vertex, Surface);
+					Standard_Real fU, fV; ProPntSrf.Parameters(1, fU, fV);
 
-//  BRepMesh::Mesh(shape,1.0);
-    BRepMesh_IncrementalMesh MESH(shape,deflection);
+					GeomLProp_SLProps clPropOfFace(Surface, fU, fV, 2, gp::Resolution());
 
-    int i = 1;
-    for (ex.Init(shape, TopAbs_FACE); ex.More(); ex.Next(),i++)
+					clNormal = clPropOfFace.Normal();
+					SbVec3f temp = SbVec3f(clNormal.X(),clNormal.Y(),clNormal.Z());
+					//Base::Console().Log("unterschied:%.2f",temp.dot((*vertexnormals)[i]));
+
+					if ( temp.dot((*vertexnormals)[i]) < 0 )
+						temp = -temp;
+					(*vertexnormals)[i] = temp;
+
+				}
+				catch(...){}
+			}
+			/*else if ((*vertexnormals)[i].sqrLength() > 0.001)
+			{
+				(*vertexnormals)[i].normalize();
+			}*/
+		}
+	}
+
+	void ViewProvider::computeFaces(SoGroup* faceRoot, const TopoDS_Shape &shape, double deflection)
 	{
-        // get the shape and mesh it
-        const TopoDS_Face& aFace = TopoDS::Face(ex.Current());
+		TopExp_Explorer ex;
 
+		//faceRoot->addChild(pcShapeMaterial);
 
-        // this block mesh the face and transfers it in a C array of vertices and face indexes
-        Standard_Integer nbNodesInFace,nbTriInFace;
-        SbVec3f* vertices=0;
-        SbVec3f* vertexnormals=0;
-        int32_t* cons=0;
+	//  BRepMesh::Mesh(shape,1.0);
+		BRepMesh_IncrementalMesh MESH(shape,deflection);
 
-        transferToArray(aFace,&vertices,&vertexnormals,&cons,nbNodesInFace,nbTriInFace);
-
-        if (!vertices)
-            continue;
-
-        //if (!this->noPerVertexNormals)
+		int i = 1;
+		for (ex.Init(shape, TopAbs_FACE); ex.More(); ex.Next(),i++)
 		{
-            // define normals (this is optional)
-            SoNormal * norm = new SoNormal;
-            norm->vector.setValues(0, nbNodesInFace, vertexnormals);
-            faceRoot->addChild(norm);
+			// get the shape and mesh it
+			const TopoDS_Face& aFace = TopoDS::Face(ex.Current());
 
-            // bind one normal per face
-            SoNormalBinding * normb = new SoNormalBinding;
-            normb->value = SoNormalBinding::PER_VERTEX_INDEXED;
-            faceRoot->addChild(normb);
-        }
 
-        // define vertices
-        SoCoordinate3 * coords = new SoCoordinate3;
-        coords->point.setValues(0,nbNodesInFace, vertices);
-        faceRoot->addChild(coords);
+			// this block mesh the face and transfers it in a C array of vertices and face indexes
+			Standard_Integer nbNodesInFace,nbTriInFace;
+			SbVec3f* vertices=0;
+			SbVec3f* vertexnormals=0;
+			int32_t* cons=0;
 
-        // Turns on backface culling
-        //      SoShapeHints * hints = new SoShapeHints;
-        //      hints->vertexOrdering = SoShapeHints::CLOCKWISE ;
-        //      hints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE ;
-        //      hints->shapeType = SoShapeHints::SOLID;
-        //      hints->shapeType = SoShapeHints::UNKNOWN_SHAPE_TYPE;
-        //      root->addChild(hints);
+			transferToArray(aFace,&vertices,&vertexnormals,&cons,nbNodesInFace,nbTriInFace);
 
-        //SoDrawStyle *Stype = new SoDrawStyle();
-        //Stype->pointSize.setValue(3.0);
-        //Stype->style.setValue( SoDrawStyle::POINTS );
+			if (!vertices)
+				continue;
 
-        //SoPointSet *PtSet = new SoPointSet;
-        //root->addChild(PtSet);
+			//if (!this->noPerVertexNormals)
+			{
+				// define normals (this is optional)
+				SoNormal * norm = new SoNormal;
+				norm->vector.setValues(0, nbNodesInFace, vertexnormals);
+				faceRoot->addChild(norm);
 
-        // define the indexed face set
-        /*Gui::SoFCSelection* sel = createFromSettings();
-        SbString name("Face");
-        name += SbString(i);
-        sel->objectName = pcObject->getNameInDocument();
-        sel->documentName = pcObject->getDocument()->getName();
-        sel->subElementName = name;
-        sel->style = Gui::SoFCSelection::EMISSIVE;
-        //sel->highlightMode = Gui::SoFCSelection::AUTO;
-        //sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
+				// bind one normal per face
+				SoNormalBinding * normb = new SoNormalBinding;
+				normb->value = SoNormalBinding::PER_VERTEX_INDEXED;
+				faceRoot->addChild(normb);
+			}
 
-        SoIndexedFaceSet * faceset = new SoIndexedFaceSet;
-        faceset->coordIndex.setValues(0,4*nbTriInFace,(const int32_t*) cons);
-		SoLocateHighlight* h = new SoLocateHighlight();
-        h->addChild(faceset);
-        faceRoot->addChild(h);
-        //vertexShapeMap[faceset] = aFace;
+			// define vertices
+			SoCoordinate3 * coords = new SoCoordinate3;
+			coords->point.setValues(0,nbNodesInFace, vertices);
+			faceRoot->addChild(coords);
 
-        delete [] vertexnormals;
-        delete [] vertices;
-        delete [] cons;
-    } // end of face loop
+			// Turns on backface culling
+			//      SoShapeHints * hints = new SoShapeHints;
+			//      hints->vertexOrdering = SoShapeHints::CLOCKWISE ;
+			//      hints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE ;
+			//      hints->shapeType = SoShapeHints::SOLID;
+			//      hints->shapeType = SoShapeHints::UNKNOWN_SHAPE_TYPE;
+			//      root->addChild(hints);
+
+			//SoDrawStyle *Stype = new SoDrawStyle();
+			//Stype->pointSize.setValue(3.0);
+			//Stype->style.setValue( SoDrawStyle::POINTS );
+
+			//SoPointSet *PtSet = new SoPointSet;
+			//root->addChild(PtSet);
+
+			// define the indexed face set
+			/*Gui::SoFCSelection* sel = createFromSettings();
+			SbString name("Face");
+			name += SbString(i);
+			sel->objectName = pcObject->getNameInDocument();
+			sel->documentName = pcObject->getDocument()->getName();
+			sel->subElementName = name;
+			sel->style = Gui::SoFCSelection::EMISSIVE;
+			//sel->highlightMode = Gui::SoFCSelection::AUTO;
+			//sel->selectionMode = Gui::SoFCSelection::SEL_ON;*/
+
+			SoIndexedFaceSet * faceset = new SoIndexedFaceSet;
+			faceset->coordIndex.setValues(0,4*nbTriInFace,(const int32_t*) cons);
+			SoLocateHighlight* h = new SoLocateHighlight();
+			h->addChild(faceset);
+			faceRoot->addChild(h);
+			//soShapeMap[faceset] = aFace;
+
+			delete [] vertexnormals;
+			delete [] vertices;
+			delete [] cons;
+		} // end of face loop
+	}
+
 }
 

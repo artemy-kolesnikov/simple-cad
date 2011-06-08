@@ -23,17 +23,30 @@
 
 class SoNode;
 class SoSelection;
+class SoEventCallback;
 
 namespace Gui
 {
 
 	class InteractiveView;
+	class InventorViewer;
+
+	class ViewerEvents : public QObject
+	{
+		friend class InventorViewer;
+
+	private:
+		ViewerEvents() {}
+
+	Q_SIGNALS:
+	};
 
 	class InventorViewer : public SoQtExaminerViewer
 	{
 		typedef SoQtExaminerViewer inherited;
 	public:
 		InventorViewer(QWidget* parent = 0);
+		~InventorViewer();
 
 		void setInteractiveView(InteractiveView* view);
 		InteractiveView* getInteractiveView() const;
@@ -46,10 +59,19 @@ namespace Gui
 		virtual void setSceneGraph(SoNode* root);
 		virtual SoNode* getSceneGraph();
 
+		static void eventCallback(void* data, SoEventCallback* callback);
+		static void selectionCallback(void* data, SoPath* path);
+		static void deselectionCallback(void* data, SoPath* path);
+
+		void eventHandler(SoEventCallback* callback);
+		void selectionHandler(SoPath* path);
+		void deselectionHandler(SoPath* path);
+
 	private:
 		InteractiveView* interactiveView;
 
 		SoSelection* rootSelection;
+		SoEventCallback* eventCallbacker;
 	};
 
 }

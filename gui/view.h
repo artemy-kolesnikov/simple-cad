@@ -23,8 +23,6 @@
 
 #include <memory>
 
-#include "viewprovider.h"
-
 #include <messagereceiver.h>
 
 class QFocusEvent;
@@ -35,6 +33,7 @@ namespace Gui
 	class InventorViewer;
 	class InteractiveView;
 	class Model;
+	class ViewProvider;
 
 	/**
 	 * Display loaded model
@@ -103,7 +102,7 @@ namespace Gui
 		std::auto_ptr<InventorViewer> inventorViewer;
 		std::auto_ptr<InteractiveView> interactiveView;
 
-		ViewProvider viewProvider;
+		std::auto_ptr<ViewProvider> viewProvider;
 	};
 
 }

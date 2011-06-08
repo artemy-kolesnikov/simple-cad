@@ -14,22 +14,44 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef VIEWER_SHAPE_HEADER
+#define VIEWER_SHAPE_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <TopoDS_Shape.hxx>
+#include <QString>
+
+#include "viewprovider.h"
+
+class SoGroup;
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
+	class ViewerShape
 	{
-		using namespace Sketcher;
+		friend class ViewProvider;
+	public:
+		ViewerShape(QString name, TopoDS_Shape shape);
+		~ViewerShape();
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+		QString getName() const;
+		TopoDS_Shape getShape() const;
+
+	private:
+		void computeShape();
+
+		SoGroup* getSoGroup() const;
+
+	private:
+		TopoDS_Shape shape;
+		QString name;
+		SoGroup* rootGroup;
+		SoGroup* faces;
+		SoGroup* edges;
+		SoGroup* vertices;
+	};
 
 }
+
+#endif // VIEWER_SHAPE_HEADER
 

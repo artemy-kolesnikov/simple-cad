@@ -8,6 +8,8 @@ FIND_PACKAGE(Qt4 REQUIRED)
 
 INCLUDE(${QT_USE_FILE})
 
+QT4_ADD_RESOURCES(CAD_RCS cad.qrc)
+
 SET(SOURCES
 	action/boolean.cpp
 	action/common.cpp
@@ -34,6 +36,7 @@ SET(SOURCES
 	gui/model.cpp
 	gui/view.cpp
 	gui/viewprovider.cpp
+	gui/viewershape.cpp
 	gui/widget/createprimitivewidget.cpp
 	gui/widget/pointsettingswidget.cpp
 	gui/widget/positionsettingswidget.cpp
@@ -47,6 +50,7 @@ SET(SOURCES
 	sketcher/mod/circle.cpp
 	sketcher/mod/resizepolygon.cpp
 	common/sendmessagecommand.cpp
+	${CAD_RCS}
 )
 
 SET(HEADERS

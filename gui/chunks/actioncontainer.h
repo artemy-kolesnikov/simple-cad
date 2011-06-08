@@ -14,22 +14,23 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef ACTION_CONTAINER_HEADER
+#define ACTION_CONTAINER_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <QList>
+#include <QAction>
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
+	class ActionContainer
 	{
-		using namespace Sketcher;
-
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+	public:
+		virtual ~ActionContainer();
+		virtual void getActionList(QList<QAction*> >& list) = 0;
+	};
 
 }
+
+#endif // ACTION_CONTAINER_HEADER
 

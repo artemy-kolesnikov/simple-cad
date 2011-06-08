@@ -14,22 +14,29 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef MULTIDOC_CONTAINER_HEADER
+#define MULTIDOC_CONTAINER_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <QList>
+#include <QAction>
+
+class Model;
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
-	{
-		using namespace Sketcher;
+	class View;
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+	class MultiDocContainer
+	{
+	public:
+		virtual ~MultiDocContainer();
+
+		virtual Model* getActiveModel() const = 0;
+		virtual View* getActiveView() const = 0;
+	};
 
 }
+
+#endif // MULTIDOC_CONTAINER_HEADER
 
