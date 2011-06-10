@@ -27,6 +27,7 @@
 
 class QFocusEvent;
 class TopoDS_Shape;
+class SoPath;
 
 namespace Gui
 {
@@ -82,6 +83,8 @@ namespace Gui
 		void viewDatumPlane();
 		void shapeAdded(const TopoDS_Shape& shape);
 		void shapeRemoved(const TopoDS_Shape& shape);
+		void pathSelected(SoPath* path);
+		void pathDeselected(SoPath* path);
 
 	private:
 		void createUI();

@@ -18,8 +18,8 @@
 #define INVENTOR_VIEWER_HEADER
 
 #include <Inventor/Qt/viewers/SoQtExaminerViewer.h>
-
 #include <QWidget>
+#include <memory>
 
 class SoNode;
 class SoSelection;
@@ -35,10 +35,14 @@ namespace Gui
 	{
 		friend class InventorViewer;
 
+		Q_OBJECT
+
 	private:
 		ViewerEvents() {}
 
 	Q_SIGNALS:
+		void pathSelected(SoPath* path);
+		void pathDeselected(SoPath* path);
 	};
 
 	class InventorViewer : public SoQtExaminerViewer
@@ -54,6 +58,8 @@ namespace Gui
 		SoSelection* getRootNode();
 
 		void setCameraOrientation(const SbRotation& rotation);
+
+		const ViewerEvents* getEventObject() const;
 
 	private:
 		virtual void setSceneGraph(SoNode* root);
@@ -72,6 +78,7 @@ namespace Gui
 
 		SoSelection* rootSelection;
 		SoEventCallback* eventCallbacker;
+		std::auto_ptr<ViewerEvents> viewerEvents;
 	};
 
 }

@@ -38,8 +38,8 @@ namespace Gui
 		ViewProvider(InventorViewer& viewer);
 		~ViewProvider();
 
-		TopoDS_Shape getTopoShape(const ViewerShape* shape) const;
-		const ViewerShape* getViewerShape(const TopoDS_Shape& shape) const;
+		bool getTopoShape(const ViewerShape* viewerShape, TopoDS_Shape& topoShape) const;
+		bool getViewerShape(const TopoDS_Shape& topoShape, const ViewerShape* viewerShape) const;
 
 		void display(ViewerShape* shape);
 		void remove(ViewerShape* shape);

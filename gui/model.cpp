@@ -71,30 +71,6 @@ namespace Gui
 		if (shapeList.IsNull() || !shapeList->Length())
 			throw Common::FileException(QObject::tr("Ошибка чтения элементов"));
 
-		/*ViewProvider provider;
-
-		for (int i = 1; i <= dsShapes->Length(); ++i)
-		{
-			SoGroup* faces = new SoGroup();
-			faces->ref();
-			//SoGroup* vert = new SoGroup();
-			//vert->ref();
-			//SoGroup* edges = new SoGroup();
-			//edges->ref();
-
-			provider.computeFaces(faces, dsShapes->Value(i), .2);
-			//computeVertices(vert, dsShapes->Value(i));
-			//computeEdges(edges, dsShapes->Value(i));
-
-			separator->addChild(faces);
-
-			SbViewportRegion region(viewer->getSize());
-		
-			viewer->getCamera()->viewAll(faces, region);
-			//separator->addChild(vert);
-			//separator->addChild(edges);
-		}*/
-
 		this->fileName = fileName;
 
 		/*Q_EMIT changed();

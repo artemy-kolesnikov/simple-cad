@@ -65,6 +65,11 @@ namespace Gui
 	{
 		inventorViewer.reset(new InventorViewer(this));
 
+		connect(inventorViewer->getEventObject(), SIGNAL(pathSelected(SoPath*)),
+			this, SLOT(pathSelected(SoPath*)));
+		connect(inventorViewer->getEventObject(), SIGNAL(pathDeselected(SoPath*)),
+			this, SLOT(pathDeselected(SoPath*)));
+
 		QHBoxLayout *layout = new QHBoxLayout(this);
 		layout->setContentsMargins(QMargins(0, 0, 0, 0));;
 		layout->addWidget(inventorViewer->getWidget());
@@ -172,187 +177,28 @@ namespace Gui
 	{
 	}
 
-	/*void View::init()
+	void View::pathSelected(SoPath* path)
 	{
-		view = model->getContext()->CurrentViewer()->CreateView();
+		int pathLength = path->getLength();
+		assert(pathLength > 2);
 
-		int windowHandle = (int)winId();
-		short hi, lo;
-		lo = (short) windowHandle;
-		hi = (short) (windowHandle >> 16);
+		SoNode* node = path->getNodeFromTail(pathLength - 2);
 
-#ifdef Q_OS_WIN32 
-		Handle(WNT_Window) hWnd = new WNT_Window( Handle(Graphic3d_WNTGraphicDevice)
-			::DownCast(myContext->CurrentViewer()->Device()), (int) hi, (int) lo);
-		hWnd->SetFlags(WDF_NOERASEBKGRND);
-#elif defined Q_OS_LINUX
-		Handle(Xw_Window) hWnd = new Xw_Window(Handle(Graphic3d_GraphicDevice)::
-			DownCast(model->getContext()->CurrentViewer()->Device()),(int) hi,(int) lo, Xw_WQ_SAMEQUALITY);
-#endif
-
-		view->SetWindow(hWnd, 0, paintCallBack, this);
-
-		if (!hWnd->IsMapped())
-			hWnd->Map();
-		view->SetBackgroundColor(Quantity_NOC_BLACK);
-		view->MustBeResized();
-
-		//Handle(Geom_Axis2Placement) trihedronAxis = new Geom_Axis2Placement(gp::XOY());
-		//Handle(AIS_Trihedron) trihedron = new AIS_Trihedron(trihedronAxis);
-		//model->getContext()->Display(trihedron);
-
-		//view->TriedronDisplay(Aspect_TOTP_LEFT_LOWER, Quantity_NOC_WHITE, 0.1, V3d_ZBUFFER);
-	}
-
-	void View::paintEvent(QPaintEvent*)
-	{
-		if (firstPaint)
+        if (SoGroup::getClassTypeId() == node->getTypeId())
 		{
-			init();
-			firstPaint = false;
-		}
-
-		if( !view.IsNull() )
-		{
-			view->Redraw();
+			TopoDS_Shape shape;
+			const ViewerShape* viewerShape = 0;
+			//if (viewProvider->getViewerShape(shape
+			qDebug() << "Path selected";
 		}
 	}
 
-	void View::resizeEvent(QResizeEvent*)
+	void View::pathDeselected(SoPath* path)
 	{
-		if( !view.IsNull() )
-		{
-			view->MustBeResized();
-		}
-	}*/
-
-	/*void View::wheelEvent(QWheelEvent* event)
-	{
-		if (event->delta() < 0)
-			view->SetScale(1.05);
-		else
-			view->SetScale(0.95);
-
-		view->SetViewMappingDefault();
+		qDebug() << "Path deselected";
 	}
 
-	void View::mousePressEvent(QMouseEvent* event)
-	{
-		if (event->button() == Qt::LeftButton)
-			onLButtonDown((event->buttons() | event->modifiers()), event->pos());
-		else if (event->button() == Qt::MidButton)
-			onMButtonDown(event->buttons() | event->modifiers(), event->pos());
-		else if (event->button() == Qt::RightButton)
-			onRButtonDown(event->buttons() | event->modifiers(), event->pos() );
-	}
-
-	void View::mouseMoveEvent(QMouseEvent* event)
-	{
-		QPoint point = event->pos();
-
-		switch (curAction)
-		{
-			case caMove:
-			{
-				view->Pan(point.x() - panPoint.x(), panPoint.y() - point.y());
-				break;
-			}
-			case caRotate:
-			{
-				view->Rotation(point.x(), point.y());
-				view->Redraw();
-				break;
-			}
-			case caRectSelect:
-			{
-				rectBand->setGeometry(QRect(pressedPoint, point).normalized());
-				model->getContext()->MoveTo(point.x(), point.y(), view);
-				model->getContext()->Select(pressedPoint.x(), pressedPoint.y(), point.x(), point.y(), view);
-
-				Q_EMIT selectionChanged();
-
-				break;
-			}
-			default:
-			{
-				model->getContext()->MoveTo(point.x(), point.y(), view);
-				break;
-			}
-		}
-
-		panPoint = point;
-	}
-
-	void View::mouseReleaseEvent(QMouseEvent*)
-	{
-		if (caRectSelect == curAction)
-		{
-			Q_ASSERT(rectBand);
-			rectBand->hide();
-		}
-
-		curAction = caNone;
-	}
-
-	void View::keyPressEvent(QKeyEvent* event)
-	{
-		if (event->key() == Qt::Key_Space)
-		{
-			modKey = mkSpace;
-		}
-	}
-
-	void View::keyReleaseEvent(QKeyEvent* event)
-	{
-		if (event->key() == Qt::Key_Space)
-			modKey = mkNone;
-	}
-
-	void View::onLButtonDown(const int flags, const QPoint point)
-	{
-		pressedPoint = point;
-
-		if (flags & Qt::ControlModifier)
-			curAction = caMove;
-		else if (modKey == mkSpace)
-		{
-			curAction = caRotate;
-			view->StartRotation(point.x(), point.y());
-		}
-		else if (flags & Qt::ShiftModifier)
-		{
-			model->getContext()->ShiftSelect();
-
-			Q_EMIT selectionChanged();
-		}
-		else
-		{
-			model->getContext()->Select();
-
-			Q_EMIT selectionChanged();
-
-			selectHook();
-
-			curAction = caRectSelect;
-
-			if (!rectBand)
-				rectBand = new QRubberBand(QRubberBand::Rectangle, this);
-			rectBand->setGeometry(QRect(pressedPoint, QSize()));
-			rectBand->show();
-		}
-	}
-
-	void View::onRButtonDown(const int, const QPoint point)
-	{
-		pressedPoint = point;
-	}
-
-	void View::onMButtonDown(const int, const QPoint point)
-	{
-		pressedPoint = point;
-	}
-
-	void View::selectHook()
+	/*void View::selectHook()
 	{
 		boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
 		if (shapes->Length() == 1)

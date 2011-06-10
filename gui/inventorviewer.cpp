@@ -44,6 +44,8 @@ namespace Gui
 		eventCallbacker->ref();
 		eventCallbacker->addEventCallback(SoEvent::getClassTypeId(),
 			&InventorViewer::eventCallback, this);
+
+		viewerEvents.reset(new ViewerEvents());
 	}
 
 	InventorViewer::~InventorViewer()
@@ -54,6 +56,11 @@ namespace Gui
 	void InventorViewer::setCameraOrientation(const SbRotation& rotation)
 	{
 		getCamera()->orientation.setValue(rotation);
+	}
+
+	const ViewerEvents* InventorViewer::getEventObject() const
+	{
+		return viewerEvents.get();
 	}
 
 	void InventorViewer::setInteractiveView(InteractiveView* view)
@@ -113,10 +120,12 @@ namespace Gui
 
 	void InventorViewer::selectionHandler(SoPath* path)
 	{
+		Q_EMIT viewerEvents->pathSelected(path);
 	}
 
 	void InventorViewer::deselectionHandler(SoPath* path)
 	{
+		Q_EMIT viewerEvents->pathDeselected(path);
 	}
 
 }

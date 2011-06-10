@@ -61,6 +61,7 @@ SET(HEADERS
 	gui/mainwindow.h
 	gui/model.h
 	gui/view.h
+	gui/inventorviewer.h
 	gui/widget/createprimitivewidget.h
 	gui/widget/pointsettingswidget.h
 	gui/widget/positionsettingswidget.h

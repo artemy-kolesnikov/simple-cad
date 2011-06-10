@@ -86,22 +86,26 @@ namespace Gui
 			topoIt->second->unref();*/
 	}
 
-	TopoDS_Shape ViewProvider::getTopoShape(const ViewerShape* shape) const
+	bool ViewProvider::getTopoShape(const ViewerShape* viewerShape, TopoDS_Shape& topoShape) const
 	{
-		std::map<const ViewerShape*, TopoDS_Shape>::const_iterator it = viewerShapeMap.find(shape);
+		bool res = false;
+		std::map<const ViewerShape*, TopoDS_Shape>::const_iterator it = viewerShapeMap.find(viewerShape);
 		if (it != viewerShapeMap.end())
-			return it->second;
+		{
+			topoShape = it->second;
+			res = true;
+		}
 
-		return TopoDS_Shape();
+		return res;
 	}
 
-	const ViewerShape* ViewProvider::getViewerShape(const TopoDS_Shape& shape) const
+	bool ViewProvider::getViewerShape(const TopoDS_Shape& topoShape, const ViewerShape* viewerShape) const
 	{
-		TopoShapeList::const_iterator it = findViewerShape(shape);
+		TopoShapeList::const_iterator it = findViewerShape(topoShape);
 		if (it != topoShapeList.end())
-			return it->second;
+			viewerShape = it->second;
 
-		return 0;
+		return (viewerShape != 0);
 	}
 
 	void ViewProvider::display(ViewerShape* shape)
