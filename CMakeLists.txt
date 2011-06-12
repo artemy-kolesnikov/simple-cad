@@ -30,11 +30,15 @@ SET(SOURCES
 	gui/controller.cpp
 	gui/command/createprimitivecommand.cpp
 	gui/command/createsketchcommand.cpp
+	gui/command/removecommand.cpp
+	gui/command/boolcommand.cpp
 	gui/interactiveview.cpp
 	gui/inventorviewer.cpp
 	gui/mainwindow.cpp
 	gui/model.cpp
 	gui/view.cpp
+	gui/shapemodel.cpp
+	gui/shape.cpp
 	gui/viewprovider.cpp
 	gui/viewershape.cpp
 	gui/widget/createprimitivewidget.cpp
@@ -42,6 +46,7 @@ SET(SOURCES
 	gui/widget/positionsettingswidget.cpp
 	gui/widget/propertieswidget.cpp
 	gui/widget/widgetdialog.cpp
+	gui/widget/booloperationwidget.cpp
 	main.cpp
 	sketcher/gui/sketcherview.cpp
 	sketcher/mod/primitive2d.cpp
@@ -61,12 +66,14 @@ SET(HEADERS
 	gui/mainwindow.h
 	gui/model.h
 	gui/view.h
+	gui/shapemodel.h
 	gui/inventorviewer.h
 	gui/widget/createprimitivewidget.h
 	gui/widget/pointsettingswidget.h
 	gui/widget/positionsettingswidget.h
 	gui/widget/propertieswidget.h
 	gui/widget/widgetdialog.h
+	gui/widget/booloperationwidget.h
 	sketcher/mod/primitive2d.h
 	sketcher/gui/sketcherview.h
 )
@@ -124,7 +131,7 @@ set (base_directory .)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE}
 	${QT_QTOPENGL_INCLUDE_DIR} ${base_directory} ${base_directory}/gui
-	${base_directory}/gui/widget ${base_directory}/operation
+	${base_directory}/gui/widget
 	${base_directory}/common ${base_directory}/action
 	${base_directory}/sketcher/gui ${base_directory}/sketcher/mod ${base_directory}/gui/command
 	${base_directory}/sketcher/command ${base_directory}/sketcher)

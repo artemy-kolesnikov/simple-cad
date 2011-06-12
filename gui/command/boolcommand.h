@@ -14,45 +14,38 @@
  * GNU General Public License for more details.
  */
 
-#ifndef VIEWER_SHAPE_HEADER
-#define VIEWER_SHAPE_HEADER
+#ifndef BOOL_COMMAND_HEADER
+#define BOOL_COMMAND_HEADER
 
+#include <command.h>
 #include <QString>
-
-#include "viewprovider.h"
-
-#include <shape.h>
-
-class SoGroup;
 
 namespace Gui
 {
 
-	class ViewerShape
+	class Model;
+
+	class BooleanCommand : public Common::Command
 	{
-		friend class ViewProvider;
 	public:
-		ViewerShape(QString name, Shape shape);
-		~ViewerShape();
+		enum OperationType
+		{
+			Fuse,
+			Common,
+			Cut
+		};
 
-		QString getName() const;
-		Shape getShape() const;
+		QString getOperationName() const;
+		static QString getOperationNameByType(OperationType type);
+
+		BooleanCommand(Model& model, OperationType type);
+		virtual void execute();
 
 	private:
-		void computeShape();
-
-		SoGroup* getSoGroup() const;
-
-	private:
-		Shape shape;
-		QString name;
-		SoGroup* rootGroup;
-		SoGroup* faces;
-		SoGroup* edges;
-		SoGroup* vertices;
+		Model& model;
+		OperationType type;
 	};
-
 }
 
-#endif // VIEWER_SHAPE_HEADER
+#endif // BOOL_COMMAND_HEADER
 

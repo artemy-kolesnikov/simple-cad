@@ -18,19 +18,18 @@
 #define MODEL_HEADER
 
 #include <QObject>
-#include <QStringList>
-
-#include <gp_Pnt.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
+#include <QList>
 
 #include <list>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
-#include "error.h"
+#include <shape.h>
 
 namespace Gui
 {
+
+	class ShapeModel;
 
 	/**
 	 * Keeps loaded CAD model
@@ -41,17 +40,22 @@ namespace Gui
 
 	public:
 		Model(QObject* parent = 0);
+		~Model();
 
 		QString getFileName() const;
 
-		const TopTools_HSequenceOfShape& getShapes() const;
+		const QList<Shape>& getShapes() const;
 
-		void removeShape(const TopoDS_Shape& shape);
-		void addShape(const TopoDS_Shape& shape);
+		void removeShape(const Shape& shape);
+		void addShape(const Shape& shape);
+
+		ShapeModel* getQModel() const;
+
+		void test();
 
 	Q_SIGNALS:
-		void shapeAdded(const TopoDS_Shape& shape);
-		void shapeRemoved(const TopoDS_Shape& shape);
+		void shapeAdded(const Shape& shape);
+		void shapeRemoved(const Shape& shape);
 		void fileNameChanged(QString& newFileName);
 
 	public Q_SLOTS:
@@ -61,7 +65,9 @@ namespace Gui
 	private:
 		QString fileName;
 
-		Handle(TopTools_HSequenceOfShape) shapeList;
+		QList<Shape> shapeList;
+
+		std::auto_ptr<ShapeModel> shapeModel;
 	};
 
 }

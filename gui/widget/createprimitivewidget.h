@@ -45,7 +45,7 @@ namespace Gui
 		void setType(CreatePrimitiveCommand::ObjectType type);
 		CreatePrimitiveCommand::ObjectType getType() const;
 
-		void getCreationAction(std::auto_ptr<Action::Create3dPrimitive>& action) const;
+		void getAction(std::auto_ptr<Action::Create3dPrimitive>& action) const;
 
 	private Q_SLOTS:
 		void primitiveSelectionChanged(int index);

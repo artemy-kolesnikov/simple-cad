@@ -55,23 +55,28 @@
 
 #include <exception.h>
 #include <viewprovider.h>
+#include <shapemodel.h>
 
 namespace Gui
 {
 
 	Model::Model(QObject* parent) : QObject(parent)
 	{
-		shapeList = new TopTools_HSequenceOfShape();
+		shapeModel.reset(new ShapeModel(this));
+	}
+
+	Model::~Model()
+	{
 	}
 
 	void Model::loadModel(QString& fileName)
 	{
-		FileHelper::readFile(fileName, shapeList);
+		/*FileHelper::readFile(fileName, shapeList);
 
 		if (shapeList.IsNull() || !shapeList->Length())
 			throw Common::FileException(QObject::tr("Ошибка чтения элементов"));
 
-		this->fileName = fileName;
+		this->fileName = fileName;*/
 
 		/*Q_EMIT changed();
 		Q_EMIT fileNameChanged(fileName);*/
@@ -91,9 +96,9 @@ namespace Gui
 		return fileName;
 	}
 
-	const TopTools_HSequenceOfShape& Model::getShapes() const
+	const QList<Shape>& Model::getShapes() const
 	{
-		//return *shapeList;
+		return shapeList;
 	}
 
 	/*boost::shared_ptr<AIS_SequenceOfInteractive> Model::getSelectedShapes() const
@@ -153,16 +158,35 @@ namespace Gui
 		}
 	}*/
 
-	void Model::removeShape(const TopoDS_Shape& shape)
+	void Model::removeShape(const Shape& shape)
 	{
 		// TODO: Удаление шейпа из коллекции
-		//context->Erase(shape);
-		Q_EMIT shapeRemoved(shape);
+		int index = shapeList.indexOf(shape);
+		if (index != -1)
+		{
+			Q_EMIT shapeRemoved(shape);
+			shapeList.removeAt(index);
+		}
 	}
 
-	void Model::addShape(const TopoDS_Shape& shape)
+	void Model::addShape(const Shape& shape)
 	{
+		shapeList.push_back(shape);
 		Q_EMIT shapeAdded(shape);
+	}
+
+	ShapeModel* Model::getQModel() const
+	{
+		return shapeModel.get();
+	}
+
+	void Model::test()
+	{
+		TopoDS_Shape shape1 = shapeList.at(0).getShape();
+		TopoDS_Shape shape2 = shapeList.at(1).getShape();
+
+		BRepAlgoAPI_Fuse fuse(shape1, shape2);
+		TopoDS_Shape shape = fuse.Shape();
 	}
 
 }

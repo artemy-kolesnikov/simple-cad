@@ -186,7 +186,7 @@ namespace Gui
 		return new Action::CreateTorus(axis, radius1, radius2, angle, 0, 0);
 	}
 
-	void CreatePrimitiveWidget::getCreationAction(std::auto_ptr<Action::Create3dPrimitive>& action) const
+	void CreatePrimitiveWidget::getAction(std::auto_ptr<Action::Create3dPrimitive>& action) const
 	{
 		switch (type)
 		{

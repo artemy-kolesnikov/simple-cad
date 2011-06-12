@@ -43,8 +43,10 @@
 #include <Inventor/nodes/SoGroup.h>
 #include <Inventor/nodes/SoSeparator.h>
 #include <Inventor/nodes/SoSelection.h>
+#include <Inventor/actions/SoSearchAction.h>
 
 #include <commandmessage.h>
+#include <shape.h>
 #include "viewprovider.h"
 
 namespace Gui
@@ -52,7 +54,7 @@ namespace Gui
 
 	View::View(QWidget* parent) : QWidget(parent),
 		model(0), curAction(caNone),
-		modKey(mkNone)
+		modKey(mkNone), selectedShape(0)
 	{
 		createUI();
 	}
@@ -83,10 +85,10 @@ namespace Gui
 	{
 		this->model = model;
 
-		connect(model, SIGNAL(shapeAdded(const TopoDS_Shape&)),
-			this, SLOT(shapeAdded(const TopoDS_Shape&)));
-		connect(model, SIGNAL(shapeRemoved(const TopoDS_Shape&)),
-			this, SLOT(shapeRemoved(const TopoDS_Shape&)));
+		connect(model, SIGNAL(shapeAdded(const Shape&)),
+			this, SLOT(shapeAdded(const Shape&)));
+		connect(model, SIGNAL(shapeRemoved(const Shape&)),
+			this, SLOT(shapeRemoved(const Shape&)));
 	}
 
 	Model* View::getModel() const
@@ -105,6 +107,11 @@ namespace Gui
 		Sketcher::CommandMessage* message = dynamic_cast<Sketcher::CommandMessage*>(msg);
 		if (message && interactiveView.get())
 			interactiveView->receive(message);
+	}
+
+	const ViewerShape* View::getSelectedShape() const
+	{
+		return selectedShape;
 	}
 
 	void View::viewFront()
@@ -162,7 +169,7 @@ namespace Gui
 		//view->SetFront();
 	}
 
-	void View::shapeAdded(const TopoDS_Shape& shape)
+	void View::shapeAdded(const Shape& shape)
 	{
 		/*SoGroup* faces = new SoGroup();
 		viewProvider.computeFaces(faces, shape, 1);
@@ -173,8 +180,14 @@ namespace Gui
 		inventorViewer->viewAll();
 	}
 
-	void View::shapeRemoved(const TopoDS_Shape& shape)
+	void View::shapeRemoved(const Shape& shape)
 	{
+		const ViewerShape* viewerShape = 0;
+		viewProvider->getViewerShape(shape, viewerShape);
+
+		assert(viewerShape);
+
+		viewProvider->remove(viewerShape);
 	}
 
 	void View::pathSelected(SoPath* path)
@@ -186,16 +199,22 @@ namespace Gui
 
         if (SoGroup::getClassTypeId() == node->getTypeId())
 		{
-			TopoDS_Shape shape;
-			const ViewerShape* viewerShape = 0;
-			//if (viewProvider->getViewerShape(shape
-			qDebug() << "Path selected";
+			/*SoSearchAction sa;
+			sa.setNode(node);
+			sa.setInterest(SoSearchAction::FIRST);
+			sa.apply(inventorViewer->getRootNode());
+			SoPath* nodePath = sa.getPath();*/
+
+			viewProvider->getViewerShape(static_cast<SoGroup*>(node), selectedShape);
+
+			assert(selectedShape);
+
+			Q_EMIT selectionChanged();
 		}
 	}
 
 	void View::pathDeselected(SoPath* path)
 	{
-		qDebug() << "Path deselected";
 	}
 
 	/*void View::selectHook()

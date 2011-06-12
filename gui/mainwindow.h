@@ -100,6 +100,10 @@ namespace Gui
 		void sketchArc();
 		void sketchNurbs();
 
+		void removeShape();
+
+		void booleanOperation();
+
 	private:
 		void createUI();
 		void createDockWidget();
@@ -154,6 +158,8 @@ namespace Gui
 		QAction* acSelectEdge;
 		QAction* acSelectFace;
 		QAction* acSelectSolid;*/
+
+		QAction* acRemove;
 
 		QMap<QWidget*, Model*> windowModelMap;
 

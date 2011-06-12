@@ -10,7 +10,7 @@
 namespace Gui
 {
 
-	ViewerShape::ViewerShape(QString name, TopoDS_Shape shape) :
+	ViewerShape::ViewerShape(QString name, Shape shape) :
 		name(name), shape(shape)
 	{
 		rootGroup = new SoGroup();
@@ -37,7 +37,7 @@ namespace Gui
 		return rootGroup;
 	}
 
-	TopoDS_Shape ViewerShape::getShape() const
+	Shape ViewerShape::getShape() const
 	{
 		return shape;
 	}
@@ -45,30 +45,30 @@ namespace Gui
 	void ViewerShape::computeShape()
 	{
 		Bnd_Box bounds;
-		BRepBndLib::Add(shape, bounds);
+		BRepBndLib::Add(shape.getShape(), bounds);
 		bounds.SetGap(0.0);
 		Standard_Real xMin, yMin, zMin, xMax, yMax, zMax;
 		bounds.Get(xMin, yMin, zMin, xMax, yMax, zMax);
 		Standard_Real deflection = ((xMax-xMin)+(yMax-yMin)+(zMax-zMin))/300.0 *
 			0.2;
-		BRepMesh::Mesh(shape,deflection);
+		BRepMesh::Mesh(shape.getShape(), deflection);
 
 		faces = new SoGroup();
-		faces->ref();
+		//faces->ref();
 
-		ViewProvider::computeFaces(faces, shape, deflection);
+		ViewProvider::computeFaces(faces, shape.getShape(), deflection);
 
 		rootGroup->addChild(faces);
 
 		edges = new SoGroup();
-		edges->ref();
-		ViewProvider::computeEdges(edges, shape);
+		//edges->ref();
+		ViewProvider::computeEdges(edges, shape.getShape());
 
 		rootGroup->addChild(edges);
 
 		vertices = new SoGroup();
-		vertices->ref();
-		ViewProvider::computeVertices(vertices, shape);
+		//vertices->ref();
+		ViewProvider::computeVertices(vertices, shape.getShape());
 
 		rootGroup->addChild(vertices);
 	}

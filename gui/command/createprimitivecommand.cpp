@@ -22,6 +22,8 @@
 #include <mainwindow.h>
 #include <model.h>
 #include <widgetdialog.h>
+#include <shape.h>
+#include <TopoDS_Shape.hxx>
 
 namespace Gui
 {
@@ -37,9 +39,10 @@ namespace Gui
 		if (dlg->exec() == QDialog::Accepted)
 		{
 			std::auto_ptr<Action::Create3dPrimitive> createAction;
-			settingsWidget->getCreationAction(createAction);
+			settingsWidget->getAction(createAction);
 			createAction->execute();
-			model.addShape(createAction->getShape());
+			TopoDS_Shape topoShape = createAction->getShape();
+			model.addShape(Shape(topoShape, QObject::tr("Shape")));
 		}
 	}
 

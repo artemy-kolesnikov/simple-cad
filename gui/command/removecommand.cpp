@@ -14,45 +14,23 @@
  * GNU General Public License for more details.
  */
 
-#ifndef VIEWER_SHAPE_HEADER
-#define VIEWER_SHAPE_HEADER
+#include "removecommand.h"
 
-#include <QString>
-
-#include "viewprovider.h"
-
-#include <shape.h>
-
-class SoGroup;
+#include <model.h>
+#include <viewershape.h>
 
 namespace Gui
 {
 
-	class ViewerShape
+	RemoveCommand::RemoveCommand(Model& model, const ViewerShape& shape) :
+		model(model), shape(shape)
 	{
-		friend class ViewProvider;
-	public:
-		ViewerShape(QString name, Shape shape);
-		~ViewerShape();
+	}
 
-		QString getName() const;
-		Shape getShape() const;
-
-	private:
-		void computeShape();
-
-		SoGroup* getSoGroup() const;
-
-	private:
-		Shape shape;
-		QString name;
-		SoGroup* rootGroup;
-		SoGroup* faces;
-		SoGroup* edges;
-		SoGroup* vertices;
-	};
+	void RemoveCommand::execute()
+	{
+		model.removeShape(shape.getShape());
+	}
 
 }
-
-#endif // VIEWER_SHAPE_HEADER
 

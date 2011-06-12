@@ -50,9 +50,12 @@
 
 #include <createprimitivecommand.h>
 #include <createsketchcommand.h>
+#include <removecommand.h>
 #include <commandmessage.h>
 #include <sendmessagecommand.h>
 #include <sketchcommon.h>
+#include <shapemodel.h>
+#include <boolcommand.h>
 
 namespace Gui
 {
@@ -286,6 +289,15 @@ namespace Gui
 		QAction* acSketch = new QAction(tr("Эскиз"), this);
 		connect(acSketch, SIGNAL(triggered()), this, SLOT(createSketch()));
 		creationMenu->addAction(acSketch);
+
+		acRemove = new QAction(tr("Удалить"), this);
+		connect(acRemove, SIGNAL(triggered()), this, SLOT(removeShape()));
+		actionMenu->addAction(acRemove);
+		acRemove->setEnabled(false);
+
+		QAction* acBoolean = new QAction(tr("Булевы операции"), this);
+		connect(acBoolean, SIGNAL(triggered()), this, SLOT(booleanOperation()));
+		operationMenu->addAction(acBoolean);
 	}
 
 	void MainWindow::createViewActions()
@@ -461,7 +473,7 @@ namespace Gui
 		}
 
 		currentChild = qobject_cast<ChildWindow*>(window);
-		//shapesTreeView->setModel(currentChild->getShapeModel());
+		//shapesTreeView->setModel(currentModel().getQModel());
 
 		connect(currentChild->getView().getModel(), SIGNAL(changed()),
 			this, SLOT(modelChanged()));
@@ -490,6 +502,9 @@ namespace Gui
 
 	void MainWindow::viewSelectionChanged()
 	{
+		View& view = currentView();
+		acRemove->setEnabled(view.getSelectedShape() != 0);
+
 		/*ChildWindow* window = currentChildWindow();
 		if (!window)
 			return;
@@ -762,6 +777,23 @@ namespace Gui
 		CommandMessage* msg = new CommandMessage(CommandMessage::CreateNurbs);
 		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
 		controller->execCommand(cmd);*/
+	}
+
+	void MainWindow::removeShape()
+	{
+		View& view = currentView();
+		const ViewerShape* shape = view.getSelectedShape();
+		Model& model = currentModel();
+		RemoveCommand* cmd = new RemoveCommand(model, *shape);
+		controller->execCommand(cmd);
+	}
+
+	void MainWindow::booleanOperation()
+	{
+		Model& model = currentModel();
+		//model.test();
+		BooleanCommand* cmd = new BooleanCommand(model, BooleanCommand::Fuse);
+		controller->execCommand(cmd);
 	}
 
 }

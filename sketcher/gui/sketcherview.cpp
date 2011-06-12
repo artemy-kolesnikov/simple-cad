@@ -147,7 +147,7 @@ namespace Sketcher
 
 		planeProjector.reset(new SbPlaneProjector());
 
-		drawGrid();
+		//drawGrid();
 
 		boxManip = new SoTabBoxManip();
 		boxManip->ref();

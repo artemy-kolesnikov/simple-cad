@@ -26,7 +26,6 @@
 #include <messagereceiver.h>
 
 class QFocusEvent;
-class TopoDS_Shape;
 class SoPath;
 
 namespace Gui
@@ -35,6 +34,8 @@ namespace Gui
 	class InteractiveView;
 	class Model;
 	class ViewProvider;
+	class Shape;
+	class ViewerShape;
 
 	/**
 	 * Display loaded model
@@ -68,6 +69,8 @@ namespace Gui
 
 		virtual void receive(Common::Message* msg);
 
+		const ViewerShape* getSelectedShape() const;
+
 	Q_SIGNALS:
 		void selectionChanged();
 
@@ -81,8 +84,8 @@ namespace Gui
 		void viewAll();
 		void viewAxometric();
 		void viewDatumPlane();
-		void shapeAdded(const TopoDS_Shape& shape);
-		void shapeRemoved(const TopoDS_Shape& shape);
+		void shapeAdded(const Shape& shape);
+		void shapeRemoved(const Shape& shape);
 		void pathSelected(SoPath* path);
 		void pathDeselected(SoPath* path);
 
@@ -106,6 +109,8 @@ namespace Gui
 		std::auto_ptr<InteractiveView> interactiveView;
 
 		std::auto_ptr<ViewProvider> viewProvider;
+
+		const ViewerShape* selectedShape;
 	};
 
 }
