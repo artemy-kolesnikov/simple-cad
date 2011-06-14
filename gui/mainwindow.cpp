@@ -259,7 +259,7 @@ namespace Gui
 		primitivesMenu->addAction(acCylinder);
 		mainToolBar->addAction(acCylinder);
 
-		QAction* acSphere = new QAction(QIcon(":/gui/icons/spere.svg"), tr("Сфера"), this);
+		QAction* acSphere = new QAction(QIcon(":/gui/icons/sphere.svg"), tr("Сфера"), this);
 		connect(acSphere, SIGNAL(triggered()), this, SLOT(createSphere()));
 		primitivesMenu->addAction(acSphere);
 		mainToolBar->addAction(acSphere);
@@ -274,12 +274,12 @@ namespace Gui
 		primitivesMenu->addAction(acTorus);
 		mainToolBar->addAction(acTorus);
 
-		QAction* acPlane = new QAction(QIcon(":/gui/icons/plane.svg"), tr("Плоскость"), this);
+		QAction* acPlane = new QAction(QIcon(":/gui/icons/plane.png"), tr("Плоскость"), this);
 		connect(acPlane, SIGNAL(triggered()), this, SLOT(createPlane()));
 		primitivesMenu->addAction(acPlane);
 		mainToolBar->addAction(acPlane);
 
-		QAction* acEllipsoid = new QAction(QIcon(":/gui/icons/ellipsoid.svg"), tr("Еллипсоид"), this);
+		QAction* acEllipsoid = new QAction(QIcon(":/gui/icons/ellipsoid.png"), tr("Еллипсоид"), this);
 		connect(acEllipsoid, SIGNAL(triggered()), this, SLOT(createEllipsoid()));
 		primitivesMenu->addAction(acEllipsoid);
 		mainToolBar->addAction(acEllipsoid);
@@ -367,22 +367,22 @@ namespace Gui
 
 	void MainWindow::createSketcherAction()
 	{
-		QAction* acPolyline = new QAction(QIcon(":/gui/icons/sketch_polyline.png"), tr("Ломанаия линия"), this);
+		QAction* acPolyline = new QAction(QIcon(":/gui/icons/polyline.png"), tr("Ломанаия линия"), this);
 		connect(acPolyline, SIGNAL(triggered()), this, SLOT(sketchPolyline()));
 		sketcherMenu->addAction(acPolyline);
 		mainToolBar->addAction(acPolyline);
 
-		QAction* acRectangle = new QAction(QIcon(":/gui/icons/sketch_rectangle.png"), tr("Прямоугольник"), this);
+		QAction* acRectangle = new QAction(QIcon(":/gui/icons/rectangle.png"), tr("Прямоугольник"), this);
 		connect(acRectangle, SIGNAL(triggered()), this, SLOT(sketchRectangle()));
 		sketcherMenu->addAction(acRectangle);
 		mainToolBar->addAction(acRectangle);
 
-		QAction* acCircle = new QAction(QIcon(":/gui/icons/sketch_circle.png"), tr("Окружность"), this);
+		QAction* acCircle = new QAction(QIcon(":/gui/icons/circle.png"), tr("Окружность"), this);
 		connect(acCircle, SIGNAL(triggered()), this, SLOT(sketchCircle()));
 		sketcherMenu->addAction(acCircle);
 		mainToolBar->addAction(acCircle);
 
-		QAction* acArc = new QAction(QIcon(":/gui/icons/sketch_arc.png"), tr("Дуга"), this);
+		QAction* acArc = new QAction(QIcon(":/gui/icons/arc.png"), tr("Дуга"), this);
 		connect(acArc, SIGNAL(triggered()), this, SLOT(sketchArc()));
 		sketcherMenu->addAction(acArc);
 		mainToolBar->addAction(acArc);

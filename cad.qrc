@@ -18,15 +18,17 @@
 		<file>gui/icons/box.svg</file>
 		<file>gui/icons/cone.svg</file>
 		<file>gui/icons/cylinder.svg</file>
-		<file>gui/icons/sphere.svg</file>
 		<file>gui/icons/torus.svg</file>
+		<file>gui/icons/ellipsoid.png</file>
+		<file>gui/icons/plane.png</file>
+		<file>gui/icons/sphere.svg</file>
 		<file>gui/icons/new_document.svg</file>
 		<file>gui/icons/open_document.svg</file>
-		<file>gui/icons/sketch_circle.png</file>
-		<file>gui/icons/sketch_line.png</file>
-		<file>gui/icons/sketch_polyline.png</file>
-		<file>gui/icons/sketch_rectangle.png</file>
-		<file>gui/icons/sketch_arc.png</file>
+		<file>gui/icons/circle.png</file>
+		<file>gui/icons/line.png</file>
+		<file>gui/icons/polyline.png</file>
+		<file>gui/icons/rectangle.png</file>
+		<file>gui/icons/arc.png</file>
 		<file>gui/icons/bool_common.svg</file>
 		<file>gui/icons/bool_cut.svg</file>
 		<file>gui/icons/bool_fuse.svg</file>
