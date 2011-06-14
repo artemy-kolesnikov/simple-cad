@@ -194,7 +194,7 @@ namespace Gui
 
 	void ShapeModel::reload()
 	{
-		const QList<Shape>& shapeList = model->getShapes();
+		/*const QList<Shape>& shapeList = model->getShapes();
 		Shape shape;
 		foreach(shape, shapeList)
 		{
@@ -205,7 +205,7 @@ namespace Gui
 			rootItem->appendChild(item);
 		}
 
-		reset();
+		reset();*/
 	}
 
 	void ShapeModel::shapeAdded(const Shape& shape)

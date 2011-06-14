@@ -17,6 +17,8 @@
 #ifndef COMMAND_HEADER
 #define COMMAND_HEADER
 
+#include <QString>
+
 namespace Common
 {
 
@@ -25,6 +27,7 @@ namespace Common
 	public:
 		virtual ~Command() {}
 		virtual void execute() = 0;
+		virtual QString getName() const = 0;
 	};
 
 }

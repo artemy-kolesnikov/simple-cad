@@ -31,6 +31,8 @@ class QRadioButton;
 namespace Gui
 {
 
+	class ShapeListWidget;
+
 	class BoolOperationWidget : public QWidget
 	{
 		Q_OBJECT
@@ -45,13 +47,15 @@ namespace Gui
 
 	private:
 		BooleanCommand::OperationType type;
-		const QList<Shape>& shapeList;
 
-		QComboBox* cbShape1;
-		QComboBox* cbShape2;
+		ShapeListWidget* shapeList1;
+		ShapeListWidget* shapeList2;
+
 		QRadioButton* rbFuse;
 		QRadioButton* rbCommon;
 		QRadioButton* rbCut;
+
+		const QList<Shape>& shapeList;
 	};
 
 }

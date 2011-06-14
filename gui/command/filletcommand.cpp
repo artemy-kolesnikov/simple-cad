@@ -14,9 +14,9 @@
  * GNU General Public License for more details.
  */
 
-#include "boolcommand.h"
+#include "filletcommand.h"
 
-#include <booloperationwidget.h>
+#include <filletoperationwidget.h>
 #include <cadapplication.h>
 #include <mainwindow.h>
 #include <model.h>
@@ -25,21 +25,21 @@
 namespace Gui
 {
 
-	BooleanCommand::BooleanCommand(Model& model, OperationType type) :
-		model(model), type(type)
+	FilletCommand::FilletCommand(Model& model, const ViewerShape& shape) :
+		model(model), shape(shape)
 	{
 	}
 
-	void BooleanCommand::execute()
+	void FilletCommand::execute()
 	{
 		MainWindow* win = CADApplication::getMainWindow();
 
-		BoolOperationWidget* operationWidget = new BoolOperationWidget(model.getShapes(), type, win);
+		FilletOperationWidget* operationWidget = new FilletOperationWidget(model.getShapes(), win);
 		WidgetDialog* dlg = new WidgetDialog(win);
 		dlg->setCentralWidget(operationWidget);
 		if (dlg->exec() == QDialog::Accepted)
 		{
-			std::auto_ptr<Action::Boolean> action;
+			std::auto_ptr<Action::CombineAction> action;
 			operationWidget->getAction(action);
 			action->execute();
 
@@ -55,19 +55,10 @@ namespace Gui
 		}
 	}
 
-	QString BooleanCommand::getName() const
+	QString FilletCommand::getName() const
 	{
-		return getOperationNameByType(type);
-	}
-
-	QString BooleanCommand::getOperationNameByType(OperationType type)
-	{
-		if (type == Fuse)
-			return QObject::tr("Объединение");
-		else if (type == Common)
-			return QObject::tr("Пересечение");
-		else if (type == Cut)
-			return QObject::tr("Вычитание");
+		return QObject::tr("Скругление");
 	}
 
 }
+

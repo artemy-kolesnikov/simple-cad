@@ -22,8 +22,6 @@
 #include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoSelection.h>
 
-#include <GL/gl.h>
-
 namespace Gui
 {
 

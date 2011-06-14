@@ -14,27 +14,36 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef SHAPE_LIST_WIDGET_HEADER
+#define SHAPE_LIST_WIDGET_HEADER
 
-#include <sketcherview.h>
-#include <view.h>
+#include <QWidget>
+#include <QList>
+
+#include <shape.h>
+
+class QComboBox;
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
+	class ShapeListWidget : public QWidget
 	{
-		using namespace Sketcher;
+		Q_OBJECT
+	public:
+		ShapeListWidget(const QList<Shape>& shapeList, QWidget* parent = 0);
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
+		const Shape& getShape() const;
 
-	QString CreateSketchCommand::getName() const
-	{
-		return QObject::tr("Создать эскиз");
-	}
+	private:
+		void createUI();
+
+	private:
+		const QList<Shape>& shapeList;
+		QComboBox* cbShape;
+	};
 
 }
+
+#endif // SHAPE_LIST_WIDGET_HEADER
 

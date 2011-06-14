@@ -172,9 +172,10 @@ namespace Gui
 	Action::Create3dPrimitive* CreatePrimitiveWidget::createEllipsoidAction() const
 	{
 		gp_Ax3 axis(getPoint(), getDir());
-		float height = getHeight();
-		float width = getWidth();
-		return new Action::CreatePlane(axis, height, width);
+		float radius1 = getRadius1();
+		float radius2 = getRadius2();
+		float angle = getAngle();
+		return new Action::CreateEllipsoid(axis, radius1, radius2, angle, 0, 0);
 	}
 
 	Action::Create3dPrimitive* CreatePrimitiveWidget::createTorusAction() const

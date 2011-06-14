@@ -32,5 +32,9 @@ namespace Gui
 		model.removeShape(shape.getShape());
 	}
 
+	QString RemoveCommand::getName() const
+	{
+		return QObject::tr("Удалить");
+	}
 }
 

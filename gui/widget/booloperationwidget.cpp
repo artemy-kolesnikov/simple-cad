@@ -19,7 +19,6 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
-#include <QComboBox>
 #include <QRadioButton>
 
 #include <TopoDS_Shape.hxx>
@@ -27,6 +26,8 @@
 #include <fuse.h>
 #include <common.h>
 #include <cut.h>
+
+#include "shapelistwidget.h"
 
 namespace Gui
 {
@@ -39,8 +40,8 @@ namespace Gui
 
 	void BoolOperationWidget::getAction(std::auto_ptr<Action::Boolean>& action) const
 	{
-		TopoDS_Shape shape1 = shapeList.at(cbShape1->currentIndex()).getShape();
-		TopoDS_Shape shape2 = shapeList.at(cbShape2->currentIndex()).getShape();
+		TopoDS_Shape shape1 = shapeList1->getShape().getShape();
+		TopoDS_Shape shape2 = shapeList2->getShape().getShape();
 
 		if (rbFuse->isChecked())
 			action.reset(new Action::Fuse(shape1, shape2));
@@ -73,21 +74,14 @@ namespace Gui
 		QLabel* lbShape = new QLabel(tr("Фигура"), this);
 		layout->addWidget(lbShape);
 
-		QGridLayout* shapeLayout = new QGridLayout();
+		QVBoxLayout* shapeLayout = new QVBoxLayout();
 		layout->addLayout(shapeLayout);
 
-		cbShape1 = new QComboBox(this);
-		shapeLayout->addWidget(cbShape1);
+		shapeList1 = new ShapeListWidget(shapeList, this);
+		shapeLayout->addWidget(shapeList1);
 
-		cbShape2 = new QComboBox(this);
-		shapeLayout->addWidget(cbShape2);
-
-		Shape shape;
-		foreach(shape, shapeList)
-		{
-			cbShape1->addItem(shape.getName());
-			cbShape2->addItem(shape.getName());
-		}
+		shapeList2 = new ShapeListWidget(shapeList, this);
+		shapeLayout->addWidget(shapeList2);
 	}
 
 }

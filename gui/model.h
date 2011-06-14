@@ -51,8 +51,6 @@ namespace Gui
 
 		ShapeModel* getQModel() const;
 
-		void test();
-
 	Q_SIGNALS:
 		void shapeAdded(const Shape& shape);
 		void shapeRemoved(const Shape& shape);
@@ -68,6 +66,8 @@ namespace Gui
 		QList<Shape> shapeList;
 
 		std::auto_ptr<ShapeModel> shapeModel;
+
+		int nextShapeId;
 	};
 
 }

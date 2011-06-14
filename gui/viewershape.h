@@ -18,12 +18,22 @@
 #define VIEWER_SHAPE_HEADER
 
 #include <QString>
+#include <memory>
+#include <map>
+#include <TopoDS_Shape.hxx>
 
 #include "viewprovider.h"
 
 #include <shape.h>
 
 class SoGroup;
+class SoTransform;
+class SoCenterballManip;
+class SoSensor;
+class SoSelection;
+class SoSeparator;
+class SoVertexShape;
+class SoPickedPoint;
 
 namespace Gui
 {
@@ -38,10 +48,20 @@ namespace Gui
 		QString getName() const;
 		Shape getShape() const;
 
+		void setCentralBallManip() const;
+		void removeManip() const;
+
+		TopoDS_Shape getShape(const SoPickedPoint* point) const;
+
 	private:
 		void computeShape();
+		void computeEdges(SoGroup* edgeRoot, const TopoDS_Shape &shape);
+		void computeVertices(SoGroup* vertexRoot, const TopoDS_Shape &shape);
+		void computeFaces(SoGroup* faceRoot, const TopoDS_Shape &shape, double deflection);
 
 		SoGroup* getSoGroup() const;
+
+		static void transformCallback(void* userData, SoSensor* sensor);
 
 	private:
 		Shape shape;
@@ -50,6 +70,10 @@ namespace Gui
 		SoGroup* faces;
 		SoGroup* edges;
 		SoGroup* vertices;
+		SoTransform* transform;
+		SoSeparator* rootSeparator;
+
+		std::map<SoVertexShape*, TopoDS_Shape> shapeMap;
 	};
 
 }

@@ -54,10 +54,6 @@ namespace Gui
 		typedef std::list<SoShapePair> SoShapeList;
 		typedef std::list<TopoShapePair> TopoShapeList;*/
 
-		static void computeEdges(SoGroup* edgeRoot, const TopoDS_Shape &shape);
-		static void computeVertices(SoGroup* vertexRoot, const TopoDS_Shape &shape);
-		static void computeFaces(SoGroup* faceRoot, const TopoDS_Shape &shape, double deflection);
-
 	private:
 		/*template<class T1, class T2>
 		class Pair

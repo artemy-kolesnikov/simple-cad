@@ -35,8 +35,7 @@
 
 #include <gp_Pnt.hxx>
 #include <Inventor/SbPlane.h>
-
-#include <boost/shared_ptr.hpp>
+#include <cassert>
 
 #include "childwindow.h"
 #include "model.h"
@@ -56,6 +55,7 @@
 #include <sketchcommon.h>
 #include <shapemodel.h>
 #include <boolcommand.h>
+#include <filletcommand.h>
 
 namespace Gui
 {
@@ -120,11 +120,11 @@ namespace Gui
 		shapesTreeView = new QTreeView(shapesDock);
 		shapesLayout->addWidget(shapesTreeView);
 
-		propertiesWidget = new PropertiesWidget(this);
+		/*propertiesWidget = new PropertiesWidget(this);
 		shapesLayout->addWidget(propertiesWidget);
 
 		connect(propertiesWidget, SIGNAL(shadedChanged(bool)),
-			this, SLOT(setShadded(bool)));
+			this, SLOT(setShadded(bool)));*/
 	}
 
 	void MainWindow::createMenu()
@@ -291,9 +291,14 @@ namespace Gui
 		creationMenu->addAction(acSketch);
 
 		acRemove = new QAction(tr("Удалить"), this);
+		acRemove->setShortcut(Qt::Key_Delete);
 		connect(acRemove, SIGNAL(triggered()), this, SLOT(removeShape()));
 		actionMenu->addAction(acRemove);
 		acRemove->setEnabled(false);
+
+		QAction* acFillet = new QAction(tr("Скругление"), this);
+		connect(acFillet, SIGNAL(triggered()), this, SLOT(makeFillet()));
+		actionMenu->addAction(acFillet);
 
 		QAction* acBoolean = new QAction(tr("Булевы операции"), this);
 		connect(acBoolean, SIGNAL(triggered()), this, SLOT(booleanOperation()));
@@ -391,10 +396,8 @@ namespace Gui
 
 	ChildWindow& MainWindow::currentChildWindow() const
 	{
-		qDebug() << mdiArea->activeSubWindow();
-		ChildWindow* window = dynamic_cast<ChildWindow*>(mdiArea->activeSubWindow());
-		assert(window);
-		return *window;
+		assert(currentChild);
+		return *currentChild;
 	}
 
 	Model& MainWindow::currentModel() const
@@ -473,7 +476,7 @@ namespace Gui
 		}
 
 		currentChild = qobject_cast<ChildWindow*>(window);
-		//shapesTreeView->setModel(currentModel().getQModel());
+		shapesTreeView->setModel(currentModel().getQModel());
 
 		connect(currentChild->getView().getModel(), SIGNAL(changed()),
 			this, SLOT(modelChanged()));
@@ -503,7 +506,8 @@ namespace Gui
 	void MainWindow::viewSelectionChanged()
 	{
 		View& view = currentView();
-		acRemove->setEnabled(view.getSelectedShape() != 0);
+		bool enabled = view.getSelectedShape() != 0;
+		acRemove->setEnabled(enabled);
 
 		/*ChildWindow* window = currentChildWindow();
 		if (!window)
@@ -661,7 +665,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Box);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createCylinder()
@@ -669,7 +681,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Cylinder);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createSphere()
@@ -677,7 +697,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Sphere);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createCone()
@@ -685,7 +713,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Cone);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createTorus()
@@ -693,7 +729,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Torus);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createPlane()
@@ -701,7 +745,15 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Plane);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createEllipsoid()
@@ -709,14 +761,30 @@ namespace Gui
 		Model& model = currentModel();
 		CreatePrimitiveCommand* cmd = new CreatePrimitiveCommand(model,
 			CreatePrimitiveCommand::Ellipsoid);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::createSketch()
 	{
 		View& view = currentView();
 		CreateSketchCommand* cmd = new CreateSketchCommand(SbPlane(SbVec3f(0, 0, 1), 0), view);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::sketchPolyline()
@@ -728,7 +796,15 @@ namespace Gui
 
 		CommandMessage* msg = new CommandMessage(Sketcher::ptPolyline);
 		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::sketchRectangle()
@@ -740,7 +816,15 @@ namespace Gui
 
 		CommandMessage* msg = new CommandMessage(Sketcher::ptRectangle);
 		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::sketchCircle()
@@ -752,7 +836,15 @@ namespace Gui
 
 		CommandMessage* msg = new CommandMessage(Sketcher::ptCircle);
 		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::sketchArc()
@@ -764,7 +856,15 @@ namespace Gui
 
 		CommandMessage* msg = new CommandMessage(Sketcher::ptArc);
 		SendMessageCommand* cmd = new SendMessageCommand(view, msg);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::sketchNurbs()
@@ -781,19 +881,57 @@ namespace Gui
 
 	void MainWindow::removeShape()
 	{
+		if (QMessageBox::question(this, tr("Удаление объекта"),
+				tr("Удалить объект?"), QMessageBox::Yes
+				|QMessageBox::No | QMessageBox::Cancel, QMessageBox::No)
+				!= QMessageBox::Yes)
+			return;
+
 		View& view = currentView();
 		const ViewerShape* shape = view.getSelectedShape();
 		Model& model = currentModel();
 		RemoveCommand* cmd = new RemoveCommand(model, *shape);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 	void MainWindow::booleanOperation()
 	{
 		Model& model = currentModel();
-		//model.test();
 		BooleanCommand* cmd = new BooleanCommand(model, BooleanCommand::Fuse);
-		controller->execCommand(cmd);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
+	}
+
+	void MainWindow::makeFillet()
+	{
+		View& view = currentView();
+		const ViewerShape* shape = view.getSelectedShape();
+		Model& model = currentModel();
+		FilletCommand* cmd = new FilletCommand(model, *shape);
+
+		try
+		{
+			controller->execCommand(cmd);
+		}
+		catch(Common::Exception& ex)
+		{
+			QMessageBox::critical(this, tr("Ошибка"), ex.what());
+		}
 	}
 
 }

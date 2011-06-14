@@ -25,6 +25,11 @@
 #include <shape.h>
 #include <TopoDS_Shape.hxx>
 
+namespace
+{
+	const int TYPE_COUNT = 9;
+}
+
 namespace Gui
 {
 
@@ -42,25 +47,46 @@ namespace Gui
 			settingsWidget->getAction(createAction);
 			createAction->execute();
 			TopoDS_Shape topoShape = createAction->getShape();
-			model.addShape(Shape(topoShape, QObject::tr("Shape")));
+			QString objectName = getObjectNameByType(settingsWidget->getType());
+			model.addShape(Shape(topoShape, objectName));
 		}
+	}
+
+	QString CreatePrimitiveCommand::getName() const
+	{
+		return QObject::tr("Создать примитив");
 	}
 
 	QStringList CreatePrimitiveCommand::getObjectNames()
 	{
 		QStringList objectNames;
-		objectNames 
-			<< QObject::tr("Прямоугольник")
-			<< QObject::tr("Окружность")
-			<< QObject::tr("Плоскость")
-			<< QObject::tr("Брусок")
-			<< QObject::tr("Цилиндр")
-			<< QObject::tr("Конус")
-			<< QObject::tr("Сфера")
-			<< QObject::tr("Еллипс")
-			<< QObject::tr("Тор");
+		for (int i = 0; i < TYPE_COUNT; ++i)
+			objectNames << getObjectNameByType(static_cast<ObjectType>(i));
 
 		return objectNames;
+	}
+
+	QString CreatePrimitiveCommand::getObjectNameByType(CreatePrimitiveCommand::ObjectType type)
+	{
+		static QString objectTypeNames[TYPE_COUNT];
+		static bool init = false;
+
+		if (!init)
+		{
+			init = true;
+
+			objectTypeNames[0] = QObject::tr("Прямоугольник");
+			objectTypeNames[1] = QObject::tr("Окружность");
+			objectTypeNames[2] = QObject::tr("Плоскость");
+			objectTypeNames[3] = QObject::tr("Брусок");
+			objectTypeNames[4] = QObject::tr("Цилиндр");
+			objectTypeNames[5] = QObject::tr("Конус");
+			objectTypeNames[6] = QObject::tr("Сфера");
+			objectTypeNames[7] = QObject::tr("Еллипс");
+			objectTypeNames[8] = QObject::tr("Тор");
+		}
+
+		return objectTypeNames[type];
 	}
 
 }

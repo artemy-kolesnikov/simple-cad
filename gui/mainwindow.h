@@ -104,6 +104,8 @@ namespace Gui
 
 		void booleanOperation();
 
+		void makeFillet();
+
 	private:
 		void createUI();
 		void createDockWidget();

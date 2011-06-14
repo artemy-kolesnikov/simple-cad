@@ -35,7 +35,7 @@ namespace Gui
 			Cut
 		};
 
-		QString getOperationName() const;
+		virtual QString getName() const;
 		static QString getOperationNameByType(OperationType type);
 
 		BooleanCommand(Model& model, OperationType type);

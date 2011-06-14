@@ -22,6 +22,7 @@ SET(SOURCES
 	action/createrectangle.cpp
 	action/createsphere.cpp
 	action/createtorus.cpp
+	action/fillet.cpp
 	action/cut.cpp
 	action/fuse.cpp
 	filehelper.cpp
@@ -32,6 +33,7 @@ SET(SOURCES
 	gui/command/createsketchcommand.cpp
 	gui/command/removecommand.cpp
 	gui/command/boolcommand.cpp
+	gui/command/filletcommand.cpp
 	gui/interactiveview.cpp
 	gui/inventorviewer.cpp
 	gui/mainwindow.cpp
@@ -47,6 +49,8 @@ SET(SOURCES
 	gui/widget/propertieswidget.cpp
 	gui/widget/widgetdialog.cpp
 	gui/widget/booloperationwidget.cpp
+	gui/widget/shapelistwidget.cpp
+	gui/widget/filletoperationwidget.cpp
 	main.cpp
 	sketcher/gui/sketcherview.cpp
 	sketcher/mod/primitive2d.cpp
@@ -74,6 +78,8 @@ SET(HEADERS
 	gui/widget/propertieswidget.h
 	gui/widget/widgetdialog.h
 	gui/widget/booloperationwidget.h
+	gui/widget/shapelistwidget.h
+	gui/widget/filletoperationwidget.h
 	sketcher/mod/primitive2d.h
 	sketcher/gui/sketcherview.h
 )

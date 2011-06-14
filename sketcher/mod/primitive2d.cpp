@@ -40,6 +40,10 @@ namespace Sketcher
 		events.reset(new Primitive2DEvents());
 	}
 
+	Primitive2D::~Primitive2D()
+	{
+	}
+
 	void Primitive2D::handleEvents(bool handle)
 	{
 		eventsHandles = handle;

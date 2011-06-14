@@ -40,10 +40,13 @@
 #include <TopoDS_Shape.hxx>
 #include <gp_Ax3.hxx>
 
-#include <Inventor/nodes/SoGroup.h>
-#include <Inventor/nodes/SoSeparator.h>
-#include <Inventor/nodes/SoSelection.h>
 #include <Inventor/actions/SoSearchAction.h>
+#include <Inventor/nodes/SoGroup.h>
+#include <Inventor/nodes/SoSelection.h>
+#include <Inventor/nodes/SoSeparator.h>
+#include <Inventor/nodes/SoShape.h>
+#include <Inventor/nodes/SoCamera.h>
+#include <Inventor/nodes/SoLight.h>
 
 #include <commandmessage.h>
 #include <shape.h>
@@ -171,11 +174,6 @@ namespace Gui
 
 	void View::shapeAdded(const Shape& shape)
 	{
-		/*SoGroup* faces = new SoGroup();
-		viewProvider.computeFaces(faces, shape, 1);
-		SoSelection* root = inventorViewer->getRootNode();
-		root->addChild(faces);*/
-		//inventorViewer->setSceneGraph(faces);
 		viewProvider->display(new ViewerShape("", shape));
 		inventorViewer->viewAll();
 	}
@@ -188,6 +186,10 @@ namespace Gui
 		assert(viewerShape);
 
 		viewProvider->remove(viewerShape);
+
+		selectedShape = 0;
+
+		Q_EMIT selectionChanged();
 	}
 
 	void View::pathSelected(SoPath* path)
@@ -199,15 +201,11 @@ namespace Gui
 
         if (SoGroup::getClassTypeId() == node->getTypeId())
 		{
-			/*SoSearchAction sa;
-			sa.setNode(node);
-			sa.setInterest(SoSearchAction::FIRST);
-			sa.apply(inventorViewer->getRootNode());
-			SoPath* nodePath = sa.getPath();*/
-
 			viewProvider->getViewerShape(static_cast<SoGroup*>(node), selectedShape);
 
 			assert(selectedShape);
+
+			selectedShape->setCentralBallManip();
 
 			Q_EMIT selectionChanged();
 		}
@@ -215,37 +213,14 @@ namespace Gui
 
 	void View::pathDeselected(SoPath* path)
 	{
+		if (!selectedShape)
+			return;
+
+		selectedShape->removeManip();
+
+		selectedShape = 0;
+		Q_EMIT selectionChanged();
 	}
-
-	/*void View::selectHook()
-	{
-		boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getSelectedShapes();
-		if (shapes->Length() == 1)
-		{
-			TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(shapes->Value(1))->Shape();
-
-			for(TopExp_Explorer faceExplorer(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next())
-			{
-				TopoDS_Face face = TopoDS::Face(faceExplorer.Current());
-
-				Handle(Geom_Surface) surface = BRep_Tool::Surface(face);
-
-				if(surface->DynamicType() == STANDARD_TYPE(Geom_Plane))
-				{
-					Handle(Geom_Plane) plane = Handle(Geom_Plane)::DownCast(surface);
-					gp_Ax3 pos = plane->Position();
-					gp_Dir dir = pos.Direction();
-					gp_Vec vec(dir);
-
-					//gp_Vec v(gp_Pnt(2, 34, 54), gp_Pnt(45, 65, 22));
-					gp_Vec v(gp_Pnt(0, 0, 0), gp_Pnt(1, 0, 0));
-					gp_Dir d(v);
-
-					model->getContext()->CurrentViewer()->SetPrivilegedPlane(pos);
-				}
-			}
-		}
-	}*/
 
 }
 

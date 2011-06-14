@@ -51,7 +51,7 @@ namespace Sketcher
 	{
 	public:
 		Primitive2D(SketcherView& sketcherView);
-		virtual ~Primitive2D() {}
+		virtual ~Primitive2D();
 
 		void handleEvents(bool handle);
 		bool isEventsHandles() const;

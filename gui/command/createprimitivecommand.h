@@ -41,12 +41,15 @@ namespace Gui
 			Torus
 		};
 
-		static QStringList getObjectNames();
-
 		CreatePrimitiveCommand(Model& model, ObjectType type) :
 			model(model), type(type)
 		{
 		}
+
+		virtual QString getName() const;
+		static QStringList getObjectNames();
+		static QString getObjectNameByType(ObjectType type);
+
 
 		virtual void execute();
 

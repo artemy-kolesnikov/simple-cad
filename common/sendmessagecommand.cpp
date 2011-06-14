@@ -16,6 +16,8 @@
 
 #include "sendmessagecommand.h"
 
+#include <QObject>
+
 namespace Common
 {
 
@@ -27,6 +29,11 @@ namespace Common
 	void SendMessageCommand::execute()
 	{
 		receiver.receive(message);
+	}
+
+	QString SendMessageCommand::getName() const
+	{
+		return QObject::tr("Отправить сообщение");
 	}
 
 }

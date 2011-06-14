@@ -14,27 +14,32 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef FILLET_HEADER_FILE
+#define FILLET_HEADER_FILE
 
-#include <sketcherview.h>
-#include <view.h>
+#include <command.h>
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
-	{
-		using namespace Sketcher;
+	class Model;
+	class ViewerShape;
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
-
-	QString CreateSketchCommand::getName() const
+	class FilletCommand : public Common::Command
 	{
-		return QObject::tr("Создать эскиз");
-	}
+	public:
+		FilletCommand(Model& model, const ViewerShape& shape);
+
+		virtual void execute();
+
+		virtual QString getName() const;
+
+	private:
+		Model& model;
+		const ViewerShape& shape;
+	};
 
 }
+
+#endif // FILLET_HEADER_FILE
 

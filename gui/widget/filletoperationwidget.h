@@ -14,27 +14,42 @@
  * GNU General Public License for more details.
  */
 
-#include "createsketchcommand.h"
+#ifndef FILLET_OPERATION_WIDGET
+#define FILLET_OPERATION_WIDGET
 
-#include <sketcherview.h>
-#include <view.h>
+#include <QWidget>
+#include <QList>
+#include <memory>
+
+#include <shape.h>
+#include <combineaction.h>
+
+class QDoubleSpinBox;
 
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
-	{
-		using namespace Sketcher;
+	class ShapeListWidget;
 
-		SketcherView* sketcherView = new SketcherView(sketchPlane, &view);
-		view.setInteractiveView(sketcherView);
-		view.viewAll();
-	}
-
-	QString CreateSketchCommand::getName() const
+	class FilletOperationWidget : public QWidget
 	{
-		return QObject::tr("Создать эскиз");
-	}
+		Q_OBJECT
+	public:
+		FilletOperationWidget(const QList<Shape>& shapeList, QWidget* parent = 0);
+
+		void getAction(std::auto_ptr<Action::CombineAction>& action) const;
+
+	private:
+		void createUI();
+
+	private:
+		ShapeListWidget* shapeListWidget;
+		const QList<Shape>& shapeList;
+
+		QDoubleSpinBox* sbRadius;
+	};
 
 }
+
+#endif // FILLET_OPERATION_WIDGET
 
