@@ -43,28 +43,6 @@ namespace Gui
 		Controller(QObject* parent = 0);
 
 		void execCommand(Common::Command* cmd);
-
-	private Q_SLOTS:
-
-	/*public Q_SLOTS:
-		void updateView();
-		void loadModel(QString& fileName);
-		void saveModel(QString& fileName);
-		void setMaterial(Graphic3d_NameOfMaterial material);
-		void setShadded(bool shadded);
-		void createRectangle(gp_Pnt& pt, float width, float height);
-
-		void makePrism(AIS_Shape* shape, float height);
-
-	Q_SIGNALS:
-		void updateViewRequest();
-		void loadModelRequest(QString& fileName);
-		void saveModelRequest(QString& fileName);
-		void setMaterialRequest(Graphic3d_NameOfMaterial material);
-		void setShaddedRequest(bool shadded);
-		void createRectangleRequest(gp_Pnt& pt, float width, float height);
-
-		void makePrismRequest(AIS_Shape* shape, float height);*/
 	};
 
 }

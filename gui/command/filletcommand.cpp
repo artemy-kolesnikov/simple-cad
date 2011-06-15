@@ -21,6 +21,7 @@
 #include <mainwindow.h>
 #include <model.h>
 #include <widgetdialog.h>
+#include <exception.h>
 
 namespace Gui
 {
@@ -33,6 +34,9 @@ namespace Gui
 	void FilletCommand::execute()
 	{
 		MainWindow* win = CADApplication::getMainWindow();
+
+		if (model.getShapes().size() == 0)
+			throw Common::Exception(QObject::tr("Отсутствуют объекты"));
 
 		FilletOperationWidget* operationWidget = new FilletOperationWidget(model.getShapes(), win);
 		WidgetDialog* dlg = new WidgetDialog(win);

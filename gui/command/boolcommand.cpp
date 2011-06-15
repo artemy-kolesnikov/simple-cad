@@ -21,6 +21,7 @@
 #include <mainwindow.h>
 #include <model.h>
 #include <widgetdialog.h>
+#include <exception.h>
 
 namespace Gui
 {
@@ -33,6 +34,9 @@ namespace Gui
 	void BooleanCommand::execute()
 	{
 		MainWindow* win = CADApplication::getMainWindow();
+
+		if (model.getShapes().size() == 0)
+			throw Common::Exception(QObject::tr("Отсутствуют объекты"));
 
 		BoolOperationWidget* operationWidget = new BoolOperationWidget(model.getShapes(), type, win);
 		WidgetDialog* dlg = new WidgetDialog(win);

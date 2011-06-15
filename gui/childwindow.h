@@ -1,6 +1,5 @@
 /*
  * Simple CAD System
- * Based on opencascade (www.opencascade.org)
  *
  * Copyright (C) 2010 Artemy Kolesnikov <artemy.kolesnikov@gmail.com>
  *
@@ -22,7 +21,7 @@
 #include <QString>
 
 class QShapeModel;
-class QFocusEvent;
+class QCloseEvent;
 
 namespace Gui
 {
@@ -33,7 +32,7 @@ namespace Gui
 
 	/**
 	 * Child MDI window.
-	 * Keeps pointers to model, set of views and controller
+	 * Keeps pointers to view and controller
 	 */
 	class ChildWindow : public QMdiSubWindow
 	{
@@ -48,13 +47,12 @@ namespace Gui
 
 	Q_SIGNALS:
 		void selectionChanged();
+		void closed();
 
 	protected:
-		virtual void keyPressEvent(QKeyEvent*);
-		virtual void keyReleaseEvent(QKeyEvent*);
+		virtual void closeEvent(QCloseEvent* event);
 
 	private Q_SLOTS:
-		void modelChanged();
 		void modelFileNameChanged(QString& fileName);
 
 	private:

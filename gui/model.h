@@ -57,8 +57,8 @@ namespace Gui
 		void fileNameChanged(QString& newFileName);
 
 	public Q_SLOTS:
-		void loadModel(QString& fileName);
-		void saveModel(QString& fileName);
+		void load(QString& fileName);
+		void save(QString& fileName);
 
 	private:
 		QString fileName;

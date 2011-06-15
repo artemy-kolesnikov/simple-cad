@@ -36,8 +36,6 @@ namespace Gui
 
 		Q_ASSERT(model);
 
-		connect(model, SIGNAL(changed()),
-			this, SLOT(modelChanged()));
 		connect(model, SIGNAL(fileNameChanged(QString&)),
 			this, SLOT(modelFileNameChanged(QString&)));
 
@@ -48,26 +46,13 @@ namespace Gui
 	{
 		view = new View(this);
 		setWidget(view);
-		connect(controller, SIGNAL(updateViewRequest()),
-			view, SLOT(updateView()));
 
 		view->setModel(model);
 
 		connect(view, SIGNAL(selectionChanged()),
 			this, SIGNAL(selectionChanged()));
 
-		connect(controller, SIGNAL(loadModelRequest(QString&)),
-			model, SLOT(loadModel(QString&)));
-
 		//shapeModel = new QShapeModel(model, this);
-
-		connect(controller, SIGNAL(setMaterialRequest(Graphic3d_NameOfMaterial)),
-			model, SLOT(setMaterial(Graphic3d_NameOfMaterial)));
-		connect(controller, SIGNAL(setShaddedRequest(bool)), model, SLOT(setShadded(bool)));
-		connect(controller, SIGNAL(createRectangleRequest(gp_Pnt&, float, float)),
-			model, SLOT(createRectangle(gp_Pnt&, float, float)));
-		connect(controller, SIGNAL(makePrismRequest(AIS_Shape*, float)),
-			model, SLOT(makePrism(AIS_Shape*, float)));
 	}
 
 	Controller* ChildWindow::getController() const
@@ -85,23 +70,15 @@ namespace Gui
 		return shapeModel;
 	}
 
-	void ChildWindow::modelChanged()
-	{
-	}
-
 	void ChildWindow::modelFileNameChanged(QString& fileName)
 	{
 		setWindowTitle(fileName);
 	}
 
-	void ChildWindow::keyPressEvent(QKeyEvent* event)
+	void ChildWindow::closeEvent(QCloseEvent* event)
 	{
-		//QCoreApplication::sendEvent(view, event);
-	}
-
-	void ChildWindow::keyReleaseEvent(QKeyEvent* event)
-	{
-		//QCoreApplication::sendEvent(view, event);
+		Q_EMIT closed();
+		QWidget::closeEvent(event);
 	}
 
 }

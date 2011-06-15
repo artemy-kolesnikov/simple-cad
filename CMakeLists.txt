@@ -44,6 +44,7 @@ set(SOURCES
 	gui/viewprovider.cpp
 	gui/viewershape.cpp
 	gui/version.cpp
+	gui/actionlist.cpp
 	gui/widget/createprimitivewidget.cpp
 	gui/widget/pointsettingswidget.cpp
 	gui/widget/positionsettingswidget.cpp

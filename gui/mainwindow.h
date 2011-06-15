@@ -39,6 +39,7 @@ namespace Gui
 	class Controller;
 	class Model;
 	class View;
+	class ActionList;
 
 	class MainWindow : public QMainWindow
 	{
@@ -47,9 +48,6 @@ namespace Gui
 		MainWindow(QWidget* parent = 0);
 
 		void openFiles(QStringList& files);
-
-		/*virtual Model* getActiveModel() const;
-		virtual View* getActiveView() const;*/
 
 	protected:
 		virtual void showEvent(QShowEvent* event);
@@ -60,10 +58,8 @@ namespace Gui
 		void openModel();
 		ChildWindow* newChildWindow();
 		void childWindowActivated(QMdiSubWindow* window);
-		void modelChanged();
-		void setShadded(bool shadded);
+		void childWindowClosed();
 		void viewSelectionChanged();
-		void makePrism();
 
 		void setDatumPlane();
 		void showDatumPlane();
@@ -131,37 +127,18 @@ namespace Gui
 
 		QMenu* fileMenu;
 		QMenu* actionMenu;
-		QMenu* planeMenu;
 		QMenu* viewMenu;
 		QMenu* helpMenu;
 		QMenu* creationMenu;
 		QMenu* operationMenu;
 		QMenu* sketcherMenu;
 
-		/*QAction* acExit;
-		QAction* acAbout;
-		QAction* acOpenModel;
-		QAction* acNewModel;
-
-		QAction* acViewFront;
-		QAction* acViewBack;
-		QAction* acViewTop;
-		QAction* acViewBottom;
-		QAction* acViewLeft;
-		QAction* acViewRight;
-		QAction* acViewDatumPlane;
-
-		QAction* acSetDatumPlane;
-		QAction* acShowDatumPlane;
-		QAction* acHideDatumPlane;
-
-		QAction* acSelectNeutral;
-		QAction* acSelectVertex;
-		QAction* acSelectEdge;
-		QAction* acSelectFace;
-		QAction* acSelectSolid;*/
-
 		QAction* acRemove;
+
+		ActionList* acList3dPrimitive;
+		ActionList* acListSketchPrimitive;
+		ActionList* acListViewType;
+		ActionList* acListModOperations;
 
 		QMap<QWidget*, Model*> windowModelMap;
 

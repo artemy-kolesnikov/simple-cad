@@ -32,40 +32,5 @@ namespace Gui
 		delete cmd;
 	}
 
-	/*void Controller::updateView()
-	{
-		Q_EMIT updateViewRequest();
-	}
-
-	void Controller::loadModel(QString& fileName)
-	{
-		Q_EMIT loadModelRequest(fileName);
-	}
-
-	void Controller::saveModel(QString& fileName)
-	{
-		Q_EMIT saveModelRequest(fileName);
-	}
-
-	void Controller::setMaterial(Graphic3d_NameOfMaterial material)
-	{
-		Q_EMIT setMaterialRequest(material);
-	}
-
-	void Controller::setShadded(bool shadded)
-	{
-		Q_EMIT setShaddedRequest(shadded);
-	}
-
-	void Controller::createRectangle(gp_Pnt& pt, float width, float height)
-	{
-		Q_EMIT createRectangleRequest(pt, width, height);
-	}
-
-	void Controller::makePrism(AIS_Shape* shape, float height)
-	{
-		Q_EMIT makePrismRequest(shape, height);
-	}*/
-
 }
 

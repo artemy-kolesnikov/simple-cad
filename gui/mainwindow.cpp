@@ -57,6 +57,7 @@
 #include <boolcommand.h>
 #include <filletcommand.h>
 #include <version.h>
+#include <actionlist.h>
 
 namespace Gui
 {
@@ -71,14 +72,18 @@ namespace Gui
 		createCommonActions();
 		createOperationActions();
 		createViewActions();
-		createSketcherAction();
+		//createSketcherAction();
+
+		acList3dPrimitive->setEnabled(false);
+		acListSketchPrimitive->setEnabled(false);
+		acListViewType->setEnabled(false);
+		acListModOperations->setEnabled(false);
 
 		currentChild = 0;
 	}
 
 	void MainWindow::showEvent(QShowEvent* event)
 	{
-		newChildWindow();
 		//createSketch();
 
 		QWidget::showEvent(event);
@@ -90,13 +95,16 @@ namespace Gui
 		foreach(fileName, files)
 		{
 			ChildWindow* window = newChildWindow();
-			//window->getController()->loadModel(fileName);
+			Model& model = currentModel();
+			model.load(fileName);
 		}
 	}
 
 	void MainWindow::createUI()
 	{
 		resize(QSize(800, 600));
+
+		setWindowTitle(tr("Simple CAD"));
 
 		mdiArea = new QMdiArea(this);
 		setCentralWidget(mdiArea);
@@ -120,12 +128,6 @@ namespace Gui
 
 		shapesTreeView = new QTreeView(shapesDock);
 		shapesLayout->addWidget(shapesTreeView);
-
-		/*propertiesWidget = new PropertiesWidget(this);
-		shapesLayout->addWidget(propertiesWidget);
-
-		connect(propertiesWidget, SIGNAL(shadedChanged(bool)),
-			this, SLOT(setShadded(bool)));*/
 	}
 
 	void MainWindow::createMenu()
@@ -141,27 +143,9 @@ namespace Gui
 		actionMenu->setTitle(tr("Действия"));
 		mainMenuBar->addMenu(actionMenu);
 
-		planeMenu = new QMenu(mainMenuBar);
-		planeMenu->setTitle(tr("Плоскость"));
-		actionMenu->addMenu(planeMenu);
-
 		sketcherMenu = new QMenu(mainMenuBar);
 		sketcherMenu->setTitle(tr("Эскиз"));
-		mainMenuBar->addMenu(sketcherMenu);
-
-		/*acSetDatumPlane = new QAction(tr("Установить плоскость"), this);
-		planeMenu->addAction(acSetDatumPlane);
-		connect(acSetDatumPlane, SIGNAL(triggered()), this, SLOT(setDatumPlane()));
-
-		acShowDatumPlane = new QAction(tr("Показать плоскость"), this);
-		planeMenu->addAction(acShowDatumPlane);
-		connect(acShowDatumPlane, SIGNAL(triggered()), this, SLOT(showDatumPlane()));
-
-		acHideDatumPlane = new QAction(tr("Спрятать плоскость"), this);
-		planeMenu->addAction(acHideDatumPlane);
-		connect(acHideDatumPlane, SIGNAL(triggered()), this, SLOT(hideDatumPlane()));
-
-		actionMenu->addSeparator();*/
+		//mainMenuBar->addMenu(sketcherMenu);
 
 		/*QMenu* selectionMenu = new QMenu(mainMenuBar);
 		selectionMenu->setTitle(tr("Выбор"));
@@ -221,6 +205,11 @@ namespace Gui
 
 	void MainWindow::createCommonActions()
 	{
+		acList3dPrimitive = new ActionList(this);
+		acListSketchPrimitive = new ActionList(this);
+		acListViewType = new ActionList(this);
+		acListModOperations = new ActionList(this);
+
 		QAction* acExit = new QAction(tr("Выход"), this);
 		connect(acExit, SIGNAL(triggered(bool)), qApp, SLOT(quit()));
 
@@ -254,56 +243,66 @@ namespace Gui
 		connect(acBox, SIGNAL(triggered()), this, SLOT(createBox()));
 		primitivesMenu->addAction(acBox);
 		mainToolBar->addAction(acBox);
+		acList3dPrimitive->addAction(acBox);
 
 		QAction* acCylinder = new QAction(QIcon(":/gui/icons/cylinder.svg"), tr("Цилиндр"), this);
 		connect(acCylinder, SIGNAL(triggered()), this, SLOT(createCylinder()));
 		primitivesMenu->addAction(acCylinder);
 		mainToolBar->addAction(acCylinder);
+		acList3dPrimitive->addAction(acCylinder);
 
 		QAction* acSphere = new QAction(QIcon(":/gui/icons/sphere.svg"), tr("Сфера"), this);
 		connect(acSphere, SIGNAL(triggered()), this, SLOT(createSphere()));
 		primitivesMenu->addAction(acSphere);
 		mainToolBar->addAction(acSphere);
+		acList3dPrimitive->addAction(acSphere);
 
 		QAction* acCone = new QAction(QIcon(":/gui/icons/cone.svg"), tr("Конус"), this);
 		connect(acCone, SIGNAL(triggered()), this, SLOT(createCone()));
 		primitivesMenu->addAction(acCone);
 		mainToolBar->addAction(acCone);
+		acList3dPrimitive->addAction(acCone);
 
 		QAction* acTorus = new QAction(QIcon(":/gui/icons/torus.svg"), tr("Тор"), this);
 		connect(acTorus, SIGNAL(triggered()), this, SLOT(createTorus()));
 		primitivesMenu->addAction(acTorus);
 		mainToolBar->addAction(acTorus);
+		acList3dPrimitive->addAction(acTorus);
 
 		QAction* acPlane = new QAction(QIcon(":/gui/icons/plane.png"), tr("Плоскость"), this);
 		connect(acPlane, SIGNAL(triggered()), this, SLOT(createPlane()));
 		primitivesMenu->addAction(acPlane);
 		mainToolBar->addAction(acPlane);
+		acList3dPrimitive->addAction(acPlane);
 
 		QAction* acEllipsoid = new QAction(QIcon(":/gui/icons/ellipsoid.png"), tr("Еллипсоид"), this);
 		connect(acEllipsoid, SIGNAL(triggered()), this, SLOT(createEllipsoid()));
 		primitivesMenu->addAction(acEllipsoid);
 		mainToolBar->addAction(acEllipsoid);
+		acList3dPrimitive->addAction(acEllipsoid);
 
 		mainToolBar->addSeparator();
 
 		QAction* acSketch = new QAction(tr("Эскиз"), this);
 		connect(acSketch, SIGNAL(triggered()), this, SLOT(createSketch()));
-		creationMenu->addAction(acSketch);
+		//creationMenu->addAction(acSketch);
 
 		acRemove = new QAction(tr("Удалить"), this);
 		acRemove->setShortcut(Qt::Key_Delete);
 		connect(acRemove, SIGNAL(triggered()), this, SLOT(removeShape()));
 		actionMenu->addAction(acRemove);
 		acRemove->setEnabled(false);
+		acListModOperations->addAction(acRemove);
 
 		QAction* acFillet = new QAction(tr("Скругление"), this);
 		connect(acFillet, SIGNAL(triggered()), this, SLOT(makeFillet()));
-		actionMenu->addAction(acFillet);
+		operationMenu->addAction(acFillet);
+		acListModOperations->addAction(acFillet);
 
 		QAction* acBoolean = new QAction(tr("Булевы операции"), this);
 		connect(acBoolean, SIGNAL(triggered()), this, SLOT(booleanOperation()));
 		operationMenu->addAction(acBoolean);
+		acListModOperations->addAction(acBoolean);
 	}
 
 	void MainWindow::createViewActions()
@@ -316,6 +315,7 @@ namespace Gui
 		connect(acViewFront, SIGNAL(triggered()), this, SLOT(viewFront()));
 		viewGroup->addAction(acViewFront);
 		mainToolBar->addAction(acViewFront);
+		acListViewType->addAction(acViewFront);
 
 		QAction* acViewBack = new QAction(QIcon(":/gui/icons/view-back.svg"), tr("Сзади"), this);
 		acViewBack->setCheckable(true);
@@ -323,6 +323,7 @@ namespace Gui
 		connect(acViewBack, SIGNAL(triggered()), this, SLOT(viewBack()));
 		viewGroup->addAction(acViewBack);
 		mainToolBar->addAction(acViewBack);
+		acListViewType->addAction(acViewBack);
 
 		QAction* acViewTop = new QAction(QIcon(":/gui/icons/view-top.svg"), tr("Сверху"), this);
 		acViewTop->setCheckable(true);
@@ -330,6 +331,7 @@ namespace Gui
 		connect(acViewTop, SIGNAL(triggered()), this, SLOT(viewTop()));
 		viewGroup->addAction(acViewTop);
 		mainToolBar->addAction(acViewTop);
+		acListViewType->addAction(acViewTop);
 
 		QAction* acViewBottom = new QAction(QIcon(":/gui/icons/view-bottom.svg"), tr("Снизу"), this);
 		acViewBottom->setCheckable(true);
@@ -337,6 +339,7 @@ namespace Gui
 		connect(acViewBottom, SIGNAL(triggered()), this, SLOT(viewBottom()));
 		viewGroup->addAction(acViewBottom);
 		mainToolBar->addAction(acViewBottom);
+		acListViewType->addAction(acViewBottom);
 
 		QAction* acViewLeft = new QAction(QIcon(":/gui/icons/view-left.svg"), tr("Слева"), this);
 		acViewLeft->setCheckable(true);
@@ -344,6 +347,7 @@ namespace Gui
 		connect(acViewLeft, SIGNAL(triggered()), this, SLOT(viewLeft()));
 		viewGroup->addAction(acViewLeft);
 		mainToolBar->addAction(acViewLeft);
+		acListViewType->addAction(acViewLeft);
 
 		QAction* acViewRight = new QAction(QIcon(":/gui/icons/view-right.svg"), tr("Справа"), this);
 		acViewRight->setCheckable(true);
@@ -351,6 +355,7 @@ namespace Gui
 		connect(acViewRight, SIGNAL(triggered()), this, SLOT(viewRight()));
 		viewGroup->addAction(acViewRight);
 		mainToolBar->addAction(acViewRight);
+		acListViewType->addAction(acViewRight);
 
 		QAction* acAxometric = new QAction(QIcon(":/gui/icons/view-axometric.svg"), tr("Аксометрически"), this);
 		acAxometric->setCheckable(true);
@@ -358,10 +363,12 @@ namespace Gui
 		connect(acAxometric, SIGNAL(triggered()), this, SLOT(viewAxometric()));
 		viewGroup->addAction(acAxometric);
 		mainToolBar->addAction(acAxometric);
+		acListViewType->addAction(acAxometric);
 
 		QAction* acViewAll = new QAction(QIcon(":/gui/icons/view-all.svg"), tr("Смотреть всё"), this);
 		viewMenu->addAction(acViewAll);
 		connect(acViewAll, SIGNAL(triggered()), this, SLOT(viewAll()));
+		acListViewType->addAction(acViewAll);
 
 		mainToolBar->addSeparator();
 	}
@@ -372,25 +379,30 @@ namespace Gui
 		connect(acPolyline, SIGNAL(triggered()), this, SLOT(sketchPolyline()));
 		sketcherMenu->addAction(acPolyline);
 		mainToolBar->addAction(acPolyline);
+		acListSketchPrimitive->addAction(acPolyline);
 
 		QAction* acRectangle = new QAction(QIcon(":/gui/icons/rectangle.png"), tr("Прямоугольник"), this);
 		connect(acRectangle, SIGNAL(triggered()), this, SLOT(sketchRectangle()));
 		sketcherMenu->addAction(acRectangle);
 		mainToolBar->addAction(acRectangle);
+		acListSketchPrimitive->addAction(acRectangle);
 
 		QAction* acCircle = new QAction(QIcon(":/gui/icons/circle.png"), tr("Окружность"), this);
 		connect(acCircle, SIGNAL(triggered()), this, SLOT(sketchCircle()));
 		sketcherMenu->addAction(acCircle);
 		mainToolBar->addAction(acCircle);
+		acListSketchPrimitive->addAction(acCircle);
 
 		QAction* acArc = new QAction(QIcon(":/gui/icons/arc.png"), tr("Дуга"), this);
 		connect(acArc, SIGNAL(triggered()), this, SLOT(sketchArc()));
 		sketcherMenu->addAction(acArc);
 		mainToolBar->addAction(acArc);
+		acListSketchPrimitive->addAction(acArc);
 
 		QAction* acNurbs = new QAction(tr("NURBS кривая"), this);
 		connect(acNurbs, SIGNAL(triggered()), this, SLOT(sketchNurbs()));
 		//sketcherMenu->addAction(acNurbs);
+		acListSketchPrimitive->addAction(acNurbs);
 
 		mainToolBar->addSeparator();
 	}
@@ -471,9 +483,6 @@ namespace Gui
 
 		if (currentChild)
 		{
-			disconnect(currentChild->getView().getModel(), SIGNAL(changed()),
-				this, SLOT(modelChanged()));
-
 			disconnect(currentChild, SIGNAL(selectionChanged()),
 				this, SLOT(viewSelectionChanged()));
 		}
@@ -481,29 +490,25 @@ namespace Gui
 		currentChild = qobject_cast<ChildWindow*>(window);
 		shapesTreeView->setModel(currentModel().getQModel());
 
-		connect(currentChild->getView().getModel(), SIGNAL(changed()),
-			this, SLOT(modelChanged()));
-
 		connect(currentChild, SIGNAL(selectionChanged()),
 			this, SLOT(viewSelectionChanged()));
+		connect(currentChild, SIGNAL(closed()),
+			this, SLOT(childWindowClosed()));
+
+		acList3dPrimitive->setEnabled(true);
+		acListSketchPrimitive->setEnabled(true);
+		acListViewType->setEnabled(true);
+		acListModOperations->setEnabled(true);
 	}
 
-	void MainWindow::modelChanged()
+	void MainWindow::childWindowClosed()
 	{
-		Model* model = static_cast<Model*>(sender());
+		currentChild = 0;
 
-		/*Handle(TopTools_HSequenceOfShape) shapes = model->getShapes();
-
-		for (int i = 1; i <= shapes->Length(); ++i)
-		{
-		}*/
-	}
-
-	void MainWindow::setShadded(bool shadded)
-	{
-		const ChildWindow& window = currentChildWindow();
-
-		//window->getController()->setShadded(shadded);
+		acList3dPrimitive->setEnabled(false);
+		acListSketchPrimitive->setEnabled(false);
+		acListViewType->setEnabled(false);
+		acListModOperations->setEnabled(false);
 	}
 
 	void MainWindow::viewSelectionChanged()
@@ -511,35 +516,6 @@ namespace Gui
 		View& view = currentView();
 		bool enabled = view.getSelectedShape() != 0;
 		acRemove->setEnabled(enabled);
-
-		/*ChildWindow* window = currentChildWindow();
-		if (!window)
-			return;
-
-		Model* model = window->getView()->getModel();
-
-		boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
-
-		Handle(AIS_Shape) shape;
-
-		if (shapes->Length() == 1)
-			shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
-
-		propertiesWidget->setShape(shape);*/
-	}
-
-	void MainWindow::makePrism()
-	{
-		/*Model* model = currentModel();
-		if (!model)
-			return;
-
-		boost::shared_ptr<AIS_SequenceOfInteractive> shapes = model->getCurrentShapes();
-		if (shapes->Length() == 1)
-		{
-			Handle(AIS_Shape) shape = Handle(AIS_Shape)::DownCast(shapes->Value(1));
-			model->makePrism(shape, 150);
-		}*/
 	}
 
 	void MainWindow::setDatumPlane()

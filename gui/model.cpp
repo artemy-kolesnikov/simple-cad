@@ -74,26 +74,27 @@ namespace Gui
 	{
 	}
 
-	void Model::loadModel(QString& fileName)
+	void Model::load(QString& fileName)
 	{
-		/*FileHelper::readFile(fileName, shapeList);
+		std::list<TopoDS_Shape> shapes;
+		FileHelper::readFile(fileName, shapes);
 
-		if (shapeList.IsNull() || !shapeList->Length())
-			throw Common::FileException(QObject::tr("Ошибка чтения элементов"));
+		std::list<TopoDS_Shape>::const_iterator it = shapes.begin();
+		for (; it != shapes.end(); ++it)
+			addShape(Shape(*it));
 
-		this->fileName = fileName;*/
+		this->fileName = fileName;
 
-		/*Q_EMIT changed();
-		Q_EMIT fileNameChanged(fileName);*/
+		Q_EMIT fileNameChanged(fileName);
 	}
 
-	void Model::saveModel(QString& fileName)
+	void Model::save(QString& fileName)
 	{
-		if (!fileName.isEmpty())
+		/*if (!fileName.isEmpty())
 		{
 			this->fileName = fileName;
 			Q_EMIT fileNameChanged(fileName);
-		}
+		}*/
 	}
 
 	QString Model::getFileName() const
@@ -105,63 +106,6 @@ namespace Gui
 	{
 		return shapeList;
 	}
-
-	/*boost::shared_ptr<AIS_SequenceOfInteractive> Model::getSelectedShapes() const
-	{
-		boost::shared_ptr<AIS_SequenceOfInteractive> selected(new AIS_SequenceOfInteractive());
-
-		for (context->InitSelected(); context->MoreSelected(); context->NextSelected())
-		{
-			Handle(AIS_InteractiveObject) object = new AIS_Shape(context->SelectedShape());
-
-			//if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
-				selected->Append(object);
-		}
-
-		return selected;
-	}
-
-	boost::shared_ptr<AIS_SequenceOfInteractive> Model::getCurrentShapes() const
-	{
-		boost::shared_ptr<AIS_SequenceOfInteractive> currentList(new AIS_SequenceOfInteractive());
-
-		for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
-		{
-			Handle(AIS_InteractiveObject) object = context->Current();
-
-			//if (object->IsKind(STANDARD_TYPE(AIS_Shape)))
-				currentList->Append(object);
-		}
-
-		return currentList;
-	}
-
-	void Model::setMaterial(Graphic3d_NameOfMaterial material)
-	{
-		for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
-		{
-			Handle(AIS_InteractiveObject) object = context->Current();
-
-			context->SetMaterial(object, material);
-		}
-	}
-
-	void Model::setMaterial(const QString& material)
-	{
-		Graphic3d_NameOfMaterial material_type = getMaterialType(material);
-
-		setMaterial(material_type);
-	}
-
-	void Model::setShadded(bool shadded)
-	{
-		for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
-		{
-			Handle(AIS_InteractiveObject) object = context->Current();
-
-			context->SetDisplayMode(object, shadded, true);
-		}
-	}*/
 
 	void Model::removeShape(const Shape& shape)
 	{
@@ -184,50 +128,6 @@ namespace Gui
 	{
 		return shapeModel.get();
 	}
-
-#if 0
-	void Model::test()
-	{
-		//TopoDS_Shape shape1 = shapeList.at(0).getShape();
-		//TopoDS_Shape shape2 = shapeList.at(1).getShape();
-
-		gp_Pnt pnt;
-		gp_Dir dir1(gp::DX());
-		gp_Ax3 axis1(pnt, dir1);
-
-		/*Action::CreateBox* createBox = new Action::CreateBox(axis, 10, 10, 10);
-		createBox->execute();
-		TopoDS_Shape box = createBox->getShape();*/
-
-		/*Action::CreateCone* createCone = new Action::CreateCone(axis1, 10, 5, 10, 180);
-		createCone->execute();
-		TopoDS_Shape cone = createCone->getShape();*/
-
-		gp_Ax2 ax1(axis1.Location(), axis1.Direction());
-		//BRepPrimAPI_MakeCone makeCone(ax1, 10, 5, 10, Standard_PI);
-		//TopoDS_Shape cone = makeCone.Shape();
-		TopoDS_Solid cone = BRepPrimAPI_MakeCone(ax1, 10, 5, 10, Standard_PI);
-
-		gp_Dir dir2(gp::DX());
-		gp_Ax3 axis2(pnt, dir2);
-
-		/*Action::CreateCylinder* createCylinder = new Action::CreateCylinder(axis2, 5, 10, 360);
-		createCylinder->execute();
-		TopoDS_Shape cylinder = createCylinder->getShape();*/
-
-		gp_Ax2 ax2(axis2.Location(), axis2.Direction());
-		//BRepPrimAPI_MakeCylinder makeCylinder(ax2, 5, 10);
-		//TopoDS_Shape cylinder = makeCylinder.Shape();
-		TopoDS_Solid cylinder = BRepPrimAPI_MakeCylinder(ax2, 5, 10);
-
-		TopoDS_Shape shape = BRepAlgoAPI_Fuse(cone, cylinder);
-		//TopoDS_Shape shape = common.Shape();
-
-		//addShape(Shape(cylinder));
-		//addShape(Shape(cone));
-		addShape(Shape(shape));
-	}
-#endif
 
 }
 
