@@ -56,6 +56,7 @@
 #include <shapemodel.h>
 #include <boolcommand.h>
 #include <filletcommand.h>
+#include <version.h>
 
 namespace Gui
 {
@@ -420,6 +421,8 @@ namespace Gui
 
 	void MainWindow::about()
 	{
+		QString msg(tr("SimpleCAD %1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR));
+		QMessageBox::information(this, tr("О программе"), msg);
 	}
 
 	void MainWindow::openModel()
