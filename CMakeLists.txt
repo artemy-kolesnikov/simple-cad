@@ -96,11 +96,6 @@ endif()
 find_package(OpenGL REQUIRED)
 
 set(OPENCASCADE_LIB
-	TKService
-	TKV3d
-	TKV2d
-	TKernel
-	PTKernel
 	TKMath
 	TKBRep
 	TKIGES
@@ -112,8 +107,6 @@ set(OPENCASCADE_LIB
 	TKShapeSchema
 	TKGeomBase
 	TKGeomAlgo
-	TKG3d
-	TKG2d
 	TKXSBase
 	TKPShape
 	TKShHealing
