@@ -20,7 +20,6 @@
 #include <QString>
 #include <QDebug>
 
-#include <TopTools_HSequenceOfShape.hxx>
 #include <TopoDS_Shape.hxx>
 #include <BRep_Builder.hxx>
 #include <IGESControl_Reader.hxx>
@@ -37,7 +36,6 @@
 #include <STEPControl_Writer.hxx>
 #include <IGESControl_Controller.hxx>
 #include <Interface_Static.hxx>
-#include <AIS_Shape.hxx>
 #include <common/exception.h>
 
 namespace
@@ -55,39 +53,42 @@ namespace
 	};
 
 	FileType getFileType(QString& fileName);
-	bool importModel(FileType ft, QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportModel(FileType ft, QString& fileName, const Handle(AIS_InteractiveContext)& context);
+	bool importModel(FileType ft, QString& fileName, std::list<TopoDS_Shape>& shapes);
+	bool exportModel(FileType ft, QString& fileName, const std::list<TopoDS_Shape>& shapes);
 
-	bool importBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool importIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool importSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool importCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
+	bool importBREP(QString& fileName, std::list<TopoDS_Shape>& shapes);
+	bool importIGES(QString& fileName, std::list<TopoDS_Shape>& shapes);
+	bool importSTEP(QString& fileName, std::list<TopoDS_Shape>& shapes);
+	bool importCSFDB(QString& fileName, std::list<TopoDS_Shape>& shapes);
 
-	bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes);
-	
-	Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context);
+	bool exportBREP(QString& fileName, const std::list<TopoDS_Shape>& shapes);
+	bool exportIGES(QString& fileName, const std::list<TopoDS_Shape>& shapes);
+	bool exportSTEP(QString& fileName, const std::list<TopoDS_Shape>& shapes);
+	bool exportCSFDB(QString& fileName, const std::list<TopoDS_Shape>& shapes);
+	bool exportSTL(QString& fileName, const std::list<TopoDS_Shape>& shapes);
+	bool exportVRML(QString& fileName, const std::list<TopoDS_Shape>& shapes);
 }
 
 void FileHelper::readFile(QString& fileName,
-	Handle(TopTools_HSequenceOfShape)& shapes)
+	std::list<TopoDS_Shape>& shapes)
 {
 	FileType ft = getFileType(fileName);
 
     if (!importModel(ft, fileName, shapes))
 	{
-		//shapes.Clear();
-		throw Common::FileException(QObject::tr("Import file error"));
+		throw Common::FileException(QObject::tr("Ошибка импорта файла"));
 	}
 }
 
 void FileHelper::writeFile(QString& fileName,
-	const Handle(AIS_InteractiveContext)& context)
+	const std::list<TopoDS_Shape>& shapes)
 {
+	FileType ft = getFileType(fileName);
+
+    if (!exportModel(ft, fileName, shapes))
+	{
+		throw Common::FileException(QObject::tr("Ошибка экспорта файла"));
+	}
 }
 
 namespace
@@ -119,7 +120,7 @@ namespace
 		return ftUnknown;
 	}
 
-	bool importModel(FileType ft, QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool importModel(FileType ft, QString& fileName, std::list<TopoDS_Shape>& shapes)
 	{
 		bool res = false;
 		switch (ft)
@@ -143,10 +144,9 @@ namespace
 		return res;
 	}
 
-	bool exportModel(FileType ft, QString& fileName, const Handle(AIS_InteractiveContext)& context)
+	bool exportModel(FileType ft, QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
-		Handle(TopTools_HSequenceOfShape) shapes = getShapes(context);
-		if (shapes.IsNull() || !shapes->Length())
+		if (shapes.size() == 0)
 			return false;
 
 		bool res;
@@ -178,7 +178,7 @@ namespace
 		return res;
 	}
 
-	bool importBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool importBREP(QString& fileName, std::list<TopoDS_Shape>& shapes)
 	{
 		TopoDS_Shape shape;
 		BRep_Builder builder;
@@ -186,12 +186,12 @@ namespace
 		Standard_Boolean result = BRepTools::Read(shape, (Standard_CString)fileName.toLatin1().constData(),
 			builder);
 		if (result)
-			shapes->Append(shape);
+			shapes.push_back(shape);
 
 		return result;
 	}
 
-	bool importIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool importIGES(QString& fileName, std::list<TopoDS_Shape>& shapes)
 	{
 		IGESControl_Reader reader;
 		int status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
@@ -200,13 +200,13 @@ namespace
 		{
 			reader.TransferRoots();
 			TopoDS_Shape shape = reader.OneShape();
-			shapes->Append(shape);
+			shapes.push_back(shape);
 		}
 
 		return (status == IFSelect_RetDone);
 	}
 
-	bool importSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool importSTEP(QString& fileName, std::list<TopoDS_Shape>& shapes)
 	{
 		STEPControl_Reader reader;
 		IFSelect_ReturnStatus status = reader.ReadFile((Standard_CString)fileName.toLatin1().constData());
@@ -226,7 +226,7 @@ namespace
 					for (int i = 1; i <= nbs; ++i)
 					{
 						TopoDS_Shape shape = reader.Shape(i);
-						shapes->Append(shape);
+						shapes.push_back(shape);
 					}
 				}
 			}
@@ -235,7 +235,7 @@ namespace
 		return (status == IFSelect_RetDone);
 	}
 
-	bool importCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool importCSFDB(QString& fileName, std::list<TopoDS_Shape>& shapes)
 	{
 	    if (FSD_File::IsGoodFileType((Standard_CString)fileName.toLatin1().constData()) != Storage_VSOk)
 		    return false;
@@ -264,39 +264,40 @@ namespace
 		        PTColStd_PersistentTransientMap map;
 		        TopoDS_Shape tShape;
 	            MgtBRep::Translate(pShape, map, tShape, MgtBRep_WithTriangle);
-	            shapes->Append(tShape);
+	            shapes.push_back(tShape);
 	        }
 	    }
 
 	    return true;
 	}
 
-	bool exportBREP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportBREP(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
-		if (shapes.IsNull() || shapes->IsEmpty())
+		if (shapes.size() == 0)
 			return false;
 
-		TopoDS_Shape shape = shapes->Value(1);
+		const TopoDS_Shape& shape = shapes.front();
 		return BRepTools::Write(shape, (Standard_CString)fileName.toLatin1().constData()); 
 	}
 
-	bool exportIGES(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportIGES(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
-		if (shapes.IsNull() || shapes->IsEmpty())
+		if (shapes.size() == 0)
 			return false;
 
 		IGESControl_Controller::Init();
 		IGESControl_Writer writer(Interface_Static::CVal("XSTEP.iges.unit"),
 			Interface_Static::IVal("XSTEP.iges.writebrep.mode"));
  
-		for (int i = 1; i <= shapes->Length(); ++i)
-			writer.AddShape (shapes->Value(i));
+ 		std::list<TopoDS_Shape>::const_iterator it = shapes.begin();
+		for (;it != shapes.end(); ++it)
+			writer.AddShape(*it);
 
 		writer.ComputeModel();
 		return writer.Write((Standard_CString)fileName.toLatin1().constData());
 	}
 
-	bool exportSTEP(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportSTEP(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
 		/*if (shapes.IsNull() || shapes->IsEmpty())
 			return false;
@@ -328,37 +329,19 @@ namespace
 		return false;
 	}
 
-	bool exportCSFDB(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportCSFDB(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
 		return false;
 	}
 
-	bool exportSTL(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportSTL(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
 		return false;
 	}
 
-	bool exportVRML(QString& fileName, Handle(TopTools_HSequenceOfShape)& shapes)
+	bool exportVRML(QString& fileName, const std::list<TopoDS_Shape>& shapes)
 	{
 		return false;
-	}
-
-	Handle(TopTools_HSequenceOfShape) getShapes(const Handle(AIS_InteractiveContext)& context)
-	{
-		Handle(TopTools_HSequenceOfShape) sequence;
-		Handle(AIS_InteractiveObject) picked;
-		for (context->InitCurrent(); context->MoreCurrent(); context->NextCurrent())
-		{
-			Handle(AIS_InteractiveObject) obj = context->Current();
-			if (obj->IsKind(STANDARD_TYPE(AIS_Shape)))
-			{
-				TopoDS_Shape shape = Handle(AIS_Shape)::DownCast(obj)->Shape();
-				if (sequence.IsNull())
-				sequence = new TopTools_HSequenceOfShape();
-				sequence->Append(shape);
-			}
-		}
-		return sequence;
 	}
 
 }

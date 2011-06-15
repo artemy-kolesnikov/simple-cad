@@ -18,8 +18,8 @@
 #define FILE_HELPER_HEADER
 
 #include <QString>
-#include <AIS_InteractiveContext.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
+#include <TopoDS_Shape.hxx>
+#include <list>
 
 #include "error.h"
 
@@ -30,10 +30,10 @@ class FileHelper
 {
 public:
 	static void readFile(QString& fileName,
-		Handle(TopTools_HSequenceOfShape)& shapes);
+		std::list<TopoDS_Shape>& shapes);
 
 	static void writeFile(QString& fileName,
-		const Handle(AIS_InteractiveContext)& context);
+		const std::list<TopoDS_Shape>& context);
 };
 
 #endif // FILE_HELPER_HEADER
