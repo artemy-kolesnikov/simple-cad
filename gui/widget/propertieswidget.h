@@ -21,7 +21,6 @@
 #include <QWidget>
 
 #include <Graphic3d_NameOfMaterial.hxx>
-#include <AIS_Shape.hxx>
 
 class QComboBox;
 class QCheckBox;
@@ -30,6 +29,7 @@ namespace Gui
 {
 
 	class Model;
+	class ViewerShape;
 
 	/**
 	 * Model properties widget
@@ -41,15 +41,7 @@ namespace Gui
 		PropertiesWidget(QWidget* parent = 0);
 
 		void setModel(Model* model);
-		void setShape(Handle(AIS_Shape)& shape);
-
-	Q_SIGNALS:
-		void materialChanged(Graphic3d_NameOfMaterial material);
-		void shadedChanged(bool shaded);
-
-	private Q_SLOTS:
-		void materialChanged(int);
-		void shaddedChanged(int);
+		void setShape(ViewerShape* shape);
 
 	private:
 		void createUI();
@@ -57,7 +49,7 @@ namespace Gui
 
 	private:
 		Model* model;
-		Handle(AIS_Shape) shape;
+		ViewerShape* shape;
 
 		QComboBox* cbMaterial;
 		QCheckBox* cbShaded;

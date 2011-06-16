@@ -26,6 +26,8 @@
 #include <QLabel>
 #include <QCheckBox>
 
+#include <viewershape.h>
+
 namespace Gui
 {
 
@@ -39,7 +41,7 @@ namespace Gui
 		this->model = model;
 	}
 
-	void PropertiesWidget::setShape(Handle(AIS_Shape)& shape)
+	void PropertiesWidget::setShape(ViewerShape* shape)
 	{
 		this->shape = shape;
 
@@ -86,34 +88,6 @@ namespace Gui
 
 	void PropertiesWidget::updateView()
 	{
-		if (!model)
-			return;
-
-		if (shape.IsNull())
-		{
-			cbMaterial->setCurrentIndex(-1);
-			//cbShaded->setCheckState(Qt::Unchecked);
-		}
-		else
-		{
-			Graphic3d_NameOfMaterial material = shape->Material();
-			cbMaterial->setCurrentIndex(material);
-
-			int shapeDisplayMode = shape->DisplayMode();
-
-			//cbShaded->setCheckState(shapeDisplayMode == 1 ? Qt::Checked : Qt::Unchecked);
-		}
-	}
-
-	void PropertiesWidget::materialChanged(int value)
-	{
-		Q_EMIT materialChanged(static_cast<Graphic3d_NameOfMaterial>(value));
-	}
-
-	void PropertiesWidget::shaddedChanged(int value)
-	{
-		bool state = (value == Qt::Checked);
-		Q_EMIT shadedChanged(state);
 	}
 
 }
