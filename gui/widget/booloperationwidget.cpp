@@ -26,14 +26,16 @@
 #include <fuse.h>
 #include <common.h>
 #include <cut.h>
-
-#include "shapelistwidget.h"
+#include <view.h>
+#include <shapelistwidget.h>
+#include <viewershape.h>
 
 namespace Gui
 {
 
-	BoolOperationWidget::BoolOperationWidget(const QList<Shape>& shapeList, BooleanCommand::OperationType type,
-		QWidget* parent) : QWidget(parent), shapeList(shapeList), type(type)
+	BoolOperationWidget::BoolOperationWidget(const QList<Shape>& shapeList,
+		BooleanCommand::OperationType type, QWidget* parent) :
+		QWidget(parent), shapeList(shapeList), type(type), selectedShapeNum(0)
 	{
 		createUI();
 	}
@@ -82,6 +84,20 @@ namespace Gui
 
 		shapeList2 = new ShapeListWidget(shapeList, this);
 		shapeLayout->addWidget(shapeList2);
+	}
+
+	void BoolOperationWidget::shapeSelected(const ViewerShape& shape,
+		const TopoDS_Shape& topoElement)
+	{
+		if (selectedShapeNum == 0)
+			shapeList1->setSelectedShape(shape.getShape());
+		else if (selectedShapeNum == 1)
+			shapeList2->setSelectedShape(shape.getShape());
+
+		++selectedShapeNum;
+
+		if (selectedShapeNum > 1)
+			selectedShapeNum = 0;
 	}
 
 }

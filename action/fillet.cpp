@@ -26,8 +26,8 @@
 
 namespace Action
 {
-	Fillet::Fillet(TopoDS_Shape shape, float radius) :
-		shape(shape), radius(radius)
+	Fillet::Fillet(TopoDS_Shape shape, TopoDS_Shape edge, float radius) :
+		shape(shape), edge(edge), radius(radius)
 	{
 	}
 
@@ -42,15 +42,16 @@ namespace Action
 
 		bool hasEdges = false;
 
-		TopExp_Explorer explorer(shape, TopAbs_EDGE);
+		/*TopExp_Explorer explorer(shape, TopAbs_EDGE);
 		while (explorer.More())
 		{
 			makeFillet.Add(radius, TopoDS::Edge(explorer.Current()));
 			explorer.Next();
-		}
+		}*/
 
 		try
 		{
+			makeFillet.Add(radius, TopoDS::Edge(edge));
 			resShape = makeFillet.Shape();
 		}
 		catch(const StdFail_NotDone& ex)

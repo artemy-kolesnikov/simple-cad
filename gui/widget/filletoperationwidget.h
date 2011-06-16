@@ -20,6 +20,7 @@
 #include <QWidget>
 #include <QList>
 #include <memory>
+#include <TopoDS_Shape.hxx>
 
 #include <shape.h>
 #include <combineaction.h>
@@ -30,6 +31,7 @@ namespace Gui
 {
 
 	class ShapeListWidget;
+	class ViewerShape;
 
 	class FilletOperationWidget : public QWidget
 	{
@@ -39,6 +41,12 @@ namespace Gui
 
 		void getAction(std::auto_ptr<Action::CombineAction>& action) const;
 
+		TopoDS_Shape getTopoElement() const;
+
+	private Q_SLOTS:
+		void shapeSelected(const ViewerShape& shape,
+			const TopoDS_Shape& topoElement);
+
 	private:
 		void createUI();
 
@@ -47,6 +55,7 @@ namespace Gui
 		const QList<Shape>& shapeList;
 
 		QDoubleSpinBox* sbRadius;
+		TopoDS_Shape topoElement;
 	};
 
 }

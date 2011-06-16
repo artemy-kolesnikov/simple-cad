@@ -53,6 +53,7 @@ set(SOURCES
 	gui/widget/booloperationwidget.cpp
 	gui/widget/shapelistwidget.cpp
 	gui/widget/filletoperationwidget.cpp
+	gui/widget/pickshapewidget.cpp
 	main.cpp
 	sketcher/gui/sketcherview.cpp
 	sketcher/mod/primitive2d.cpp
@@ -61,6 +62,7 @@ set(SOURCES
 	sketcher/mod/circle.cpp
 	sketcher/mod/resizepolygon.cpp
 	common/sendmessagecommand.cpp
+	common/command.cpp
 	${CAD_RCS}
 )
 
@@ -82,8 +84,12 @@ set(HEADERS
 	gui/widget/booloperationwidget.h
 	gui/widget/shapelistwidget.h
 	gui/widget/filletoperationwidget.h
+	gui/widget/pickshapewidget.h
 	sketcher/mod/primitive2d.h
 	sketcher/gui/sketcherview.h
+	common/command.h
+	gui/command/boolcommand.h
+	gui/command/filletcommand.h
 )
 
 if (UNIX)

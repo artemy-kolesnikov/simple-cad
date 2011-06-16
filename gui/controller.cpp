@@ -19,17 +19,45 @@
 #include <model.h>
 #include <command.h>
 
+#include <cassert>
+
 namespace Gui
 {
 
-	Controller::Controller(QObject* parent) : QObject(parent)
+	Controller::Controller(QObject* parent) : QObject(parent), currentCommand(0)
 	{
 	}
 
 	void Controller::execCommand(Common::Command* cmd)
 	{
-		cmd->execute();
-		delete cmd;
+		assert(!currentCommand && "Execute invoked before previous opearion completion");
+
+		cmd->prepare();
+
+		if (cmd->getType() == Common::Command::Delayed)
+		{
+			currentCommand = cmd;
+			connect(cmd, SIGNAL(readyToExecute()), this, SLOT(readyToExecute()));
+			connect(cmd, SIGNAL(canceled()), this, SLOT(canceled()));
+		}
+		else
+		{
+			cmd->execute();
+			delete cmd;
+		}
+	}
+
+	void Controller::readyToExecute()
+	{
+		currentCommand->execute();
+		delete currentCommand;
+		currentCommand = 0;
+	}
+
+	void Controller::canceled()
+	{
+		delete currentCommand;
+		currentCommand = 0;
 	}
 
 }

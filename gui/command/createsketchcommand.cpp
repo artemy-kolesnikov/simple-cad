@@ -22,7 +22,7 @@
 namespace Gui
 {
 
-	void CreateSketchCommand::execute()
+	void CreateSketchCommand::doExecute()
 	{
 		using namespace Sketcher;
 

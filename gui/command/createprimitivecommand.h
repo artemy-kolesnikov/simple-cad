@@ -50,9 +50,6 @@ namespace Gui
 		static QStringList getObjectNames();
 		static QString getObjectNameByType(ObjectType type);
 
-
-		virtual void execute();
-
 	private:
 		void createRectangle();
 		void createCircle();
@@ -63,6 +60,9 @@ namespace Gui
 		void createTorus();
 		void createPlane();
 		void createEllipsoid();
+
+		virtual void doPrepare() {}
+		virtual void doExecute();
 
 	private:
 		Model& model;

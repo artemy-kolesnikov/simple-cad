@@ -14,38 +14,48 @@
  * GNU General Public License for more details.
  */
 
-#ifndef SHAPE_LIST_WIDGET_HEADER
-#define SHAPE_LIST_WIDGET_HEADER
+#ifndef PICK_SHAPE_WIDGET
+#define PICK_SHAPE_WIDGET
 
 #include <QWidget>
-#include <QList>
+#include <TopoDS_Shape.hxx>
 
-#include <shape.h>
-
-class QComboBox;
+class QVBoxLayout;
 
 namespace Gui
 {
 
-	class ShapeListWidget : public QWidget
+	class ViewerShape;
+	class View;
+
+	class PickShapeWidget : public QWidget
 	{
 		Q_OBJECT
 	public:
-		ShapeListWidget(const QList<Shape>& shapeList, QWidget* parent = 0);
+		PickShapeWidget(const View& view, QWidget* parent = 0);
+		virtual ~PickShapeWidget() {}
 
-		const Shape& getShape() const;
+		void setCentralWidget(QWidget* widget);
+		QWidget* getCentralWidget() const;
 
-		void setSelectedShape(const Shape& shape);
+	Q_SIGNALS:
+		void shapeSelected(const ViewerShape& shape,
+			const TopoDS_Shape& topoElement);
+		void confirmed();
+		void canceled();
 
 	private:
 		void createUI();
 
+	private Q_SLOTS:
+		void shapeSelectionChanged();
+
 	private:
-		const QList<Shape>& shapeList;
-		QComboBox* cbShape;
+		QVBoxLayout* layout;
+		QWidget* centralWidget;
 	};
 
 }
 
-#endif // SHAPE_LIST_WIDGET_HEADER
+#endif // PICK_SHAPE_WIDGET
 

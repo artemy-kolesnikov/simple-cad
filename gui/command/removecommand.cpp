@@ -27,7 +27,7 @@ namespace Gui
 	{
 	}
 
-	void RemoveCommand::execute()
+	void RemoveCommand::doExecute()
 	{
 		model.removeShape(shape.getShape());
 	}

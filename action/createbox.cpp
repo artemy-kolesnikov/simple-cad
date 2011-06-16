@@ -22,6 +22,8 @@
 #include <StdFail_NotDone.hxx>
 #include <gp_Ax2.hxx>
 
+#include <QDebug>
+
 namespace Action
 {
 
@@ -37,6 +39,7 @@ namespace Action
 			gp_Ax2 ax2(axis.Location(), axis.Direction());
 
 			BRepPrimAPI_MakeBox makeBox(ax2, height, width, length);
+
 			return makeBox.Shape();
 		}
 		catch(const StdFail_NotDone& ex)

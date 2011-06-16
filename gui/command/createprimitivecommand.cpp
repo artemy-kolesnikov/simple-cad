@@ -33,7 +33,7 @@ namespace
 namespace Gui
 {
 
-	void CreatePrimitiveCommand::execute()
+	void CreatePrimitiveCommand::doExecute()
 	{
 		MainWindow* win = CADApplication::getMainWindow();
 

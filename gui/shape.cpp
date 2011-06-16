@@ -2,6 +2,9 @@
 
 #include <QDebug>
 #include <cassert>
+#include <BRepBuilderAPI_Transform.hxx>
+
+#include <gp_Ax1.hxx>
 
 namespace Gui
 {
@@ -57,7 +60,24 @@ namespace Gui
 
 	void Shape::setTransform(const gp_Trsf& value)
 	{
-		shape.Location(TopLoc_Location(value));
+		/*gp_Trsf shapeTrsfm;
+		shapeTrsfm.SetRotation(gp_Ax1(gp_Pnt(0.,0.,0.),gp_Vec(0.,0.,1.)),2.*PI/5.);
+		BRepBuilderAPI_Transform theTrsf(shape, T);
+		shape = theTrsf.Shape();*/
+
+		BRepBuilderAPI_Transform makeTrsf(value);
+		makeTrsf.Perform(shape, false);
+
+		TopoDS_Shape shape1 = makeTrsf.Shape();
+
+		gp_Trsf shapeTrsfm = shape1.Location().Transformation();
+
+		qDebug() << shapeTrsfm.Value(1, 1) << shapeTrsfm.Value(1, 2) << shapeTrsfm.Value(1, 3) << shapeTrsfm.Value(1, 4);
+		qDebug() << shapeTrsfm.Value(2, 1) << shapeTrsfm.Value(2, 2) << shapeTrsfm.Value(2, 3) << shapeTrsfm.Value(2, 4);
+		qDebug() << shapeTrsfm.Value(3, 1) << shapeTrsfm.Value(3, 2) << shapeTrsfm.Value(3, 3) << shapeTrsfm.Value(3, 4);
+		qDebug() << "";
+
+		//shape.Location(TopLoc_Location(value));
 	}
 
 }

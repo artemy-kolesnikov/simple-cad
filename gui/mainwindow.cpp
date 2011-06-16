@@ -62,7 +62,8 @@
 namespace Gui
 {
 
-	MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
+	MainWindow::MainWindow(QWidget* parent) :
+		QMainWindow(parent), commandWidget(0), lastCommandType(CommandNone)
 	{
 		controller = new Controller();
 
@@ -74,10 +75,10 @@ namespace Gui
 		createViewActions();
 		//createSketcherAction();
 
-		acList3dPrimitive->setEnabled(false);
-		acListSketchPrimitive->setEnabled(false);
-		acListViewType->setEnabled(false);
-		acListModOperations->setEnabled(false);
+		disableCreateActions();
+		disableViewActions();
+		disableSketch();
+		disableModOperations();
 
 		currentChild = 0;
 	}
@@ -100,6 +101,46 @@ namespace Gui
 		}
 	}
 
+	void MainWindow::setCommandWidget(QWidget* widget, MainWindow::CommandType type)
+	{
+		if (type == CommandNone)
+			return;
+
+		switch(type)
+		{
+			case CommandMod:
+				disableCreateActions();
+				disableSketch();
+				disableModOperations();
+				break;
+		}
+
+		commandWidget = widget;
+		commandDock->setWidget(commandWidget);
+		commandDock->setVisible(true);
+		lastCommandType = type;
+	}
+
+	void MainWindow::removeCommandWidget()
+	{
+		if (!commandWidget)
+			return;
+
+		switch(lastCommandType)
+		{
+			case CommandMod:
+				enableCreateActions();
+				enableSketch();
+				enableModOperations();
+				break;
+		}
+
+		commandWidget = 0;
+		commandDock->setWidget(0);
+		commandDock->setVisible(false);
+		lastCommandType = CommandNone;
+	}
+
 	void MainWindow::createUI()
 	{
 		resize(QSize(800, 600));
@@ -111,11 +152,17 @@ namespace Gui
 		//mdiArea->setViewMode(QMdiArea::TabbedView);
 		connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
 			this, SLOT(childWindowActivated(QMdiSubWindow*)));
+
+		commandDock = new QDockWidget(tr("Команда"), this);
+		commandDock->setVisible(false);
+		commandDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+		commandDock->setAllowedAreas(Qt::RightDockWidgetArea);
+		addDockWidget(Qt::RightDockWidgetArea, commandDock);
 	}
 
 	void MainWindow::createDockWidget()
 	{
-		shapesDock = new QDockWidget(tr("Shapes"), this);
+		shapesDock = new QDockWidget(tr("Объекты"), this);
 		shapesDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
 		addDockWidget(Qt::LeftDockWidgetArea, shapesDock);
 
@@ -293,6 +340,12 @@ namespace Gui
 		actionMenu->addAction(acRemove);
 		acRemove->setEnabled(false);
 		acListModOperations->addAction(acRemove);
+
+		acMove = new QAction(tr("Режим перемещения"), this);
+		connect(acMove, SIGNAL(triggered()), this, SLOT(moveShape()));
+		actionMenu->addAction(acMove);
+		acMove->setCheckable(true);
+		acListModOperations->addAction(acMove);
 
 		QAction* acFillet = new QAction(tr("Скругление"), this);
 		connect(acFillet, SIGNAL(triggered()), this, SLOT(makeFillet()));
@@ -495,20 +548,20 @@ namespace Gui
 		connect(currentChild, SIGNAL(closed()),
 			this, SLOT(childWindowClosed()));
 
-		acList3dPrimitive->setEnabled(true);
-		acListSketchPrimitive->setEnabled(true);
-		acListViewType->setEnabled(true);
-		acListModOperations->setEnabled(true);
+		enableCreateActions();
+		enableViewActions();
+		enableSketch();
+		enableModOperations();
 	}
 
 	void MainWindow::childWindowClosed()
 	{
 		currentChild = 0;
 
-		acList3dPrimitive->setEnabled(false);
-		acListSketchPrimitive->setEnabled(false);
-		acListViewType->setEnabled(false);
-		acListModOperations->setEnabled(false);
+		disableCreateActions();
+		disableViewActions();
+		disableSketch();
+		disableModOperations();
 	}
 
 	void MainWindow::viewSelectionChanged()
@@ -881,10 +934,17 @@ namespace Gui
 		}
 	}
 
+	void MainWindow::moveShape()
+	{
+		View& view = currentView();
+		view.manipulateShape(acMove->isChecked());
+	}
+
 	void MainWindow::booleanOperation()
 	{
 		Model& model = currentModel();
-		BooleanCommand* cmd = new BooleanCommand(model, BooleanCommand::Fuse);
+		View& view = currentView();
+		BooleanCommand* cmd = new BooleanCommand(model, view, BooleanCommand::Fuse);
 
 		try
 		{
@@ -901,7 +961,7 @@ namespace Gui
 		View& view = currentView();
 		const ViewerShape* shape = view.getSelectedShape();
 		Model& model = currentModel();
-		FilletCommand* cmd = new FilletCommand(model, *shape);
+		FilletCommand* cmd = new FilletCommand(model, view, *shape);
 
 		try
 		{
@@ -911,6 +971,46 @@ namespace Gui
 		{
 			QMessageBox::critical(this, tr("Ошибка"), ex.what());
 		}
+	}
+
+	void MainWindow::disableCreateActions()
+	{
+		acList3dPrimitive->setEnabled(false);
+	}
+
+	void MainWindow::enableCreateActions()
+	{
+		acList3dPrimitive->setEnabled(true);
+	}
+
+	void MainWindow::disableViewActions()
+	{
+		acListViewType->setEnabled(false);
+	}
+
+	void MainWindow::enableViewActions()
+	{
+		acListViewType->setEnabled(true);
+	}
+
+	void MainWindow::disableModOperations()
+	{
+		acListModOperations->setEnabled(false);
+	}
+
+	void MainWindow::enableModOperations()
+	{
+		acListModOperations->setEnabled(true);
+	}
+
+	void MainWindow::disableSketch()
+	{
+		acListSketchPrimitive->setEnabled(false);
+	}
+
+	void MainWindow::enableSketch()
+	{
+		acListSketchPrimitive->setEnabled(true);
 	}
 
 }

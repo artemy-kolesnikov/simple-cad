@@ -18,16 +18,58 @@
 #define COMMAND_HEADER
 
 #include <QString>
+#include <QObject>
 
 namespace Common
 {
 
-	class Command
+	class Command : public QObject
 	{
+		Q_OBJECT
 	public:
+		enum  Type
+		{
+			Immediately,
+			Delayed
+		};
+
+		Command();
 		virtual ~Command() {}
-		virtual void execute() = 0;
+
+		void prepare();
+		void execute();
+
 		virtual QString getName() const = 0;
+
+		Type getType() const;
+
+	protected Q_SLOTS:
+		void emitReadyToExecute();
+		void emitCanceled();
+
+	protected:
+		void setType(Type type);
+
+	private:
+		virtual void doPrepare() = 0;
+		virtual void doExecute() = 0;
+		//TODO: Изменить интерфейс
+		virtual void doCancel() {}
+
+	Q_SIGNALS:
+		/**
+		 * Emited for delayed command type
+		 */
+		void readyToExecute();
+		/**
+		 * Emited for delayed command type
+		 */
+		void canceled();
+
+	private:
+		Type type;
+		bool isReadyToExecute;
+		bool prepared;
 	};
 
 }

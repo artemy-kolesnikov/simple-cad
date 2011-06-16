@@ -29,8 +29,12 @@ namespace Gui
 	{
 	public:
 		RemoveCommand(Model& model, const ViewerShape& shape);
-		virtual void execute();
+
 		virtual QString getName() const;
+
+	private:
+		virtual void doPrepare() {}
+		virtual void doExecute();
 
 	private:
 		Model& model;

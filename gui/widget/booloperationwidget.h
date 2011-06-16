@@ -32,6 +32,8 @@ namespace Gui
 {
 
 	class ShapeListWidget;
+	class View;
+	class ViewerShape;
 
 	class BoolOperationWidget : public QWidget
 	{
@@ -41,6 +43,10 @@ namespace Gui
 			QWidget* parent = 0);
 
 		void getAction(std::auto_ptr<Action::Boolean>& action) const;
+
+	private Q_SLOTS:
+		void shapeSelected(const ViewerShape& shape,
+			const TopoDS_Shape& topoElement);
 
 	private:
 		void createUI();
@@ -56,6 +62,8 @@ namespace Gui
 		QRadioButton* rbCut;
 
 		const QList<Shape>& shapeList;
+
+		int selectedShapeNum;
 	};
 
 }

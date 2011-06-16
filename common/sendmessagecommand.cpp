@@ -26,7 +26,7 @@ namespace Common
 	{
 	}
 
-	void SendMessageCommand::execute()
+	void SendMessageCommand::doExecute()
 	{
 		receiver.receive(message);
 	}

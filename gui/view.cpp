@@ -21,32 +21,13 @@
 #include "interactiveview.h"
 #include "viewershape.h"
 
-#include <QColormap>
-#include <QWheelEvent>
 #include <QDebug>
-#include <QList>
 #include <QHBoxLayout>
-#include <QFocusEvent>
 
 #include <algorithm>
 
-#include <BRep_Tool.hxx>
-#include <Geom_Axis2Placement.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_Surface.hxx>
-#include <TopExp_Explorer.hxx> 
-#include <TopoDS.hxx>
-#include <TopoDS_Face.hxx> 
-#include <TopoDS_Shape.hxx>
-#include <gp_Ax3.hxx>
-
-#include <Inventor/actions/SoSearchAction.h>
 #include <Inventor/nodes/SoGroup.h>
-#include <Inventor/nodes/SoSelection.h>
-#include <Inventor/nodes/SoSeparator.h>
-#include <Inventor/nodes/SoShape.h>
-#include <Inventor/nodes/SoCamera.h>
-#include <Inventor/nodes/SoLight.h>
+#include <Inventor/nodes/SoTransform.h>
 
 #include <commandmessage.h>
 #include <shape.h>
@@ -56,8 +37,7 @@ namespace Gui
 {
 
 	View::View(QWidget* parent) : QWidget(parent),
-		model(0), curAction(caNone),
-		modKey(mkNone), selectedShape(0)
+		model(0), selectedShape(0), isShapeManip(false), manipSeted(false)
 	{
 		createUI();
 	}
@@ -115,6 +95,11 @@ namespace Gui
 	const ViewerShape* View::getSelectedShape() const
 	{
 		return selectedShape;
+	}
+
+	TopoDS_Shape View::getSelectedTopoElement() const
+	{
+		return selectedTopoElement;
 	}
 
 	void View::viewFront()
@@ -188,6 +173,7 @@ namespace Gui
 		viewProvider->remove(viewerShape);
 
 		selectedShape = 0;
+		selectedTopoElement = TopoDS_Shape();
 
 		Q_EMIT selectionChanged();
 	}
@@ -197,15 +183,27 @@ namespace Gui
 		int pathLength = path->getLength();
 		assert(pathLength > 2);
 
+		if (path->getNodeFromTail(0)->getTypeId() == SoTransform::getClassTypeId())
+			return;
+
 		SoNode* node = path->getNodeFromTail(pathLength - 2);
+
+		for (int i = 0; i < pathLength; ++i)
+			qDebug() << path->getNodeFromTail(i)->getTypeId().getName();
 
         if (SoGroup::getClassTypeId() == node->getTypeId())
 		{
 			viewProvider->getViewerShape(static_cast<SoGroup*>(node), selectedShape);
-
 			assert(selectedShape);
 
-			selectedShape->setCentralBallManip();
+			selectedTopoElement = selectedShape->getShape(path);
+			assert(!selectedTopoElement.IsNull());
+
+			if (isShapeManip)
+			{
+				selectedShape->setCentralBallManip();
+				manipSeted = true;
+			}
 
 			Q_EMIT selectionChanged();
 		}
@@ -216,10 +214,26 @@ namespace Gui
 		if (!selectedShape)
 			return;
 
-		selectedShape->removeManip();
+		if (manipSeted)
+		{
+			selectedShape->removeManip();
+			manipSeted = false;
+		}
 
 		selectedShape = 0;
+		selectedTopoElement = TopoDS_Shape();
 		Q_EMIT selectionChanged();
+	}
+
+	void View::manipulateShape(bool manipulate)
+	{
+		isShapeManip = manipulate;
+
+		if (!isShapeManip && manipSeted && selectedShape)
+		{
+			selectedShape->removeManip();
+			manipSeted = false;
+		}
 	}
 
 }

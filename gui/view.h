@@ -20,12 +20,11 @@
 #include <QWidget>
 #include <QPaintEvent>
 #include <QPoint>
-
 #include <memory>
+#include <TopoDS_Shape.hxx>
 
 #include <messagereceiver.h>
 
-class QFocusEvent;
 class SoPath;
 
 namespace Gui
@@ -43,21 +42,6 @@ namespace Gui
 	class View : public QWidget, public Common::MessageReceiver
 	{
 		Q_OBJECT
-
-		enum CurrentAction
-		{
-			caNone,
-			caMove,
-			caRotate,
-			caRectSelect
-		};
-
-		 enum ModifierKey
-		 {
-			 mkNone,
-			 mkSpace
-		 };
-
 	public:
 		View(QWidget* parent = 0);
 		~View();
@@ -70,6 +54,9 @@ namespace Gui
 		virtual void receive(Common::Message* msg);
 
 		const ViewerShape* getSelectedShape() const;
+
+		//TODO: Возможно выбранный элемент нужно хранить в классе Shape или ViewerShape
+		TopoDS_Shape getSelectedTopoElement() const;
 
 	Q_SIGNALS:
 		void selectionChanged();
@@ -84,6 +71,9 @@ namespace Gui
 		void viewAll();
 		void viewAxometric();
 		void viewDatumPlane();
+		void manipulateShape(bool manipulate);
+
+	private Q_SLOTS:
 		void shapeAdded(const Shape& shape);
 		void shapeRemoved(const Shape& shape);
 		void pathSelected(SoPath* path);
@@ -91,19 +81,8 @@ namespace Gui
 
 	private:
 		void createUI();
-		void init();
-
-		void onLButtonDown(const int flags, const QPoint point);
-		void onRButtonDown(const int flags, const QPoint point);
-		void onMButtonDown(const int flags, const QPoint point);
 
 		Model* model;
-
-		QPoint pressedPoint;
-		QPoint panPoint;
-
-		CurrentAction curAction;
-		ModifierKey modKey;
 
 		std::auto_ptr<InventorViewer> inventorViewer;
 		std::auto_ptr<InteractiveView> interactiveView;
@@ -111,6 +90,10 @@ namespace Gui
 		std::auto_ptr<ViewProvider> viewProvider;
 
 		const ViewerShape* selectedShape;
+		TopoDS_Shape selectedTopoElement;
+
+		bool isShapeManip;
+		bool manipSeted;
 	};
 
 }

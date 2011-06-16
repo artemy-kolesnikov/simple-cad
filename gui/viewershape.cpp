@@ -19,7 +19,6 @@
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Inventor/SoPath.h>
-#include <Inventor/SoPickedPoint.h>
 #include <Inventor/actions/SoSearchAction.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/manips/SoCenterballManip.h>
@@ -144,14 +143,14 @@ namespace Gui
 		manip->replaceManip(path, transform);
 	}
 
-	TopoDS_Shape ViewerShape::getShape(const SoPickedPoint* point) const
+	TopoDS_Shape ViewerShape::getShape(const SoPath* path) const
 	{
-		if (point)
+		if (path)
 		{
-			SoPath* path = point->getPath();
 			if (path->getTail()->getTypeId().isDerivedFrom(SoVertexShape::getClassTypeId()))
 			{
 				SoVertexShape* vertexShape = static_cast<SoVertexShape*>(path->getTail());
+				assert(vertexShape);
 				std::map<SoVertexShape*, TopoDS_Shape>::const_iterator it = shapeMap.find(vertexShape);
 				if (it != shapeMap.end())
 					return it->second;
@@ -213,17 +212,36 @@ namespace Gui
 							shapeTrsfm.Value(3, 1), shapeTrsfm.Value(3, 2), shapeTrsfm.Value(3, 3), shapeTrsfm.Value(3, 4),
 							0, 0, 0, 0);
 
-			matrix.setRotate(rotation);
-			matrix.setTranslate(move);
+			const SbMat& mat_old = matrix.getValue();
+
+			/*qDebug() << "old matrix";
+			qDebug() << mat_old[0][0] << mat_old[0][1] << mat_old[0][2] << mat_old[0][3];
+			qDebug() << mat_old[1][0] << mat_old[1][1] << mat_old[1][2] << mat_old[1][3];
+			qDebug() << mat_old[2][0] << mat_old[2][1] << mat_old[2][2] << mat_old[2][3];
+			qDebug() << "";*/
+
+			SbMatrix rotationMatrix;
+			rotationMatrix.setRotate(rotation);
+			matrix.multRight(rotationMatrix);
+			//matrix.setTranslate(move);
 
 			const SbMat& mat = matrix.getValue();
 
-			shapeTrsfm.SetValues(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+			//qDebug() << "new matrix";
+			gp_Trsf newTrsfm;
+			newTrsfm.SetValues(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
 								mat[1][0], mat[1][1], mat[1][2], mat[1][3], 	
 								mat[2][0], mat[2][1], mat[2][2], mat[2][3],
 								0.00001, 0.00001);
 
-			self->shape.setTransform(shapeTrsfm);
+			self->shape.setTransform(newTrsfm);
+
+			//qDebug() << q0 << q1 << q2 << q3;
+
+			/*qDebug() << mat[0][0] << mat[0][1] << mat[0][2] << mat[0][3];
+			qDebug() << mat[1][0] << mat[1][1] << mat[1][2] << mat[1][3];
+			qDebug() << mat[2][0] << mat[2][1] << mat[2][2] << mat[2][3];
+			qDebug() << "";*/
 
 			/*SbRotation rotation(q0, q1, q2, q3);
 			SbVec3f m(move[0], move[1], move[2]);

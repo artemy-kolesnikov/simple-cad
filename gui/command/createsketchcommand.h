@@ -34,9 +34,11 @@ namespace Gui
 		{
 		}
 
-		virtual void execute();
-
 		virtual QString getName() const;
+
+	private:
+		virtual void doPrepare() {}
+		virtual void doExecute();
 
 	private:
 		SbPlane sketchPlane;

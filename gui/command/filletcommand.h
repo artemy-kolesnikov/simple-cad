@@ -23,20 +23,34 @@ namespace Gui
 {
 
 	class Model;
+	class View;
 	class ViewerShape;
+	class FilletOperationWidget;
+	class PickShapeWidget;
 
 	class FilletCommand : public Common::Command
 	{
+		Q_OBJECT
 	public:
-		FilletCommand(Model& model, const ViewerShape& shape);
-
-		virtual void execute();
+		FilletCommand(Model& model, View& view, const ViewerShape& shape);
+		~FilletCommand();
 
 		virtual QString getName() const;
 
+	private Q_SLOTS:
+		void confirmed();
+
+	private:
+		virtual void doPrepare();
+		virtual void doExecute();
+		virtual void doCancel();
+
 	private:
 		Model& model;
+		View& view;
 		const ViewerShape& shape;
+		FilletOperationWidget* operationWidget;
+		PickShapeWidget* pickWidget;
 	};
 
 }

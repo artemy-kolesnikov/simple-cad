@@ -47,5 +47,11 @@ namespace Gui
 		return shapeList.at(cbShape->currentIndex());
 	}
 
+	void ShapeListWidget::setSelectedShape(const Shape& shape)
+	{
+		int index = shapeList.indexOf(shape);
+		if (index != -1)
+			cbShape->setCurrentIndex(index);
+	}
 }
 

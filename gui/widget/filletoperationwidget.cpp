@@ -23,6 +23,7 @@
 #include <TopoDS_Shape.hxx>
 
 #include <fillet.h>
+#include <viewershape.h>
 
 #include "shapelistwidget.h"
 
@@ -58,8 +59,19 @@ namespace Gui
 		TopoDS_Shape shape = shapeListWidget->getShape().getShape();
 		float radius = sbRadius->value();
 
-		action.reset(new Action::Fillet(shape, radius));
+		action.reset(new Action::Fillet(shape, topoElement, radius));
 	}
 
+	void FilletOperationWidget::shapeSelected(const ViewerShape& shape,
+		const TopoDS_Shape& topoElement)
+	{
+		shapeListWidget->setSelectedShape(shape.getShape());
+		this->topoElement = topoElement;
+	}
+
+	TopoDS_Shape FilletOperationWidget::getTopoElement() const
+	{
+		return topoElement;
+	}
 }
 

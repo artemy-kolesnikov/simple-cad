@@ -49,6 +49,15 @@ namespace Gui
 
 		void openFiles(QStringList& files);
 
+		enum CommandType
+		{
+			CommandNone,
+			CommandMod
+		};
+
+		void setCommandWidget(QWidget* widget, CommandType type);
+		void removeCommandWidget();
+
 	protected:
 		virtual void showEvent(QShowEvent* event);
 
@@ -97,6 +106,7 @@ namespace Gui
 		void sketchNurbs();
 
 		void removeShape();
+		void moveShape();
 
 		void booleanOperation();
 
@@ -110,6 +120,15 @@ namespace Gui
 		void createOperationActions();
 		void createViewActions();
 		void createSketcherAction();
+
+		void disableCreateActions();
+		void enableCreateActions();
+		void disableViewActions();
+		void enableViewActions();
+		void disableModOperations();
+		void enableModOperations();
+		void disableSketch();
+		void enableSketch();
 
 		ChildWindow& currentChildWindow() const;
 		Model& currentModel() const;
@@ -134,6 +153,7 @@ namespace Gui
 		QMenu* sketcherMenu;
 
 		QAction* acRemove;
+		QAction* acMove;
 
 		ActionList* acList3dPrimitive;
 		ActionList* acListSketchPrimitive;
@@ -147,6 +167,10 @@ namespace Gui
 		PropertiesWidget* propertiesWidget;
 
 		Controller* controller;
+
+		QDockWidget* commandDock;
+		QWidget* commandWidget;
+		CommandType lastCommandType;
 	};
 
 }

@@ -33,7 +33,7 @@ class SoSensor;
 class SoSelection;
 class SoSeparator;
 class SoVertexShape;
-class SoPickedPoint;
+class SoPath;
 
 namespace Gui
 {
@@ -51,7 +51,7 @@ namespace Gui
 		void setCentralBallManip() const;
 		void removeManip() const;
 
-		TopoDS_Shape getShape(const SoPickedPoint* point) const;
+		TopoDS_Shape getShape(const SoPath* path) const;
 
 	private:
 		void computeShape();

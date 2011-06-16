@@ -28,7 +28,7 @@ namespace Action
 	class Fillet : public CombineAction
 	{
 	public:
-		Fillet(TopoDS_Shape shape, float radius);
+		Fillet(TopoDS_Shape shape, TopoDS_Shape edge, float radius);
 
 		virtual TopoDS_Shape getShape() const;
 		virtual void execute();
@@ -43,6 +43,7 @@ namespace Action
 	private:
 		TopoDS_Shape resShape;
 		TopoDS_Shape shape;
+		TopoDS_Shape edge;
 		float radius;
 	};
 

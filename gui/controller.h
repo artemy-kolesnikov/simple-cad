@@ -43,6 +43,13 @@ namespace Gui
 		Controller(QObject* parent = 0);
 
 		void execCommand(Common::Command* cmd);
+
+	private Q_SLOTS:
+		void readyToExecute();
+		void canceled();
+
+	private:
+		Common::Command* currentCommand;
 	};
 
 }

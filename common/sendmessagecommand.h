@@ -28,8 +28,11 @@ namespace Common
 	public:
 		SendMessageCommand(MessageReceiver& receiver, Message* msg);
 
-		virtual void execute();
 		virtual QString getName() const;
+
+	private:
+		virtual void doPrepare() {}
+		virtual void doExecute();
 
 	private:
 		MessageReceiver& receiver;

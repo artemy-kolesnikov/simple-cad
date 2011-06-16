@@ -24,9 +24,13 @@ namespace Gui
 {
 
 	class Model;
+	class View;
+	class BoolOperationWidget;
+	class PickShapeWidget;
 
 	class BooleanCommand : public Common::Command
 	{
+		Q_OBJECT
 	public:
 		enum OperationType
 		{
@@ -35,15 +39,23 @@ namespace Gui
 			Cut
 		};
 
+		BooleanCommand(Model& model, View& view, OperationType type);
+		~BooleanCommand();
+
 		virtual QString getName() const;
 		static QString getOperationNameByType(OperationType type);
 
-		BooleanCommand(Model& model, OperationType type);
-		virtual void execute();
+	private:
+		virtual void doPrepare();
+		virtual void doExecute();
+		virtual void doCancel();
 
 	private:
 		Model& model;
+		View& view;
 		OperationType type;
+		BoolOperationWidget* operationWidget;
+		PickShapeWidget* pickWidget;
 	};
 }
 

@@ -14,38 +14,40 @@
  * GNU General Public License for more details.
  */
 
-#ifndef SHAPE_LIST_WIDGET_HEADER
-#define SHAPE_LIST_WIDGET_HEADER
+#ifndef ACTION_LIST_HEADER
+#define ACTION_LIST_HEADER
 
-#include <QWidget>
+#include <QObject>
 #include <QList>
-
-#include <shape.h>
-
-class QComboBox;
+#include <QAction>
+#include <QString>
 
 namespace Gui
 {
 
-	class ShapeListWidget : public QWidget
+	/**
+	 * Action list. Used to group similar actions
+	 */
+	class ActionList : public QObject
 	{
-		Q_OBJECT
 	public:
-		ShapeListWidget(const QList<Shape>& shapeList, QWidget* parent = 0);
+		ActionList(QObject* parent = 0);
+		~ActionList();
 
-		const Shape& getShape() const;
+		void addAction(QAction* action);
+		void removeAction(QAction* action);
 
-		void setSelectedShape(const Shape& shape);
+		void setVisible(bool visible);
+		bool isVisible() const;
+
+		void setEnabled(bool enabled);
+		bool isEnabled() const;
 
 	private:
-		void createUI();
-
-	private:
-		const QList<Shape>& shapeList;
-		QComboBox* cbShape;
+		QList<QAction*> actionList;
 	};
 
 }
 
-#endif // SHAPE_LIST_WIDGET_HEADER
+#endif // ACTION_LIST_HEADER
 

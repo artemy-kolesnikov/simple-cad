@@ -14,22 +14,31 @@
  * GNU General Public License for more details.
  */
 
-#include "widgetdialog.h"
+#include "pickshapewidget.h"
 
-#include <QPushButton>
+#include <QCoreApplication>
+#include <QDialog>
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <QVBoxLayout>
+
+#include <cassert>
+
+#include <view.h>
+#include <viewershape.h>
 
 namespace Gui
 {
-
-	WidgetDialog::WidgetDialog(QWidget* parent) : QDialog(parent),
-		layout(0), centralWidget(0)
+	PickShapeWidget::PickShapeWidget(const View& view, QWidget* parent) :
+		QWidget(parent), centralWidget(0)
 	{
 		createUI();
+
+		connect(&view, SIGNAL(selectionChanged()),
+			this, SLOT(shapeSelectionChanged()));
 	}
 
-	void WidgetDialog::createUI()
+	void PickShapeWidget::createUI()
 	{
 		layout = new QVBoxLayout(this);
 
@@ -37,27 +46,45 @@ namespace Gui
 		layout->addLayout(buttonLayout);
 
 		QPushButton* btOk = new QPushButton(tr("OK"), this);
-		connect(btOk, SIGNAL(clicked()), this, SLOT(accept()));
+		connect(btOk, SIGNAL(clicked()), this, SIGNAL(confirmed()));
 
 		QPushButton* btCancel = new QPushButton(tr("Cancel"), this);
-		connect(btCancel, SIGNAL(clicked()), this, SLOT(reject()));
+		connect(btCancel, SIGNAL(clicked()), this, SIGNAL(canceled()));
 
 		buttonLayout->addStretch();
 		buttonLayout->addWidget(btOk);
 		buttonLayout->addWidget(btCancel);
+
+		layout->addStretch();
 	}
 
-	void WidgetDialog::setCentralWidget(QWidget* widget)
+	void PickShapeWidget::shapeSelectionChanged()
+	{
+		const View* view = static_cast<View*>(sender());
+		assert(view);
+
+		const ViewerShape* shape = view->getSelectedShape();
+		// selection cleared
+		if (!shape)
+			return;
+
+		TopoDS_Shape topoElement = view->getSelectedTopoElement();
+		assert(!topoElement.IsNull());
+
+		Q_EMIT shapeSelected(*shape, topoElement);
+	}
+
+	void PickShapeWidget::setCentralWidget(QWidget* widget)
 	{
 		if (centralWidget)
 			layout->removeWidget(widget);
 
 		centralWidget = widget;
 
-		layout->insertWidget(0, centralWidget);
+		layout->insertWidget(1, centralWidget);
 	}
 
-	QWidget* WidgetDialog::getCentralWidget() const
+	QWidget* PickShapeWidget::getCentralWidget() const
 	{
 		return centralWidget;
 	}
