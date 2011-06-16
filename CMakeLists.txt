@@ -103,6 +103,9 @@ endif()
 find_package(OpenGL REQUIRED)
 
 set(OPENCASCADE_LIB
+	TKernel
+	PTKernel
+	TKG3d
 	TKMath
 	TKBRep
 	TKIGES
