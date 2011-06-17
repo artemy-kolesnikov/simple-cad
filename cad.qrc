@@ -4,33 +4,30 @@
 		<file>gui/icons/print.png</file>
 		<file>gui/icons/save.png</file>
 		<file>gui/icons/tool.png</file>
-		<file>gui/icons/view-axometric.svg</file>
-		<file>gui/icons/view-bottom.svg</file>
-		<file>gui/icons/view-front.svg</file>
-		<file>gui/icons/view-back.svg</file>
-		<file>gui/icons/view-refresh.svg</file>
-		<file>gui/icons/view-right.svg</file>
-		<file>gui/icons/view-left.svg</file>
-		<file>gui/icons/view-top.svg</file>
-		<file>gui/icons/view-zoom-in.svg</file>
-		<file>gui/icons/view-zoom-out.svg</file>
-		<file>gui/icons/booleans.svg</file>
-		<file>gui/icons/box.svg</file>
-		<file>gui/icons/cone.svg</file>
-		<file>gui/icons/cylinder.svg</file>
-		<file>gui/icons/torus.svg</file>
+		<file>gui/icons/view-axometric.png</file>
+		<file>gui/icons/view-bottom.png</file>
+		<file>gui/icons/view-front.png</file>
+		<file>gui/icons/view-back.png</file>
+		<file>gui/icons/view-right.png</file>
+		<file>gui/icons/view-left.png</file>
+		<file>gui/icons/view-top.png</file>
+		<file>gui/icons/booleans.png</file>
+		<file>gui/icons/box.png</file>
+		<file>gui/icons/cone.png</file>
+		<file>gui/icons/cylinder.png</file>
+		<file>gui/icons/torus.png</file>
 		<file>gui/icons/ellipsoid.png</file>
 		<file>gui/icons/plane.png</file>
-		<file>gui/icons/sphere.svg</file>
-		<file>gui/icons/new_document.svg</file>
-		<file>gui/icons/open_document.svg</file>
+		<file>gui/icons/sphere.png</file>
+		<file>gui/icons/new_document.png</file>
+		<file>gui/icons/open_document.png</file>
 		<file>gui/icons/circle.png</file>
 		<file>gui/icons/line.png</file>
 		<file>gui/icons/polyline.png</file>
 		<file>gui/icons/rectangle.png</file>
 		<file>gui/icons/arc.png</file>
-		<file>gui/icons/bool_common.svg</file>
-		<file>gui/icons/bool_cut.svg</file>
-		<file>gui/icons/bool_fuse.svg</file>
+		<file>gui/icons/bool_common.png</file>
+		<file>gui/icons/bool_cut.png</file>
+		<file>gui/icons/bool_fuse.png</file>
     </qresource>
 </RCC>

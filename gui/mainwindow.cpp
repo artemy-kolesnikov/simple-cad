@@ -260,10 +260,10 @@ namespace Gui
 		QAction* acExit = new QAction(tr("Выход"), this);
 		connect(acExit, SIGNAL(triggered(bool)), qApp, SLOT(quit()));
 
-		QAction* acOpenModel = new QAction(QIcon(":/gui/icons/open_document.svg"), tr("Открыть..."), this);
+		QAction* acOpenModel = new QAction(QIcon(":/gui/icons/open_document.png"), tr("Открыть..."), this);
 		connect(acOpenModel, SIGNAL(triggered(bool)), this, SLOT(openModel()));
 
-		QAction* acNewModel = new QAction(QIcon(":/gui/icons/new_document.svg"), tr("Новый"), this);
+		QAction* acNewModel = new QAction(QIcon(":/gui/icons/new_document.png"), tr("Новый"), this);
 		connect(acNewModel, SIGNAL(triggered(bool)), this, SLOT(newChildWindow()));
 
 		fileMenu->addAction(acNewModel);
@@ -286,31 +286,31 @@ namespace Gui
 		primitivesMenu->setTitle(tr("Примитивы"));
 		creationMenu->addMenu(primitivesMenu);
 
-		QAction* acBox = new QAction(QIcon(":/gui/icons/box.svg"), tr("Брусок"), this);
+		QAction* acBox = new QAction(QIcon(":/gui/icons/box.png"), tr("Брусок"), this);
 		connect(acBox, SIGNAL(triggered()), this, SLOT(createBox()));
 		primitivesMenu->addAction(acBox);
 		mainToolBar->addAction(acBox);
 		acList3dPrimitive->addAction(acBox);
 
-		QAction* acCylinder = new QAction(QIcon(":/gui/icons/cylinder.svg"), tr("Цилиндр"), this);
+		QAction* acCylinder = new QAction(QIcon(":/gui/icons/cylinder.png"), tr("Цилиндр"), this);
 		connect(acCylinder, SIGNAL(triggered()), this, SLOT(createCylinder()));
 		primitivesMenu->addAction(acCylinder);
 		mainToolBar->addAction(acCylinder);
 		acList3dPrimitive->addAction(acCylinder);
 
-		QAction* acSphere = new QAction(QIcon(":/gui/icons/sphere.svg"), tr("Сфера"), this);
+		QAction* acSphere = new QAction(QIcon(":/gui/icons/sphere.png"), tr("Сфера"), this);
 		connect(acSphere, SIGNAL(triggered()), this, SLOT(createSphere()));
 		primitivesMenu->addAction(acSphere);
 		mainToolBar->addAction(acSphere);
 		acList3dPrimitive->addAction(acSphere);
 
-		QAction* acCone = new QAction(QIcon(":/gui/icons/cone.svg"), tr("Конус"), this);
+		QAction* acCone = new QAction(QIcon(":/gui/icons/cone.png"), tr("Конус"), this);
 		connect(acCone, SIGNAL(triggered()), this, SLOT(createCone()));
 		primitivesMenu->addAction(acCone);
 		mainToolBar->addAction(acCone);
 		acList3dPrimitive->addAction(acCone);
 
-		QAction* acTorus = new QAction(QIcon(":/gui/icons/torus.svg"), tr("Тор"), this);
+		QAction* acTorus = new QAction(QIcon(":/gui/icons/torus.png"), tr("Тор"), this);
 		connect(acTorus, SIGNAL(triggered()), this, SLOT(createTorus()));
 		primitivesMenu->addAction(acTorus);
 		mainToolBar->addAction(acTorus);
@@ -362,7 +362,7 @@ namespace Gui
 	{
 		QActionGroup* viewGroup = new QActionGroup(this);
 
-		QAction* acViewFront = new QAction(QIcon(":/gui/icons/view-front.svg"), tr("Спереди"), this);
+		QAction* acViewFront = new QAction(QIcon(":/gui/icons/view-front.png"), tr("Спереди"), this);
 		acViewFront->setCheckable(true);
 		viewMenu->addAction(acViewFront);
 		connect(acViewFront, SIGNAL(triggered()), this, SLOT(viewFront()));
@@ -370,7 +370,7 @@ namespace Gui
 		mainToolBar->addAction(acViewFront);
 		acListViewType->addAction(acViewFront);
 
-		QAction* acViewBack = new QAction(QIcon(":/gui/icons/view-back.svg"), tr("Сзади"), this);
+		QAction* acViewBack = new QAction(QIcon(":/gui/icons/view-back.png"), tr("Сзади"), this);
 		acViewBack->setCheckable(true);
 		viewMenu->addAction(acViewBack);
 		connect(acViewBack, SIGNAL(triggered()), this, SLOT(viewBack()));
@@ -378,7 +378,7 @@ namespace Gui
 		mainToolBar->addAction(acViewBack);
 		acListViewType->addAction(acViewBack);
 
-		QAction* acViewTop = new QAction(QIcon(":/gui/icons/view-top.svg"), tr("Сверху"), this);
+		QAction* acViewTop = new QAction(QIcon(":/gui/icons/view-top.png"), tr("Сверху"), this);
 		acViewTop->setCheckable(true);
 		viewMenu->addAction(acViewTop);
 		connect(acViewTop, SIGNAL(triggered()), this, SLOT(viewTop()));
@@ -386,7 +386,7 @@ namespace Gui
 		mainToolBar->addAction(acViewTop);
 		acListViewType->addAction(acViewTop);
 
-		QAction* acViewBottom = new QAction(QIcon(":/gui/icons/view-bottom.svg"), tr("Снизу"), this);
+		QAction* acViewBottom = new QAction(QIcon(":/gui/icons/view-bottom.png"), tr("Снизу"), this);
 		acViewBottom->setCheckable(true);
 		viewMenu->addAction(acViewBottom);
 		connect(acViewBottom, SIGNAL(triggered()), this, SLOT(viewBottom()));
@@ -394,7 +394,7 @@ namespace Gui
 		mainToolBar->addAction(acViewBottom);
 		acListViewType->addAction(acViewBottom);
 
-		QAction* acViewLeft = new QAction(QIcon(":/gui/icons/view-left.svg"), tr("Слева"), this);
+		QAction* acViewLeft = new QAction(QIcon(":/gui/icons/view-left.png"), tr("Слева"), this);
 		acViewLeft->setCheckable(true);
 		viewMenu->addAction(acViewLeft);
 		connect(acViewLeft, SIGNAL(triggered()), this, SLOT(viewLeft()));
@@ -402,7 +402,7 @@ namespace Gui
 		mainToolBar->addAction(acViewLeft);
 		acListViewType->addAction(acViewLeft);
 
-		QAction* acViewRight = new QAction(QIcon(":/gui/icons/view-right.svg"), tr("Справа"), this);
+		QAction* acViewRight = new QAction(QIcon(":/gui/icons/view-right.png"), tr("Справа"), this);
 		acViewRight->setCheckable(true);
 		viewMenu->addAction(acViewRight);
 		connect(acViewRight, SIGNAL(triggered()), this, SLOT(viewRight()));
@@ -410,7 +410,7 @@ namespace Gui
 		mainToolBar->addAction(acViewRight);
 		acListViewType->addAction(acViewRight);
 
-		QAction* acAxometric = new QAction(QIcon(":/gui/icons/view-axometric.svg"), tr("Аксометрически"), this);
+		QAction* acAxometric = new QAction(QIcon(":/gui/icons/view-axometric.png"), tr("Аксометрически"), this);
 		acAxometric->setCheckable(true);
 		viewMenu->addAction(acAxometric);
 		connect(acAxometric, SIGNAL(triggered()), this, SLOT(viewAxometric()));
@@ -418,7 +418,7 @@ namespace Gui
 		mainToolBar->addAction(acAxometric);
 		acListViewType->addAction(acAxometric);
 
-		QAction* acViewAll = new QAction(QIcon(":/gui/icons/view-all.svg"), tr("Смотреть всё"), this);
+		QAction* acViewAll = new QAction(QIcon(":/gui/icons/view-all.png"), tr("Смотреть всё"), this);
 		viewMenu->addAction(acViewAll);
 		connect(acViewAll, SIGNAL(triggered()), this, SLOT(viewAll()));
 		acListViewType->addAction(acViewAll);

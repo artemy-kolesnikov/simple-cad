@@ -20,8 +20,6 @@
 
 #include <QWidget>
 
-#include <Graphic3d_NameOfMaterial.hxx>
-
 class QComboBox;
 class QCheckBox;
 
