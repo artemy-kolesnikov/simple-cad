@@ -33,6 +33,7 @@ namespace Common
 	private:
 		virtual void doPrepare() {}
 		virtual void doExecute();
+		virtual void doCancel() {}
 
 	private:
 		MessageReceiver& receiver;

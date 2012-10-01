@@ -36,16 +36,17 @@ namespace Common
 		Command();
 		virtual ~Command() {}
 
-		void prepare();
-		void execute();
-
 		virtual QString getName() const = 0;
 
 		Type getType() const;
 
+	public Q_SLOTS:
+		void prepare();
+		void execute();
+		void cancel();
+
 	protected Q_SLOTS:
 		void emitReadyToExecute();
-		void emitCanceled();
 
 	protected:
 		void setType(Type type);
@@ -53,8 +54,7 @@ namespace Common
 	private:
 		virtual void doPrepare() = 0;
 		virtual void doExecute() = 0;
-		//TODO: Изменить интерфейс
-		virtual void doCancel() {}
+		virtual void doCancel() = 0;
 
 	Q_SIGNALS:
 		/**

@@ -60,5 +60,10 @@ namespace Gui
 		currentCommand = 0;
 	}
 
+	void Controller::cancelAllCommands()
+	{
+		currentCommand->cancel();
+	}
+
 }
 

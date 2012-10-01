@@ -56,7 +56,7 @@ namespace Gui
 		QObject::connect(pickWidget, SIGNAL(shapeSelected(const ViewerShape&, const TopoDS_Shape&)),
 			operationWidget, SLOT(shapeSelected(const ViewerShape&, const TopoDS_Shape&)));
 
-		QObject::connect(pickWidget, SIGNAL(canceled()), this, SLOT(emitCanceled()));
+		QObject::connect(pickWidget, SIGNAL(canceled()), this, SLOT(cancel()));
 		QObject::connect(pickWidget, SIGNAL(confirmed()), this, SLOT(confirmed()));
 	}
 

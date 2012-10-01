@@ -63,6 +63,7 @@ namespace Gui
 
 		virtual void doPrepare() {}
 		virtual void doExecute();
+		virtual void doCancel() {}
 
 	private:
 		Model& model;

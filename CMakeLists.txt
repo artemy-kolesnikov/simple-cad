@@ -160,7 +160,7 @@ if (WIN32)
 	link_directories(${OPENCASCADE_LIB_DIR} ${COIN_LIB_DIR})
 endif()
 
-set (CMAKE_BUILD_TYPE "Release")
+#set (CMAKE_BUILD_TYPE "Release")
 
 include_directories(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE}
 	${base_directory} ${base_directory}/gui

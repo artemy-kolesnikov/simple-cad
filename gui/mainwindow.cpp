@@ -562,6 +562,8 @@ namespace Gui
 		disableViewActions();
 		disableSketch();
 		disableModOperations();
+
+		controller->cancelAllCommands();
 	}
 
 	void MainWindow::viewSelectionChanged()

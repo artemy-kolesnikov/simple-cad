@@ -44,6 +44,9 @@ namespace Gui
 
 		void execCommand(Common::Command* cmd);
 
+	public Q_SLOTS:
+		void cancelAllCommands();
+
 	private Q_SLOTS:
 		void readyToExecute();
 		void canceled();

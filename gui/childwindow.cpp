@@ -77,6 +77,7 @@ namespace Gui
 
 	void ChildWindow::closeEvent(QCloseEvent* event)
 	{
+		qDebug() << "closeEvent()";
 		Q_EMIT closed();
 		QWidget::closeEvent(event);
 	}

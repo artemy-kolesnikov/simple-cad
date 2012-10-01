@@ -39,6 +39,7 @@ namespace Gui
 	private:
 		virtual void doPrepare() {}
 		virtual void doExecute();
+		virtual void doCancel() {}
 
 	private:
 		SbPlane sketchPlane;

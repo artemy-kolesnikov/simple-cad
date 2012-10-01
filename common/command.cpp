@@ -39,6 +39,12 @@ namespace Common
 		doExecute();
 	}
 
+	void Command::cancel()
+	{
+		doCancel();
+		Q_EMIT canceled();
+	}
+
 	void Command::setType(Type type)
 	{
 		this->type = type;
@@ -60,10 +66,5 @@ namespace Common
 		Q_EMIT readyToExecute();
 	}
 
-	void Command::emitCanceled()
-	{
-		doCancel();
-		Q_EMIT canceled();
-	}
 }
 

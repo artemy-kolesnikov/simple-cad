@@ -53,7 +53,7 @@ namespace Common
 
 }
 
-/*
+#if 0
 	void Model::test()
 	{
 		//TopoDS_Shape shape1 = shapeList.at(0).getShape();
@@ -96,6 +96,6 @@ namespace Common
 		addShape(Shape(shape));
 	}
 
-*/
+#endif
 #endif // VIEW_COMMAND_HEADER
 
