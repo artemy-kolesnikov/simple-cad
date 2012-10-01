@@ -71,6 +71,8 @@ namespace Gui
 			return gp::DY();
 		if (cbDirection->currentIndex() == 2)
 			return gp::DZ();
+
+        return gp_Dir();
 	}
 
 	void PositionSettingsWidget::setDirection(const gp_Dir& dir)

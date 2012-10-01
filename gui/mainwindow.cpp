@@ -95,7 +95,7 @@ namespace Gui
 		QString fileName;
 		foreach(fileName, files)
 		{
-			ChildWindow* window = newChildWindow();
+			newChildWindow();
 			Model& model = currentModel();
 			model.load(fileName);
 		}
@@ -113,6 +113,8 @@ namespace Gui
 				disableSketch();
 				disableModOperations();
 				break;
+            case CommandNone:
+                break;
 		}
 
 		commandWidget = widget;
@@ -133,6 +135,8 @@ namespace Gui
 				enableSketch();
 				enableModOperations();
 				break;
+            case CommandNone:
+                break;
 		}
 
 		commandWidget = 0;
@@ -575,7 +579,7 @@ namespace Gui
 
 	void MainWindow::setDatumPlane()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 
 		PositionSettingsWidget* planeWidget = new PositionSettingsWidget(this);
 
@@ -599,14 +603,14 @@ namespace Gui
 
 	void MainWindow::showDatumPlane()
 	{	
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 
 		//model->showDatumPlane();
 	}
 
 	void MainWindow::hideDatumPlane()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 
 		//model->hideDatumPlane();
 	}
@@ -661,35 +665,35 @@ namespace Gui
 
 	void MainWindow::selectNeutral()
 	{
-		Model& model = currentModel();
+		//Model& model = currentModel();
 		//if (model)
 			//model->selectNeutral();
 	}
 
 	void MainWindow::selectVertex()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 		//if (model)
 			//model->selectVertex();
 	}
 
 	void MainWindow::selectEdge()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 		//if (model)
 			//model->selectEdge();
 	}
 
 	void MainWindow::selectFace()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 		//if (model)
 			//model->selectFace();
 	}
 
 	void MainWindow::selectSolid()
 	{
-		const Model& model = currentModel();
+		//const Model& model = currentModel();
 		//if (model)
 			//model->selectSolid();
 	}

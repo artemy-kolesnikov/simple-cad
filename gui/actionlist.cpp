@@ -56,7 +56,7 @@ namespace Gui
 		if (actionList.size() == 0)
 			return false;
 
-		actionList.at(0)->isVisible();
+		return actionList.at(0)->isVisible();
 	}
 
 	void ActionList::setEnabled(bool enabled)
@@ -71,7 +71,7 @@ namespace Gui
 		if (actionList.size() == 0)
 			return false;
 
-		actionList.at(0)->isEnabled();
+		return actionList.at(0)->isEnabled();
 	}
 
 }

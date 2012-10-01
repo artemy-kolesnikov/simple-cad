@@ -35,7 +35,7 @@ namespace Gui
 
 	BoolOperationWidget::BoolOperationWidget(const QList<Shape>& shapeList,
 		BooleanCommand::OperationType type, QWidget* parent) :
-		QWidget(parent), shapeList(shapeList), type(type), selectedShapeNum(0)
+		QWidget(parent), type(type), shapeList(shapeList), selectedShapeNum(0)
 	{
 		createUI();
 	}

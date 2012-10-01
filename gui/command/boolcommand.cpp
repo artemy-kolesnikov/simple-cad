@@ -97,6 +97,7 @@ namespace Gui
 			return QObject::tr("Пересечение");
 		else if (type == Cut)
 			return QObject::tr("Вычитание");
+        return "";
 	}
 
 }

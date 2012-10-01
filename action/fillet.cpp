@@ -40,8 +40,6 @@ namespace Action
 	{
 		BRepFilletAPI_MakeFillet makeFillet(shape);
 
-		bool hasEdges = false;
-
 		/*TopExp_Explorer explorer(shape, TopAbs_EDGE);
 		while (explorer.More())
 		{

@@ -64,7 +64,7 @@ namespace Gui
 {
 
 	ViewerShape::ViewerShape(QString name, Shape shape) :
-		name(name), shape(shape)
+		shape(shape), name(name)
 	{
 		rootGroup = new SoGroup();
 		rootGroup->ref();
@@ -212,7 +212,7 @@ namespace Gui
 							shapeTrsfm.Value(3, 1), shapeTrsfm.Value(3, 2), shapeTrsfm.Value(3, 3), shapeTrsfm.Value(3, 4),
 							0, 0, 0, 0);
 
-			const SbMat& mat_old = matrix.getValue();
+			//const SbMat& mat_old = matrix.getValue();
 
 			/*qDebug() << "old matrix";
 			qDebug() << mat_old[0][0] << mat_old[0][1] << mat_old[0][2] << mat_old[0][3];

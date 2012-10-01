@@ -10,6 +10,9 @@ include(${QT_USE_FILE})
 
 qt4_add_resources(CAD_RCS cad.qrc)
 
+set (CMAKE_BUILD_TYPE "Release")
+set (CMAKE_CXX_FLAGS "-Wall")
+
 set(SOURCES
 	action/boolean.cpp
 	action/common.cpp
@@ -159,8 +162,6 @@ if (WIN32)
 
 	link_directories(${OPENCASCADE_LIB_DIR} ${COIN_LIB_DIR})
 endif()
-
-#set (CMAKE_BUILD_TYPE "Release")
 
 include_directories(${CMAKE_SOURCE_DIR} ${OPENCASCADE_INCLUDE}
 	${base_directory} ${base_directory}/gui
